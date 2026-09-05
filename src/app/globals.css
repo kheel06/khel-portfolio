@@ -326,3 +326,43 @@ a {
     animation: none;
   }
 }
+
+/* =========================================
+   SCROLL TIMELINES
+========================================= */
+
+.timeline-node {
+  transition:
+    border-color 280ms ease,
+    box-shadow 280ms ease,
+    background-color 280ms ease;
+}
+
+.timeline-node [data-timeline-icon] {
+  transition:
+    background-color 280ms ease,
+    color 280ms ease,
+    box-shadow 280ms ease;
+}
+
+.timeline-node.is-timeline-active {
+  border-color: rgba(34, 211, 238, 0.9);
+  box-shadow:
+    0 0 0 5px rgba(255, 255, 255, 0.95),
+    0 0 26px rgba(34, 211, 238, 0.38);
+}
+
+.timeline-node.is-timeline-active [data-timeline-icon] {
+  background-color: #0891b2;
+  color: #ffffff;
+  box-shadow:
+    0 0 16px rgba(34, 211, 238, 0.95),
+    0 0 32px rgba(34, 211, 238, 0.35);
+}
+
+.dark .timeline-node.is-timeline-active {
+  border-color: rgba(103, 232, 249, 0.9);
+  box-shadow:
+    0 0 0 5px rgba(7, 11, 20, 0.95),
+    0 0 28px rgba(34, 211, 238, 0.45);
+}

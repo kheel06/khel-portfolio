@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowUpRight,
@@ -23,17 +23,29 @@ const navigation = [
   { label: "Contact", href: "#contact" },
 ];
 
+function subscribeToHydration() {
+  return () => {};
+}
+
+function getHydratedSnapshot() {
+  return true;
+}
+
+function getServerSnapshot() {
+  return false;
+}
+
 /* =========================================================
    THEME TOGGLE
 ========================================================= */
 
 function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useSyncExternalStore(
+    subscribeToHydration,
+    getHydratedSnapshot,
+    getServerSnapshot,
+  );
 
   /*
    * Prevent hydration mismatch.
@@ -580,7 +592,7 @@ export function Navbar() {
                 dark:hover:text-cyan-100
               "
             >
-              <span>Let's Talk</span>
+              <span>Let&apos;s Talk</span>
 
               <ArrowUpRight
                 size={13}
@@ -954,33 +966,42 @@ export function Navbar() {
                       delay: 0.18,
                       duration: 0.2,
                     }}
-                    className="
-                      mt-3
-                      flex
-                      items-center
-                      justify-between
-                      rounded-lg
-                      bg-slate-950
-                      px-4 py-3
-                      text-xs
-                      font-semibold
-                      uppercase
-                      tracking-[0.12em]
-                      text-white
-                      transition-all duration-300
+                  className="
+                    mt-3
+                    flex
+                    min-h-12
+                    w-full
+                    items-center
+                    justify-between
+                    rounded-lg
+                    bg-cyan-400
+                    px-4 py-3
+                    text-xs
+                    font-bold
+                    uppercase
+                    tracking-[0.12em]
+                    text-slate-950
+                    shadow-[0_10px_28px_rgba(34,211,238,0.18)]
+                    transition-all duration-300
 
-                      hover:bg-slate-800
+                    hover:-translate-y-0.5
+                    hover:bg-cyan-300
+                    focus-visible:outline-none
+                    focus-visible:ring-2
+                    focus-visible:ring-cyan-300
+                    focus-visible:ring-offset-2
+                    focus-visible:ring-offset-[#080d18]
+                  "
+                >
+                  <span className="relative z-10 whitespace-nowrap">
+                    Let&apos;s Talk
+                  </span>
 
-                      dark:bg-white
-                      dark:text-slate-950
-                      dark:hover:bg-slate-100
-                    "
-                  >
-                    <span>Let's Talk</span>
-
-                    <ArrowUpRight
-                      size={15}
-                    />
+                  <ArrowUpRight
+                    size={15}
+                    aria-hidden="true"
+                    className="relative z-10 shrink-0"
+                  />
                   </motion.a>
                 </motion.div>
               </>

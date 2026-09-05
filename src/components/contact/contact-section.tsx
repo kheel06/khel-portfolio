@@ -260,6 +260,105 @@ export function ContactSection() {
       ====================================================================== */}
 
       <div className="container-khel relative z-10">
+        <motion.header
+          variants={
+            shouldReduceMotion
+              ? undefined
+              : containerVariants
+          }
+          initial={
+            shouldReduceMotion
+              ? false
+              : "hidden"
+          }
+          whileInView={
+            shouldReduceMotion
+              ? undefined
+              : "visible"
+          }
+          viewport={{
+            once: true,
+            amount: 0.2,
+          }}
+          className="
+            mb-14
+            max-w-3xl
+            sm:mb-16
+          "
+        >
+          <motion.div
+            variants={
+              shouldReduceMotion
+                ? undefined
+                : itemVariants
+            }
+            className="flex items-center gap-3"
+          >
+            <span
+              aria-hidden="true"
+              className="
+                h-px
+                w-8
+                bg-cyan-600/70
+                dark:bg-cyan-400/70
+              "
+            />
+
+            <p
+              className="
+                text-[11px]
+                font-semibold
+                uppercase
+                tracking-[0.25em]
+                text-cyan-700
+                dark:text-cyan-400
+              "
+            >
+              07 — Contact
+            </p>
+
+          </motion.div>
+
+          <motion.h2
+            variants={
+              shouldReduceMotion
+                ? undefined
+                : itemVariants
+            }
+            className="
+              mt-5
+              text-4xl
+              font-bold
+              tracking-[-0.035em]
+              text-slate-950
+              sm:text-5xl
+              dark:text-white
+            "
+          >
+            LET&apos;S BUILD SOMETHING.
+          </motion.h2>
+
+          <motion.p
+            variants={
+              shouldReduceMotion
+                ? undefined
+                : itemVariants
+            }
+            className="
+              mt-6
+              max-w-2xl
+              text-sm
+              leading-7
+              text-slate-600
+              sm:text-base
+              dark:text-slate-400
+            "
+          >
+            Have a project, opportunity, or technical problem you&apos;d
+            like to discuss? Send me a message and I&apos;ll get back to you.
+          </motion.p>
+        </motion.header>
+
         <motion.div
           variants={
             shouldReduceMotion
@@ -291,89 +390,7 @@ export function ContactSection() {
               LEFT
           ================================================================== */}
 
-          <div>
-            {/* LABEL */}
-
-            <motion.div
-              variants={
-                shouldReduceMotion
-                  ? undefined
-                  : itemVariants
-              }
-              className="flex items-center gap-3"
-            >
-              <motion.span
-                initial={
-                  shouldReduceMotion
-                    ? false
-                    : {
-                        width: 0,
-                      }
-                }
-                whileInView={
-                  shouldReduceMotion
-                    ? undefined
-                    : {
-                        width: 32,
-                      }
-                }
-                viewport={{
-                  once: true,
-                }}
-                transition={{
-                  duration: 0.6,
-                  ease: easing,
-                }}
-                className="
-                  h-px
-                  bg-cyan-600/70
-
-                  dark:bg-cyan-400/70
-                "
-              />
-
-              <p
-                className="
-                  text-[11px]
-                  font-semibold
-                  uppercase
-                  tracking-[0.25em]
-                  text-cyan-700
-
-                  dark:text-cyan-400
-                "
-              >
-                07 — Contact
-              </p>
-            </motion.div>
-
-            {/* HEADING */}
-
-            <motion.h2
-              variants={
-                shouldReduceMotion
-                  ? undefined
-                  : itemVariants
-              }
-              className="
-                mt-5
-                text-4xl
-                font-bold
-                tracking-[-0.035em]
-                text-slate-950
-
-                sm:text-5xl
-
-                dark:text-white
-              "
-            >
-              LET&apos;S BUILD
-              <br />
-              SOMETHING.
-            </motion.h2>
-
-            {/* DESCRIPTION */}
-
+          <div className="mx-auto w-full max-w-lg lg:mx-0">
             <motion.p
               variants={
                 shouldReduceMotion
@@ -381,20 +398,15 @@ export function ContactSection() {
                   : itemVariants
               }
               className="
-                mt-6
-                max-w-lg
-                text-sm
-                leading-7
-                text-slate-600
-
-                sm:text-base
-
-                dark:text-slate-400
+                text-[10px]
+                font-semibold
+                uppercase
+                tracking-[0.2em]
+                text-slate-500
+                dark:text-slate-500
               "
             >
-              Have a project, opportunity, or technical problem
-              you&apos;d like to discuss? Send me a message and
-              I&apos;ll get back to you.
+              Direct contact
             </motion.p>
 
             {/* CONTACT DETAILS */}
@@ -405,7 +417,7 @@ export function ContactSection() {
                   ? undefined
                   : containerVariants
               }
-              className="mt-10 space-y-4"
+              className="mt-5 space-y-4"
             >
               <ContactDetail
                 icon={<Mail size={17} />}

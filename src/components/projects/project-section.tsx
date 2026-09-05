@@ -1,6 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   AnimatePresence,
   motion,
@@ -15,6 +20,7 @@ import {
 
 import { ProjectCard } from "./project-card";
 import { ProjectDialog } from "./project-dialog";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 /* =========================================================
    FILTERS
@@ -28,87 +34,18 @@ const filters: Array<"All" | ProjectCategory> = [
 ];
 
 /* =========================================================
-   MOTION
-========================================================= */
-
-const easing = [0.22, 1, 0.36, 1] as const;
-
-const headerContainer = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const headerItem = {
-  hidden: {
-    opacity: 0,
-    y: 24,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.7,
-      ease: easing,
-    },
-  },
-};
-
-const projectContainer = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.05,
-    },
-  },
-};
-
-const projectItem = {
-  hidden: {
-    opacity: 0,
-    y: 32,
-    scale: 0.985,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.75,
-      ease: easing,
-    },
-  },
-  exit: {
-    opacity: 0,
-    y: 18,
-    scale: 0.98,
-    transition: {
-      duration: 0.25,
-      ease: easing,
-    },
-  },
-};
-
-/* =========================================================
    PROJECT SECTION
 ========================================================= */
 
 export function ProjectSection() {
   const shouldReduceMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
 
   const [activeFilter, setActiveFilter] =
     useState<(typeof filters)[number]>("All");
 
   const [selectedProject, setSelectedProject] =
     useState<Project | null>(null);
-
-  /* -------------------------------------------------------
-     FILTER PROJECTS
-  ------------------------------------------------------- */
 
   const filteredProjects = useMemo(() => {
     if (activeFilter === "All") {
@@ -120,13 +57,616 @@ export function ProjectSection() {
     );
   }, [activeFilter]);
 
+  /* =========================================================
+     MASTER SECTION ANIMATION
+
+     Handles:
+     - Header reveal
+     - Heading reveal
+     - Filter entrance
+     - Background atmosphere
+     - Bottom technical marker
+  ========================================================= */
+
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+
+    if (!section) return;
+
+    const ctx = gsap.context(() => {
+      const header =
+        section.querySelector<HTMLElement>(
+          "[data-projects-header]",
+        );
+
+      const headerLabel =
+        section.querySelector<HTMLElement>(
+          "[data-projects-label]",
+        );
+
+      const heading =
+        section.querySelector<HTMLElement>(
+          "[data-projects-title]",
+        );
+
+      const description =
+        section.querySelector<HTMLElement>(
+          "[data-projects-description]",
+        );
+
+      const filtersEl =
+        section.querySelector<HTMLElement>(
+          "[data-projects-filters]",
+        );
+
+      const atmosphere =
+        gsap.utils.toArray<HTMLElement>(
+          "[data-projects-atmosphere]",
+          section,
+        );
+
+      const bottomMarker =
+        section.querySelector<HTMLElement>(
+          "[data-projects-bottom-marker]",
+        );
+
+      if (
+        !header ||
+        !heading ||
+        !description ||
+        !filtersEl
+      ) {
+        return;
+      }
+
+      /* -------------------------------------------------------
+         REDUCED MOTION
+      ------------------------------------------------------- */
+
+      if (shouldReduceMotion) {
+        gsap.set(
+          [
+            header,
+            headerLabel,
+            heading,
+            description,
+            filtersEl,
+            bottomMarker,
+            ...atmosphere,
+          ].filter(Boolean),
+          {
+            clearProps: "all",
+          },
+        );
+
+        return;
+      }
+
+      /* -------------------------------------------------------
+         INITIAL STATES
+      ------------------------------------------------------- */
+
+      gsap.set(header, {
+        opacity: 0,
+        y: 38,
+        filter: "blur(8px)",
+      });
+
+      if (headerLabel) {
+        gsap.set(headerLabel, {
+          opacity: 0,
+          x: -18,
+        });
+      }
+
+      gsap.set(heading, {
+        opacity: 0,
+        y: 24,
+        clipPath: "inset(0 0 100% 0)",
+      });
+
+      gsap.set(description, {
+        opacity: 0,
+        y: 18,
+      });
+
+      gsap.set(filtersEl, {
+        opacity: 0,
+        x: 24,
+      });
+
+      if (bottomMarker) {
+        gsap.set(bottomMarker, {
+          opacity: 0,
+          y: 18,
+        });
+      }
+
+      if (atmosphere.length) {
+        gsap.set(atmosphere, {
+          opacity: 0,
+          scale: 0.82,
+        });
+      }
+
+      /* -------------------------------------------------------
+         HEADER REVEAL
+      ------------------------------------------------------- */
+
+      const headerTimeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: header,
+          start: "top 82%",
+          once: true,
+        },
+      });
+
+      headerTimeline
+        .to(
+          header,
+          {
+            opacity: 1,
+            y: 0,
+            filter: "blur(0px)",
+            duration: 0.8,
+            ease: "power3.out",
+          },
+          0,
+        )
+        .to(
+          headerLabel,
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.45,
+            ease: "power3.out",
+          },
+          0.12,
+        )
+        .to(
+          heading,
+          {
+            opacity: 1,
+            y: 0,
+            clipPath: "inset(0 0 0% 0)",
+            duration: 0.8,
+            ease: "power4.out",
+          },
+          0.18,
+        )
+        .to(
+          description,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.55,
+            ease: "power3.out",
+          },
+          0.38,
+        )
+        .to(
+          filtersEl,
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.55,
+            ease: "power3.out",
+          },
+          0.3,
+        );
+
+      /* -------------------------------------------------------
+         ATMOSPHERE
+      ------------------------------------------------------- */
+
+      if (atmosphere.length) {
+        const atmosphereTimeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: "top 85%",
+            end: "bottom 15%",
+            scrub: 1.4,
+          },
+        });
+
+        atmosphereTimeline.to(
+          atmosphere,
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            ease: "none",
+            stagger: 0.08,
+          },
+          0,
+        );
+
+        atmosphere.forEach((element, index) => {
+          gsap.to(element, {
+            xPercent: index % 2 === 0 ? 4 : -4,
+            yPercent: index % 2 === 0 ? -3 : 3,
+            ease: "none",
+            scrollTrigger: {
+              trigger: section,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 1.8,
+            },
+          });
+        });
+      }
+
+      /* -------------------------------------------------------
+         BOTTOM MARKER
+      ------------------------------------------------------- */
+
+      if (bottomMarker) {
+        gsap.fromTo(
+          bottomMarker,
+          {
+            opacity: 0,
+            y: 18,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.65,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: bottomMarker,
+              start: "top 88%",
+              once: true,
+            },
+          },
+        );
+      }
+
+      /* -------------------------------------------------------
+         REFRESH AFTER LAYOUT
+      ------------------------------------------------------- */
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          ScrollTrigger.refresh();
+        });
+      });
+    }, section);
+
+    return () => {
+      ctx.revert();
+    };
+  }, [shouldReduceMotion]);
+
+  /* =========================================================
+     CARD GRID ANIMATION
+
+     IMPORTANT:
+     Event listeners are cleaned up separately.
+
+     DO NOT use:
+       ctx.add(...)
+
+     inside the gsap.context callback because ctx is not
+     initialized until gsap.context() returns.
+  ========================================================= */
+
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+
+    if (!section || shouldReduceMotion) {
+      return;
+    }
+
+    /*
+     * Store DOM event cleanup functions here.
+     *
+     * This is the important fix for:
+     *
+     * Cannot access 'ctx' before initialization
+     */
+    const eventCleanups: Array<() => void> = [];
+
+    const ctx = gsap.context(() => {
+      const grid =
+        section.querySelector<HTMLElement>(
+          "[data-projects-grid]",
+        );
+
+      const cards =
+        gsap.utils.toArray<HTMLElement>(
+          "[data-projects-card]",
+          section,
+        );
+
+      if (!grid || cards.length === 0) {
+        return;
+      }
+
+      cards.forEach((card, index) => {
+        const image =
+          card.querySelector<HTMLElement>(
+            ".project-card-image",
+          );
+
+        const glow =
+          card.querySelector<HTMLElement>(
+            ".project-card-glow",
+          );
+
+        const isRight = index % 2 === 1;
+
+        /* -----------------------------------------------------
+           INITIAL CARD STATE
+        ----------------------------------------------------- */
+
+        gsap.set(card, {
+          opacity: 0,
+          y: 42,
+          x: isRight ? 24 : -24,
+          scale: 0.97,
+          rotate: isRight ? 0.7 : -0.7,
+          transformOrigin: "center center",
+          clipPath:
+            "inset(0 0 12% 0 round 1rem)",
+          force3D: true,
+        });
+
+        if (image) {
+          gsap.set(image, {
+            scale: 1.08,
+            yPercent: 2,
+            force3D: true,
+          });
+        }
+
+        if (glow) {
+          gsap.set(glow, {
+            opacity: 0,
+            scale: 0.85,
+          });
+        }
+
+        /* -----------------------------------------------------
+           CARD REVEAL
+        ----------------------------------------------------- */
+
+        const reveal = gsap.timeline({
+          scrollTrigger: {
+            trigger: card,
+            start: "top 88%",
+            end: "top 52%",
+            scrub: 0.9,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        reveal.to(
+          card,
+          {
+            opacity: 1,
+            y: 0,
+            x: 0,
+            scale: 1,
+            rotate: 0,
+            clipPath:
+              "inset(0 0 0% 0 round 1rem)",
+            duration: 1,
+            ease: "power3.out",
+          },
+          0,
+        );
+
+        if (image) {
+          reveal.to(
+            image,
+            {
+              scale: 1,
+              yPercent: 0,
+              duration: 1,
+              ease: "power2.out",
+            },
+            0.04,
+          );
+        }
+
+        if (glow) {
+          reveal.to(
+            glow,
+            {
+              opacity: 1,
+              scale: 1,
+              duration: 0.55,
+              ease: "power2.out",
+            },
+            0.25,
+          );
+        }
+
+        /* -----------------------------------------------------
+           IMAGE PARALLAX
+        ----------------------------------------------------- */
+
+        if (image) {
+          gsap.fromTo(
+            image,
+            {
+              yPercent: -3,
+            },
+            {
+              yPercent: 3,
+              ease: "none",
+              scrollTrigger: {
+                trigger: card,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1.5,
+                invalidateOnRefresh: true,
+              },
+            },
+          );
+        }
+
+        /* -----------------------------------------------------
+           VIEWPORT FOCUS
+        ----------------------------------------------------- */
+
+        gsap.fromTo(
+          card,
+          {
+            filter: "brightness(0.94)",
+          },
+          {
+            filter: "brightness(1)",
+            ease: "none",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 72%",
+              end: "center 48%",
+              scrub: 1,
+            },
+          },
+        );
+
+        /* -----------------------------------------------------
+           HOVER ENTER
+        ----------------------------------------------------- */
+
+        const handleEnter = () => {
+          gsap.to(card, {
+            y: -5,
+            duration: 0.35,
+            ease: "power3.out",
+            overwrite: "auto",
+          });
+
+          if (image) {
+            gsap.to(image, {
+              scale: 1.035,
+              duration: 0.6,
+              ease: "power3.out",
+              overwrite: "auto",
+            });
+          }
+
+          if (glow) {
+            gsap.to(glow, {
+              opacity: 1,
+              scale: 1.05,
+              duration: 0.45,
+              ease: "power2.out",
+              overwrite: "auto",
+            });
+          }
+        };
+
+        /* -----------------------------------------------------
+           HOVER LEAVE
+        ----------------------------------------------------- */
+
+        const handleLeave = () => {
+          gsap.to(card, {
+            y: 0,
+            duration: 0.4,
+            ease: "power3.out",
+            overwrite: "auto",
+          });
+
+          if (image) {
+            gsap.to(image, {
+              scale: 1,
+              duration: 0.7,
+              ease: "power3.out",
+              overwrite: "auto",
+            });
+          }
+
+          if (glow) {
+            gsap.to(glow, {
+              opacity: 0.65,
+              scale: 1,
+              duration: 0.45,
+              ease: "power2.out",
+              overwrite: "auto",
+            });
+          }
+        };
+
+        /* -----------------------------------------------------
+           EVENT LISTENERS
+        ----------------------------------------------------- */
+
+        card.addEventListener(
+          "mouseenter",
+          handleEnter,
+        );
+
+        card.addEventListener(
+          "mouseleave",
+          handleLeave,
+        );
+
+        /*
+         * IMPORTANT:
+         *
+         * Do NOT do:
+         *
+         * ctx.add(() => {...})
+         *
+         * here.
+         *
+         * ctx doesn't exist until after gsap.context()
+         * has returned.
+         */
+        eventCleanups.push(() => {
+          card.removeEventListener(
+            "mouseenter",
+            handleEnter,
+          );
+
+          card.removeEventListener(
+            "mouseleave",
+            handleLeave,
+          );
+        });
+      });
+
+      /* -------------------------------------------------------
+         REFRESH AFTER CARD LAYOUT
+      ------------------------------------------------------- */
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          ScrollTrigger.refresh();
+        });
+      });
+    }, section);
+
+    /* ---------------------------------------------------------
+       COMPLETE CLEANUP
+
+       1. Remove DOM listeners.
+       2. Revert GSAP context.
+    --------------------------------------------------------- */
+
+    return () => {
+      eventCleanups.forEach((cleanup) => {
+        cleanup();
+      });
+
+      eventCleanups.length = 0;
+
+      ctx.revert();
+    };
+  }, [activeFilter, shouldReduceMotion]);
+
+  /* =========================================================
+     RENDER
+  ========================================================= */
+
   return (
     <>
-      {/* =====================================================
-          PROJECT SECTION
-      ===================================================== */}
-
       <section
+        ref={sectionRef}
         id="projects"
         className="
           relative
@@ -142,17 +682,20 @@ export function ProjectSection() {
           sm:py-36
         "
       >
-        {/* ===================================================
+        {/* =====================================================
             ATMOSPHERIC BACKGROUND
-        =================================================== */}
+        ====================================================== */}
 
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
+          className="
+            pointer-events-none
+            absolute
+            inset-0
+          "
         >
-          {/* Cyan atmosphere */}
-
-          <motion.div
+          <div
+            data-projects-atmosphere
             className="
               absolute
               left-[15%]
@@ -164,35 +707,10 @@ export function ProjectSection() {
               blur-3xl
               dark:bg-cyan-500/[0.035]
             "
-            initial={
-              shouldReduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                    scale: 0.8,
-                  }
-            }
-            whileInView={
-              shouldReduceMotion
-                ? undefined
-                : {
-                    opacity: 1,
-                    scale: 1,
-                  }
-            }
-            viewport={{
-              once: true,
-              amount: 0.1,
-            }}
-            transition={{
-              duration: 1.5,
-              ease: easing,
-            }}
           />
 
-          {/* Blue atmosphere */}
-
-          <motion.div
+          <div
+            data-projects-atmosphere
             className="
               absolute
               right-[8%]
@@ -204,36 +722,24 @@ export function ProjectSection() {
               blur-3xl
               dark:bg-blue-600/[0.025]
             "
-            initial={
-              shouldReduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                    scale: 0.85,
-                  }
-            }
-            whileInView={
-              shouldReduceMotion
-                ? undefined
-                : {
-                    opacity: 1,
-                    scale: 1,
-                  }
-            }
-            viewport={{
-              once: true,
-              amount: 0.1,
-            }}
-            transition={{
-              duration: 1.6,
-              delay: 0.1,
-              ease: easing,
-            }}
           />
 
-          {/* =================================================
-              LIGHT MODE GRID
-          ================================================= */}
+          <div
+            data-projects-atmosphere
+            className="
+              absolute
+              bottom-[10%]
+              left-[25%]
+              h-64
+              w-64
+              rounded-full
+              bg-purple-500/[0.014]
+              blur-3xl
+              dark:bg-purple-500/[0.018]
+            "
+          />
+
+          {/* LIGHT MODE GRID */}
 
           <div
             className="
@@ -262,9 +768,7 @@ export function ProjectSection() {
             }}
           />
 
-          {/* =================================================
-              DARK MODE GRID
-          ================================================= */}
+          {/* DARK MODE GRID */}
 
           <div
             className="
@@ -297,33 +801,15 @@ export function ProjectSection() {
 
         {/* =====================================================
             MAIN CONTENT
-        ===================================================== */}
+        ====================================================== */}
 
-        <div className="container-khel relative">
+        <div className="container-khel relative z-10">
           {/* ===================================================
               HEADER
-          =================================================== */}
+          ==================================================== */}
 
-          <motion.div
-            variants={
-              shouldReduceMotion
-                ? undefined
-                : headerContainer
-            }
-            initial={
-              shouldReduceMotion
-                ? false
-                : "hidden"
-            }
-            whileInView={
-              shouldReduceMotion
-                ? undefined
-                : "visible"
-            }
-            viewport={{
-              once: true,
-              amount: 0.25,
-            }}
+          <div
+            data-projects-header
             className="
               flex
               flex-col
@@ -333,79 +819,37 @@ export function ProjectSection() {
               lg:items-end
             "
           >
-            {/* =================================================
-                HEADER LEFT
-            ================================================= */}
-
             <div>
-              {/* Section label */}
-
-              <motion.div
-                variants={
-                  shouldReduceMotion
-                    ? undefined
-                    : headerItem
-                }
+              <div
+                data-projects-label
+                className="flex items-center gap-3"
               >
-                <div className="flex items-center gap-3">
-                  <motion.span
-                    aria-hidden="true"
-                    initial={
-                      shouldReduceMotion
-                        ? false
-                        : {
-                            width: 0,
-                            opacity: 0,
-                          }
-                    }
-                    whileInView={
-                      shouldReduceMotion
-                        ? undefined
-                        : {
-                            width: 32,
-                            opacity: 1,
-                          }
-                    }
-                    viewport={{
-                      once: true,
-                      amount: 0.5,
-                    }}
-                    transition={{
-                      duration: 0.55,
-                      ease: easing,
-                    }}
-                    className="
-                      h-px
-                      bg-cyan-500/70
-                      dark:bg-cyan-400/70
-                    "
-                  />
+                <span
+                  aria-hidden="true"
+                  className="
+                    h-px
+                    w-8
+                    bg-cyan-500/70
+                    dark:bg-cyan-400/70
+                  "
+                />
 
-                  <p
-                    className="
-                      text-[11px]
-                      font-semibold
-                      uppercase
-                      tracking-[0.25em]
-                      text-cyan-600
-                      dark:text-cyan-400
-                    "
-                  >
-                    05 — Selected Work
-                  </p>
-                </div>
-              </motion.div>
+                <p
+                  className="
+                    text-[11px]
+                    font-semibold
+                    uppercase
+                    tracking-[0.25em]
+                    text-cyan-600
+                    dark:text-cyan-400
+                  "
+                >
+                  05 — Selected Work
+                </p>
+              </div>
 
-              {/* =================================================
-                  MAIN HEADING
-              ================================================= */}
-
-              <motion.h2
-                variants={
-                  shouldReduceMotion
-                    ? undefined
-                    : headerItem
-                }
+              <h2
+                data-projects-title
                 className="
                   mt-5
                   max-w-3xl
@@ -422,18 +866,10 @@ export function ProjectSection() {
                 PROJECTS BUILT
                 <br />
                 FOR REAL WORKFLOWS.
-              </motion.h2>
+              </h2>
 
-              {/* =================================================
-                  DESCRIPTION
-              ================================================= */}
-
-              <motion.p
-                variants={
-                  shouldReduceMotion
-                    ? undefined
-                    : headerItem
-                }
+              <p
+                data-projects-description
                 className="
                   mt-7
                   max-w-xl
@@ -447,19 +883,13 @@ export function ProjectSection() {
                 A selection of projects focused on solving
                 practical problems through thoughtful design
                 and reliable engineering.
-              </motion.p>
+              </p>
             </div>
 
-            {/* =================================================
-                FILTERS
-            ================================================= */}
+            {/* FILTERS */}
 
             <motion.div
-              variants={
-                shouldReduceMotion
-                  ? undefined
-                  : headerItem
-              }
+              data-projects-filters
               className="relative flex flex-wrap gap-2"
             >
               {filters.map((filter) => {
@@ -473,16 +903,12 @@ export function ProjectSection() {
                     whileHover={
                       shouldReduceMotion
                         ? undefined
-                        : {
-                            y: -2,
-                          }
+                        : { y: -2 }
                     }
                     whileTap={
                       shouldReduceMotion
                         ? undefined
-                        : {
-                            scale: 0.97,
-                          }
+                        : { scale: 0.97 }
                     }
                     className="
                       relative
@@ -511,8 +937,6 @@ export function ProjectSection() {
                       dark:hover:text-white
                     "
                   >
-                    {/* Active background */}
-
                     {active && (
                       <motion.span
                         layoutId="project-filter"
@@ -525,9 +949,7 @@ export function ProjectSection() {
                         "
                         transition={
                           shouldReduceMotion
-                            ? {
-                                duration: 0,
-                              }
+                            ? { duration: 0 }
                             : {
                                 type: "spring",
                                 stiffness: 400,
@@ -536,8 +958,6 @@ export function ProjectSection() {
                         }
                       />
                     )}
-
-                    {/* Active bottom line */}
 
                     {active && (
                       <motion.span
@@ -553,9 +973,7 @@ export function ProjectSection() {
                         "
                         transition={
                           shouldReduceMotion
-                            ? {
-                                duration: 0,
-                              }
+                            ? { duration: 0 }
                             : {
                                 type: "spring",
                                 stiffness: 400,
@@ -582,101 +1000,39 @@ export function ProjectSection() {
                 );
               })}
             </motion.div>
-          </motion.div>
+          </div>
 
           {/* ===================================================
               PROJECT GRID
-          =================================================== */}
+          ==================================================== */}
 
-          <motion.div
-            layout
-            variants={
-              shouldReduceMotion
-                ? undefined
-                : projectContainer
-            }
-            initial={
-              shouldReduceMotion
-                ? false
-                : "hidden"
-            }
-            whileInView={
-              shouldReduceMotion
-                ? undefined
-                : "visible"
-            }
-            viewport={{
-              once: true,
-              amount: 0.08,
-            }}
-            transition={{
-              layout: shouldReduceMotion
-                ? {
-                    duration: 0,
-                  }
-                : {
-                    duration: 0.55,
-                    ease: easing,
-                  },
-            }}
+          <div
+            data-projects-grid
             className="
-              mt-14
+              mt-12
               grid
               gap-5
               lg:grid-cols-2
             "
           >
-            <AnimatePresence
-              mode="popLayout"
-              initial={false}
-            >
-              {filteredProjects.map(
-                (project, index) => (
-                  <motion.div
-                    key={project.id}
-                    layout
-                    variants={
-                      shouldReduceMotion
-                        ? undefined
-                        : projectItem
-                    }
-                    initial={
-                      shouldReduceMotion
-                        ? false
-                        : "hidden"
-                    }
-                    animate="visible"
-                    exit={
-                      shouldReduceMotion
-                        ? undefined
-                        : "exit"
-                    }
-                    transition={{
-                      layout:
-                        shouldReduceMotion
-                          ? {
-                              duration: 0,
-                            }
-                          : {
-                              duration: 0.5,
-                              ease: easing,
-                            },
-                    }}
-                  >
-                    <ProjectCard
-                      project={project}
-                      index={index}
-                      onOpen={setSelectedProject}
-                    />
-                  </motion.div>
-                ),
-              )}
-            </AnimatePresence>
-          </motion.div>
+            {filteredProjects.map((project, index) => (
+              <div
+                key={project.id}
+                data-projects-card
+                className="will-change-transform"
+              >
+                <ProjectCard
+                  project={project}
+                  index={index}
+                  onOpen={setSelectedProject}
+                />
+              </div>
+            ))}
+          </div>
 
           {/* ===================================================
               EMPTY STATE
-          =================================================== */}
+          ==================================================== */}
 
           <AnimatePresence mode="wait">
             {filteredProjects.length === 0 && (
@@ -703,7 +1059,7 @@ export function ProjectSection() {
                 }
                 transition={{
                   duration: 0.4,
-                  ease: easing,
+                  ease: [0.22, 1, 0.36, 1],
                 }}
                 className="
                   mt-10
@@ -733,34 +1089,10 @@ export function ProjectSection() {
 
           {/* ===================================================
               BOTTOM TECHNICAL MARKER
-          =================================================== */}
+          ==================================================== */}
 
-          <motion.div
-            initial={
-              shouldReduceMotion
-                ? false
-                : {
-                    opacity: 0,
-                    y: 15,
-                  }
-            }
-            whileInView={
-              shouldReduceMotion
-                ? undefined
-                : {
-                    opacity: 1,
-                    y: 0,
-                  }
-            }
-            viewport={{
-              once: true,
-              amount: 0.5,
-            }}
-            transition={{
-              duration: 0.7,
-              delay: 0.15,
-              ease: easing,
-            }}
+          <div
+            data-projects-bottom-marker
             className="
               mt-14
               flex
@@ -772,8 +1104,6 @@ export function ProjectSection() {
               dark:border-white/[0.06]
             "
           >
-            {/* Left marker */}
-
             <div className="flex items-center gap-3">
               <motion.span
                 aria-hidden="true"
@@ -816,8 +1146,6 @@ export function ProjectSection() {
               </span>
             </div>
 
-            {/* Project count */}
-
             <span
               className="
                 text-[10px]
@@ -833,7 +1161,7 @@ export function ProjectSection() {
                 .padStart(2, "0")}{" "}
               Projects
             </span>
-          </motion.div>
+          </div>
         </div>
       </section>
 

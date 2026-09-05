@@ -1444,7 +1444,7 @@ export function Hero() {
                     dark:hover:bg-cyan-400/[0.05]
                   "
                 >
-                  Let's Talk
+                  Let&apos;s Talk
                 </a>
               </div>
             </FadeUp>

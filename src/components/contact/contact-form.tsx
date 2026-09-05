@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 import {
   Check,
@@ -33,6 +37,7 @@ import {
 } from "firebase/firestore";
 
 import { db } from "@/lib/firebase";
+import { gsap } from "@/lib/gsap";
 
 /* =========================================================
    VALIDATION
@@ -774,6 +779,8 @@ function SuccessMessage({
 ========================================================= */
 
 export function ContactForm() {
+  const formRef = useRef<HTMLFormElement>(null);
+
   const [
     isSubmitting,
     setIsSubmitting,
@@ -822,6 +829,68 @@ export function ContactForm() {
 
   const messageValue =
     watch("message") ?? "";
+
+  useLayoutEffect(() => {
+    const form = formRef.current;
+
+    if (!form || shouldReduceMotion || isSuccess) {
+      return;
+    }
+
+    const fields = Array.from(
+      form.querySelectorAll<HTMLElement>("[data-contact-field]"),
+    );
+
+    const handleFocus = (event: FocusEvent) => {
+      gsap.to(event.currentTarget, {
+        y: -2,
+        duration: 0.22,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    };
+
+    const handleBlur = (event: FocusEvent) => {
+      gsap.to(event.currentTarget, {
+        y: 0,
+        duration: 0.3,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    };
+
+    fields.forEach((field) => {
+      field.addEventListener("focus", handleFocus);
+      field.addEventListener("blur", handleBlur);
+    });
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        form,
+        { autoAlpha: 0, y: 24 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.78,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: form,
+            start: "top 86%",
+            once: true,
+          },
+        },
+      );
+    }, form);
+
+    return () => {
+      fields.forEach((field) => {
+        field.removeEventListener("focus", handleFocus);
+        field.removeEventListener("blur", handleBlur);
+      });
+
+      ctx.revert();
+    };
+  }, [isSuccess, shouldReduceMotion]);
 
   /* =======================================================
      RESET
@@ -982,29 +1051,35 @@ export function ContactForm() {
     rounded-xl
 
     border
-    border-white/[0.09]
+    border-slate-900/[0.1]
 
-    bg-white/[0.025]
+    bg-slate-950/[0.025]
 
     px-4
     py-3.5
 
     text-sm
-    text-white
+    text-slate-950
 
     outline-none
 
     transition-all
     duration-300
 
-    placeholder:text-slate-600
+    placeholder:text-slate-400
 
-    hover:border-white/[0.16]
+    hover:border-slate-900/[0.16]
 
     focus:border-cyan-400
     focus:bg-white/[0.035]
     focus:ring-4
     focus:ring-cyan-400/10
+
+    dark:border-white/[0.09]
+    dark:bg-white/[0.025]
+    dark:text-white
+    dark:placeholder:text-slate-600
+    dark:hover:border-white/[0.16]
 
     disabled:cursor-not-allowed
     disabled:opacity-60
@@ -1032,6 +1107,7 @@ export function ContactForm() {
         />
       ) : (
         <motion.form
+          ref={formRef}
           key="contact-form"
           onSubmit={
             handleSubmit(onSubmit)
@@ -1083,6 +1159,7 @@ export function ContactForm() {
                 </label>
 
                 <input
+                  data-contact-field
                   id="name"
                   type="text"
                   autoComplete="name"
@@ -1128,6 +1205,7 @@ export function ContactForm() {
                 </label>
 
                 <input
+                  data-contact-field
                   id="email"
                   type="email"
                   autoComplete="email"
@@ -1173,6 +1251,7 @@ export function ContactForm() {
                 </label>
 
                 <input
+                  data-contact-field
                   id="subject"
                   type="text"
                   placeholder="What would you like to build?"
@@ -1228,6 +1307,7 @@ export function ContactForm() {
                 </div>
 
                 <textarea
+                  data-contact-field
                   id="message"
                   rows={7}
                   placeholder="Tell me a little about your project..."

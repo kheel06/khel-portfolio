@@ -6,7 +6,11 @@ import {
   ExternalLink,
   X,
 } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from "motion/react";
 
 import type { Project } from "@/data/projects";
 
@@ -17,19 +21,52 @@ interface ProjectDialogProps {
 
 const easing = [0.22, 1, 0.36, 1] as const;
 
+const staggerContainer = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.055,
+      delayChildren: 0.08,
+    },
+  },
+};
+
+const fadeUp = {
+  hidden: {
+    opacity: 0,
+    y: 18,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.48,
+      ease: easing,
+    },
+  },
+};
+
 export function ProjectDialog({
   project,
   onClose,
 }: ProjectDialogProps) {
   const shouldReduceMotion = useReducedMotion();
 
+  const instant = shouldReduceMotion;
+
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {project && (
-        <div className="fixed inset-0 z-[100]">
+        <motion.div
+          key={project.title}
+          className="fixed inset-0 z-[100]"
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
           {/* =====================================================
               BACKDROP
-          ===================================================== */}
+          ====================================================== */}
 
           <motion.button
             type="button"
@@ -44,19 +81,31 @@ export function ProjectDialog({
               backdrop-blur-sm
               dark:bg-black/75
             "
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : 0.25,
-              ease: easing,
+            variants={{
+              hidden: {
+                opacity: 0,
+              },
+              visible: {
+                opacity: 1,
+                transition: {
+                  duration: instant ? 0 : 0.3,
+                  ease: easing,
+                },
+              },
+              exit: {
+                opacity: 0,
+                transition: {
+                  duration: instant ? 0 : 0.2,
+                  ease: easing,
+                },
+              },
             }}
             onClick={onClose}
           />
 
           {/* =====================================================
-              MODAL CONTAINER
-          ===================================================== */}
+              MODAL FRAME
+          ====================================================== */}
 
           <div
             className="
@@ -73,33 +122,6 @@ export function ProjectDialog({
               role="dialog"
               aria-modal="true"
               aria-labelledby="project-dialog-title"
-              initial={
-                shouldReduceMotion
-                  ? false
-                  : {
-                      opacity: 0,
-                      scale: 0.96,
-                      y: 15,
-                    }
-              }
-              animate={{
-                opacity: 1,
-                scale: 1,
-                y: 0,
-              }}
-              exit={
-                shouldReduceMotion
-                  ? undefined
-                  : {
-                      opacity: 0,
-                      scale: 0.97,
-                      y: 10,
-                    }
-              }
-              transition={{
-                duration: shouldReduceMotion ? 0 : 0.3,
-                ease: easing,
-              }}
               className="
                 relative
                 flex
@@ -118,13 +140,51 @@ export function ProjectDialog({
                 dark:bg-[#080d17]
                 dark:text-white
               "
+              variants={{
+                hidden: instant
+                  ? {}
+                  : {
+                      opacity: 0,
+                      y: 24,
+                      scale: 0.965,
+                    },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  transition: {
+                    duration: instant ? 0 : 0.42,
+                    ease: easing,
+                  },
+                },
+                exit: instant
+                  ? {}
+                  : {
+                      opacity: 0,
+                      y: 14,
+                      scale: 0.975,
+                      transition: {
+                        duration: 0.25,
+                        ease: easing,
+                      },
+                    },
+              }}
             >
               {/* =================================================
-                  MODAL HEADER
+                  HEADER
               ================================================= */}
 
-              <div
+              <motion.div
+                initial={instant ? false : { opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: instant ? 0 : 0.35,
+                  delay: instant ? 0 : 0.12,
+                  ease: easing,
+                }}
                 className="
+                  relative
+                  z-30
                   flex
                   shrink-0
                   items-center
@@ -163,25 +223,23 @@ export function ProjectDialog({
                   </p>
                 </div>
 
-                {/* Close button */}
-
                 <motion.button
                   type="button"
                   onClick={onClose}
                   aria-label="Close case study"
                   whileHover={
-                    shouldReduceMotion
+                    instant
                       ? undefined
                       : {
-                          scale: 1.05,
-                          rotate: 3,
+                          scale: 1.06,
+                          rotate: 4,
                         }
                   }
                   whileTap={
-                    shouldReduceMotion
+                    instant
                       ? undefined
                       : {
-                          scale: 0.95,
+                          scale: 0.94,
                         }
                   }
                   className="
@@ -210,10 +268,10 @@ export function ProjectDialog({
                 >
                   <X size={17} />
                 </motion.button>
-              </div>
+              </motion.div>
 
               {/* =================================================
-                  SCROLL CONTENT
+                  SCROLL AREA
               ================================================= */}
 
               <div
@@ -224,14 +282,14 @@ export function ProjectDialog({
                 "
               >
                 {/* =================================================
-                    PROJECT HERO
+                    HERO
                 ================================================= */}
 
                 <div
                   className="
                     relative
                     aspect-[16/7]
-                    min-h-[220px]
+                    min-h-[250px]
                     overflow-hidden
                     bg-slate-100
                     dark:bg-[#0b1220]
@@ -242,17 +300,18 @@ export function ProjectDialog({
                       src={project.image}
                       alt={`${project.title} preview`}
                       initial={
-                        shouldReduceMotion
+                        instant
                           ? false
                           : {
-                              scale: 1.04,
+                              scale: 1.08,
                             }
                       }
                       animate={{
                         scale: 1,
                       }}
                       transition={{
-                        duration: shouldReduceMotion ? 0 : 0.8,
+                        duration: instant ? 0 : 0.95,
+                        delay: instant ? 0 : 0.05,
                         ease: easing,
                       }}
                       className="
@@ -288,19 +347,39 @@ export function ProjectDialog({
                     </div>
                   )}
 
-                  {/* =================================================
-                      HERO GRADIENT
-                  ================================================= */}
+                  {/* IMAGE DEPTH */}
 
-                  <div
+                  <motion.div
+                    initial={instant ? false : { opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{
+                      duration: instant ? 0 : 0.7,
+                      delay: instant ? 0 : 0.2,
+                    }}
                     className="
+                      pointer-events-none
                       absolute
                       inset-0
                       bg-gradient-to-t
                       from-white
-                      via-transparent
+                      via-white/5
                       to-transparent
                       dark:from-[#080d17]
+                      dark:via-[#080d17]/10
+                    "
+                  />
+
+                  <div
+                    className="
+                      pointer-events-none
+                      absolute
+                      inset-x-0
+                      bottom-0
+                      h-32
+                      bg-gradient-to-t
+                      from-black/10
+                      to-transparent
+                      dark:from-black/20
                     "
                   />
 
@@ -308,7 +387,14 @@ export function ProjectDialog({
                       HERO CONTENT
                   ================================================= */}
 
-                  <div
+                  <motion.div
+                    variants={
+                      shouldReduceMotion
+                        ? undefined
+                        : staggerContainer
+                    }
+                    initial="hidden"
+                    animate="visible"
                     className="
                       absolute
                       bottom-6
@@ -318,63 +404,48 @@ export function ProjectDialog({
                       sm:left-8
                     "
                   >
-                    <motion.h2
-                      id="project-dialog-title"
-                      initial={
-                        shouldReduceMotion
-                          ? false
-                          : {
-                              opacity: 0,
-                              y: 12,
-                            }
+                    <motion.div
+                      variants={
+                        shouldReduceMotion ? undefined : fadeUp
                       }
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                      }}
-                      transition={{
-                        duration: shouldReduceMotion ? 0 : 0.5,
-                        delay: shouldReduceMotion ? 0 : 0.1,
-                        ease: easing,
-                      }}
-                      className="
-                        text-3xl
-                        font-bold
-                        tracking-tight
-                        text-slate-950
-                        dark:text-white
-                        sm:text-5xl
-                      "
                     >
-                      {project.title}
-                    </motion.h2>
-
-                    {/* Technologies */}
+                      <h2
+                        id="project-dialog-title"
+                        className="
+                          text-3xl
+                          font-bold
+                          tracking-[-0.04em]
+                          text-slate-950
+                          dark:text-white
+                          sm:text-5xl
+                        "
+                      >
+                        {project.title}
+                      </h2>
+                    </motion.div>
 
                     <motion.div
-                      initial={
-                        shouldReduceMotion
-                          ? false
-                          : {
-                              opacity: 0,
-                              y: 10,
-                            }
+                      variants={
+                        shouldReduceMotion ? undefined : fadeUp
                       }
-                      animate={{
-                        opacity: 1,
-                        y: 0,
-                      }}
-                      transition={{
-                        duration: shouldReduceMotion ? 0 : 0.45,
-                        delay: shouldReduceMotion ? 0 : 0.18,
-                        ease: easing,
-                      }}
-                      className="mt-4 flex flex-wrap gap-2"
+                      className="
+                        mt-4
+                        flex
+                        flex-wrap
+                        gap-2
+                      "
                     >
                       {project.technologies.map(
                         (technology) => (
-                          <span
+                          <motion.span
                             key={technology}
+                            whileHover={
+                              instant
+                                ? undefined
+                                : {
+                                    y: -2,
+                                  }
+                            }
                             className="
                               rounded-md
                               border
@@ -392,18 +463,25 @@ export function ProjectDialog({
                             "
                           >
                             {technology}
-                          </span>
+                          </motion.span>
                         ),
                       )}
                     </motion.div>
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* =================================================
                     MAIN CONTENT
                 ================================================= */}
 
-                <div
+                <motion.div
+                  variants={
+                    shouldReduceMotion
+                      ? undefined
+                      : staggerContainer
+                  }
+                  initial="hidden"
+                  animate="visible"
                   className="
                     p-6
                     sm:p-8
@@ -414,25 +492,28 @@ export function ProjectDialog({
                       OVERVIEW
                   ================================================= */}
 
-                  <CaseStudyBlock title="Overview">
-                    <p
-                      className="
-                        text-sm
-                        leading-7
-                        text-slate-600
-                        sm:text-base
-                        dark:text-slate-400
-                      "
-                    >
-                      {project.description}
-                    </p>
-                  </CaseStudyBlock>
+                  <AnimatedBlock reduceMotion={!!instant}>
+                    <CaseStudyBlock title="Overview">
+                      <p
+                        className="
+                          text-sm
+                          leading-7
+                          text-slate-600
+                          sm:text-base
+                          dark:text-slate-400
+                        "
+                      >
+                        {project.description}
+                      </p>
+                    </CaseStudyBlock>
+                  </AnimatedBlock>
 
                   {/* =================================================
                       PROBLEM / SOLUTION
                   ================================================= */}
 
-                  <div
+                  <AnimatedBlock
+                    reduceMotion={!!instant}
                     className="
                       mt-12
                       grid
@@ -465,346 +546,522 @@ export function ProjectDialog({
                         {project.solution}
                       </p>
                     </CaseStudyBlock>
-                  </div>
+                  </AnimatedBlock>
 
                   {/* =================================================
                       ARCHITECTURE
                   ================================================= */}
 
-                  <CaseStudyBlock
-                    title="Architecture"
+                  <AnimatedBlock
+                    reduceMotion={!!instant}
                     className="mt-12"
                   >
-                    <div
-                      className="
-                        grid
-                        gap-2
-                        sm:grid-cols-2
-                      "
-                    >
-                      {project.architecture.map(
-                        (item, index) => (
-                          <motion.div
-                            key={item}
-                            whileHover={
-                              shouldReduceMotion
-                                ? undefined
-                                : {
-                                    y: -2,
-                                  }
-                            }
-                            transition={{
-                              duration: 0.2,
-                              ease: "easeOut",
-                            }}
-                            className="
-                              flex
-                              items-center
-                              gap-3
-                              rounded-xl
-                              border
-                              border-slate-900/[0.07]
-                              bg-slate-900/[0.02]
-                              p-4
-                              transition-colors
-                              duration-300
-                              hover:border-cyan-500/20
-                              dark:border-white/[0.06]
-                              dark:bg-white/[0.02]
-                              dark:hover:border-cyan-400/20
-                            "
-                          >
-                            <span
+                    <CaseStudyBlock title="Architecture">
+                      <div
+                        className="
+                          grid
+                          gap-2
+                          sm:grid-cols-2
+                        "
+                      >
+                        {project.architecture.map(
+                          (item, index) => (
+                            <motion.div
+                              key={item}
+                              initial={
+                                instant
+                                  ? false
+                                  : {
+                                      opacity: 0,
+                                      y: 12,
+                                    }
+                              }
+                              animate={{
+                                opacity: 1,
+                                y: 0,
+                              }}
+                              transition={{
+                                duration: instant
+                                  ? 0
+                                  : 0.4,
+                                delay: instant
+                                  ? 0
+                                  : 0.04 * index,
+                                ease: easing,
+                              }}
+                              whileHover={
+                                instant
+                                  ? undefined
+                                  : {
+                                      y: -3,
+                                    }
+                              }
                               className="
-                                font-mono
-                                text-[9px]
-                                text-cyan-600
-                                dark:text-cyan-400
+                                group
+                                flex
+                                items-center
+                                gap-3
+                                rounded-xl
+                                border
+                                border-slate-900/[0.07]
+                                bg-slate-900/[0.02]
+                                p-4
+                                transition-all
+                                duration-300
+                                hover:border-cyan-500/20
+                                hover:bg-cyan-500/[0.025]
+                                dark:border-white/[0.06]
+                                dark:bg-white/[0.02]
+                                dark:hover:border-cyan-400/20
+                                dark:hover:bg-cyan-400/[0.025]
                               "
                             >
-                              {String(index + 1).padStart(
-                                2,
-                                "0",
-                              )}
-                            </span>
+                              <span
+                                className="
+                                  font-mono
+                                  text-[9px]
+                                  text-cyan-600
+                                  transition-transform
+                                  duration-300
+                                  group-hover:translate-x-0.5
+                                  dark:text-cyan-400
+                                "
+                              >
+                                {String(index + 1).padStart(
+                                  2,
+                                  "0",
+                                )}
+                              </span>
 
-                            <span
-                              className="
-                                text-xs
-                                text-slate-600
-                                dark:text-slate-400
-                              "
-                            >
-                              {item}
-                            </span>
-                          </motion.div>
-                        ),
-                      )}
-                    </div>
-                  </CaseStudyBlock>
+                              <span
+                                className="
+                                  text-xs
+                                  text-slate-600
+                                  dark:text-slate-400
+                                "
+                              >
+                                {item}
+                              </span>
+                            </motion.div>
+                          ),
+                        )}
+                      </div>
+                    </CaseStudyBlock>
+                  </AnimatedBlock>
 
                   {/* =================================================
                       KEY FEATURES
                   ================================================= */}
 
-                  <CaseStudyBlock
-                    title="Key Features"
+                  <AnimatedBlock
+                    reduceMotion={!!instant}
                     className="mt-12"
                   >
-                    <div
-                      className="
-                        grid
-                        gap-3
-                        sm:grid-cols-2
-                      "
-                    >
-                      {project.features.map((feature) => (
-                        <div
-                          key={feature}
-                          className="
-                            flex
-                            items-center
-                            gap-3
-                            text-sm
-                            text-slate-600
-                            dark:text-slate-400
-                          "
-                        >
-                          <CheckCircle2
-                            size={16}
-                            className="
-                              shrink-0
-                              text-cyan-600
-                              dark:text-cyan-400
-                            "
-                          />
+                    <CaseStudyBlock title="Key Features">
+                      <div
+                        className="
+                          grid
+                          gap-3
+                          sm:grid-cols-2
+                        "
+                      >
+                        {project.features.map(
+                          (feature, index) => (
+                            <motion.div
+                              key={feature}
+                              initial={
+                                instant
+                                  ? false
+                                  : {
+                                      opacity: 0,
+                                      x: -10,
+                                    }
+                              }
+                              animate={{
+                                opacity: 1,
+                                x: 0,
+                              }}
+                              transition={{
+                                duration: instant
+                                  ? 0
+                                  : 0.4,
+                                delay: instant
+                                  ? 0
+                                  : 0.035 * index,
+                                ease: easing,
+                              }}
+                              className="
+                                group
+                                flex
+                                items-center
+                                gap-3
+                                text-sm
+                                text-slate-600
+                                dark:text-slate-400
+                              "
+                            >
+                              <span
+                                className="
+                                  flex
+                                  h-7
+                                  w-7
+                                  shrink-0
+                                  items-center
+                                  justify-center
+                                  rounded-full
+                                  bg-cyan-500/[0.06]
+                                  transition-transform
+                                  duration-300
+                                  group-hover:scale-105
+                                  dark:bg-cyan-400/[0.06]
+                                "
+                              >
+                                <CheckCircle2
+                                  size={15}
+                                  className="
+                                    text-cyan-600
+                                    dark:text-cyan-400
+                                  "
+                                />
+                              </span>
 
-                          <span>{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CaseStudyBlock>
+                              <span>{feature}</span>
+                            </motion.div>
+                          ),
+                        )}
+                      </div>
+                    </CaseStudyBlock>
+                  </AnimatedBlock>
 
                   {/* =================================================
                       CHALLENGES
                   ================================================= */}
 
-                  <CaseStudyBlock
-                    title="Challenges"
+                  <AnimatedBlock
+                    reduceMotion={!!instant}
                     className="mt-12"
                   >
-                    <div className="space-y-3">
-                      {project.challenges.map(
-                        (challenge) => (
-                          <div
-                            key={challenge}
-                            className="
-                              flex
-                              gap-3
-                              text-sm
-                              leading-6
-                              text-slate-600
-                              dark:text-slate-500
-                            "
-                          >
-                            <span
+                    <CaseStudyBlock title="Challenges">
+                      <div className="space-y-3">
+                        {project.challenges.map(
+                          (challenge, index) => (
+                            <motion.div
+                              key={challenge}
+                              initial={
+                                instant
+                                  ? false
+                                  : {
+                                      opacity: 0,
+                                      x: -12,
+                                    }
+                              }
+                              animate={{
+                                opacity: 1,
+                                x: 0,
+                              }}
+                              transition={{
+                                duration: instant
+                                  ? 0
+                                  : 0.4,
+                                delay: instant
+                                  ? 0
+                                  : 0.045 * index,
+                                ease: easing,
+                              }}
                               className="
-                                mt-2
-                                h-1
-                                w-1
-                                shrink-0
-                                rounded-full
-                                bg-cyan-600
-                                dark:bg-cyan-400
+                                group
+                                flex
+                                gap-3
+                                text-sm
+                                leading-6
+                                text-slate-600
+                                dark:text-slate-500
                               "
-                            />
+                            >
+                              <span
+                                className="
+                                  mt-[10px]
+                                  h-1
+                                  w-1
+                                  shrink-0
+                                  rounded-full
+                                  bg-cyan-600
+                                  transition-transform
+                                  duration-300
+                                  group-hover:scale-150
+                                  dark:bg-cyan-400
+                                "
+                              />
 
-                            <span>{challenge}</span>
-                          </div>
-                        ),
-                      )}
-                    </div>
-                  </CaseStudyBlock>
+                              <span>{challenge}</span>
+                            </motion.div>
+                          ),
+                        )}
+                      </div>
+                    </CaseStudyBlock>
+                  </AnimatedBlock>
 
                   {/* =================================================
                       RESULTS
                   ================================================= */}
 
-                  <CaseStudyBlock
-                    title="Results"
+                  <AnimatedBlock
+                    reduceMotion={!!instant}
                     className="mt-12"
                   >
-                    <div
-                      className="
-                        grid
-                        gap-3
-                        sm:grid-cols-2
-                      "
-                    >
-                      {project.results.map((result) => (
-                        <motion.div
-                          key={result}
-                          whileHover={
-                            shouldReduceMotion
-                              ? undefined
-                              : {
-                                  y: -2,
-                                }
-                          }
-                          transition={{
-                            duration: 0.2,
-                            ease: "easeOut",
-                          }}
-                          className="
-                            rounded-xl
-                            border
-                            border-cyan-500/10
-                            bg-cyan-500/[0.025]
-                            p-4
-                            text-sm
-                            text-slate-600
-                            transition-colors
-                            duration-300
-                            hover:border-cyan-500/20
-                            dark:border-cyan-400/10
-                            dark:bg-cyan-400/[0.025]
-                            dark:text-slate-400
-                            dark:hover:border-cyan-400/20
-                          "
-                        >
-                          {result}
-                        </motion.div>
-                      ))}
-                    </div>
-                  </CaseStudyBlock>
+                    <CaseStudyBlock title="Results">
+                      <div
+                        className="
+                          grid
+                          gap-3
+                          sm:grid-cols-2
+                        "
+                      >
+                        {project.results.map(
+                          (result, index) => (
+                            <motion.div
+                              key={result}
+                              initial={
+                                instant
+                                  ? false
+                                  : {
+                                      opacity: 0,
+                                      y: 12,
+                                    }
+                              }
+                              animate={{
+                                opacity: 1,
+                                y: 0,
+                              }}
+                              transition={{
+                                duration: instant
+                                  ? 0
+                                  : 0.42,
+                                delay: instant
+                                  ? 0
+                                  : 0.05 * index,
+                                ease: easing,
+                              }}
+                              whileHover={
+                                instant
+                                  ? undefined
+                                  : {
+                                      y: -3,
+                                    }
+                              }
+                              className="
+                                rounded-xl
+                                border
+                                border-cyan-500/10
+                                bg-cyan-500/[0.025]
+                                p-4
+                                text-sm
+                                leading-6
+                                text-slate-600
+                                transition-all
+                                duration-300
+                                hover:border-cyan-500/20
+                                hover:bg-cyan-500/[0.04]
+                                dark:border-cyan-400/10
+                                dark:bg-cyan-400/[0.025]
+                                dark:text-slate-400
+                                dark:hover:border-cyan-400/20
+                                dark:hover:bg-cyan-400/[0.04]
+                              "
+                            >
+                              {result}
+                            </motion.div>
+                          ),
+                        )}
+                      </div>
+                    </CaseStudyBlock>
+                  </AnimatedBlock>
 
                   {/* =================================================
-                      PROJECT LINKS
+                      LINKS
                   ================================================= */}
 
                   {(project.github || project.live) && (
-                    <div
+                    <AnimatedBlock
+                      reduceMotion={!!instant}
                       className="
                         mt-12
-                        flex
-                        flex-col
-                        gap-3
                         border-t
                         border-slate-900/[0.08]
                         pt-8
                         dark:border-white/[0.07]
-                        sm:flex-row
                       "
                     >
-                      {/* GitHub */}
+                      <div
+                        className="
+                          flex
+                          flex-col
+                          gap-3
+                          sm:flex-row
+                        "
+                      >
+                        {project.github && (
+                          <motion.a
+                            href={project.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            whileHover={
+                              instant
+                                ? undefined
+                                : {
+                                    y: -3,
+                                  }
+                            }
+                            whileTap={
+                              instant
+                                ? undefined
+                                : {
+                                    scale: 0.98,
+                                  }
+                            }
+                            className="
+                              group
+                              inline-flex
+                              items-center
+                              justify-center
+                              gap-2
+                              rounded-xl
+                              border
+                              border-slate-900/[0.1]
+                              bg-slate-900/[0.025]
+                              px-5
+                              py-3
+                              text-sm
+                              font-semibold
+                              text-slate-900
+                              transition-all
+                              duration-300
+                              hover:border-slate-900/[0.2]
+                              hover:bg-slate-900/[0.05]
+                              dark:border-white/[0.1]
+                              dark:bg-white/[0.03]
+                              dark:text-white
+                              dark:hover:border-white/[0.2]
+                              dark:hover:bg-white/[0.05]
+                            "
+                          >
+                            <GitHubIcon size={16} />
 
-                      {project.github && (
-                        <motion.a
-                          href={project.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          whileHover={
-                            shouldReduceMotion
-                              ? undefined
-                              : {
-                                  y: -2,
-                                }
-                          }
-                          whileTap={
-                            shouldReduceMotion
-                              ? undefined
-                              : {
-                                  scale: 0.98,
-                                }
-                          }
-                          className="
-                            inline-flex
-                            items-center
-                            justify-center
-                            gap-2
-                            rounded-xl
-                            border
-                            border-slate-900/[0.1]
-                            bg-slate-900/[0.025]
-                            px-5
-                            py-3
-                            text-sm
-                            font-semibold
-                            text-slate-900
-                            transition-all
-                            duration-300
-                            hover:border-slate-900/[0.2]
-                            hover:bg-slate-900/[0.05]
-                            dark:border-white/[0.1]
-                            dark:bg-white/[0.03]
-                            dark:text-white
-                            dark:hover:border-white/[0.2]
-                            dark:hover:bg-white/[0.05]
-                          "
-                        >
-                          <GitHubIcon size={16} />
+                            <span>GitHub</span>
 
-                          <span>GitHub</span>
+                            <ExternalLink
+                              size={13}
+                              className="
+                                transition-transform
+                                duration-300
+                                group-hover:translate-x-0.5
+                                group-hover:-translate-y-0.5
+                              "
+                            />
+                          </motion.a>
+                        )}
 
-                          <ExternalLink size={13} />
-                        </motion.a>
-                      )}
+                        {project.live && (
+                          <motion.a
+                            href={project.live}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            whileHover={
+                              instant
+                                ? undefined
+                                : {
+                                    y: -3,
+                                  }
+                            }
+                            whileTap={
+                              instant
+                                ? undefined
+                                : {
+                                    scale: 0.98,
+                                  }
+                            }
+                            className="
+                              group
+                              inline-flex
+                              items-center
+                              justify-center
+                              gap-2
+                              rounded-xl
+                              bg-slate-950
+                              px-5
+                              py-3
+                              text-sm
+                              font-semibold
+                              text-white
+                              transition-all
+                              duration-300
+                              hover:bg-slate-800
+                              dark:bg-white
+                              dark:text-slate-950
+                              dark:hover:bg-slate-100
+                            "
+                          >
+                            <span>Live Project</span>
 
-                      {/* Live Project */}
-
-                      {project.live && (
-                        <motion.a
-                          href={project.live}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          whileHover={
-                            shouldReduceMotion
-                              ? undefined
-                              : {
-                                  y: -2,
-                                }
-                          }
-                          whileTap={
-                            shouldReduceMotion
-                              ? undefined
-                              : {
-                                  scale: 0.98,
-                                }
-                          }
-                          className="
-                            inline-flex
-                            items-center
-                            justify-center
-                            gap-2
-                            rounded-xl
-                            bg-slate-950
-                            px-5
-                            py-3
-                            text-sm
-                            font-semibold
-                            text-white
-                            transition-all
-                            duration-300
-                            hover:bg-slate-800
-                            dark:bg-white
-                            dark:text-slate-950
-                            dark:hover:bg-slate-100
-                          "
-                        >
-                          <span>Live Project</span>
-
-                          <ArrowUpRight size={16} />
-                        </motion.a>
-                      )}
-                    </div>
+                            <ArrowUpRight
+                              size={16}
+                              className="
+                                transition-transform
+                                duration-300
+                                group-hover:translate-x-0.5
+                                group-hover:-translate-y-0.5
+                              "
+                            />
+                          </motion.a>
+                        )}
+                      </div>
+                    </AnimatedBlock>
                   )}
-                </div>
+                </motion.div>
               </div>
             </motion.div>
           </div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+/* =========================================================
+   ANIMATED CONTENT BLOCK
+========================================================= */
+
+function AnimatedBlock({
+  children,
+  className = "",
+  reduceMotion,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  reduceMotion: boolean;
+}) {
+  return (
+    <motion.div
+      initial={
+        reduceMotion
+          ? false
+          : {
+              opacity: 0,
+              y: 20,
+            }
+      }
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      transition={{
+        duration: reduceMotion ? 0 : 0.5,
+        ease: easing,
+      }}
+      className={className}
+    >
+      {children}
+    </motion.div>
   );
 }
 
@@ -824,10 +1081,19 @@ function CaseStudyBlock({
   return (
     <section className={className}>
       <div className="mb-5 flex items-center gap-3">
-        <span
+        <motion.span
+          initial={{
+            width: 0,
+          }}
+          animate={{
+            width: 20,
+          }}
+          transition={{
+            duration: 0.45,
+            ease: easing,
+          }}
           className="
             h-px
-            w-5
             bg-cyan-500/50
             dark:bg-cyan-400/50
           "
