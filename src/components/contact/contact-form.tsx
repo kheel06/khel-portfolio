@@ -25,13 +25,17 @@ import {
 } from "@/lib/validations/contact";
 
 /* ============================================================================
+   TYPES
+============================================================================ */
+
+type FormStatus = "idle" | "success" | "error";
+
+/* ============================================================================
    CONTACT FORM
 ============================================================================ */
 
 export function ContactForm() {
-  const [status, setStatus] = useState<
-    "idle" | "success" | "error"
-  >("idle");
+  const [status, setStatus] = useState<FormStatus>("idle");
 
   const {
     register,
@@ -43,6 +47,12 @@ export function ContactForm() {
     },
   } = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+    },
   });
 
   /* ==========================================================================
@@ -50,21 +60,72 @@ export function ContactForm() {
   ========================================================================== */
 
   const onSubmit = async (data: ContactFormData) => {
+    if (isSubmitting) {
+      return;
+    }
+
     setStatus("idle");
 
+    const payload = {
+      name: data.name.trim(),
+      email: data.email.trim(),
+      subject: data.subject.trim(),
+      message: data.message.trim(),
+    };
+
     try {
+      /* ----------------------------------------------------------------------
+         1. SAVE MESSAGE TO FIRESTORE
+      ---------------------------------------------------------------------- */
+
       await addDoc(
         collection(db, "messages"),
         {
-          name: data.name.trim(),
-          email: data.email.trim(),
-          subject: data.subject.trim(),
-          message: data.message.trim(),
+          ...payload,
           createdAt: serverTimestamp(),
         },
       );
 
+      /* ----------------------------------------------------------------------
+         2. SEND EMAIL NOTIFICATION
+         
+         This calls:
+         /api/contact
+
+         Your API route should use Brevo SMTP + Nodemailer.
+      ---------------------------------------------------------------------- */
+
+      const emailResponse = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      /*
+        If the email endpoint fails, the Firestore message has still
+        been saved successfully. We log the problem but don't tell
+        the visitor that their message was completely lost.
+      */
+
+      if (!emailResponse.ok) {
+        console.error(
+          "Email notification failed:",
+          await emailResponse.text().catch(() => ""),
+        );
+      }
+
+      /* ----------------------------------------------------------------------
+         3. RESET FORM
+      ---------------------------------------------------------------------- */
+
       reset();
+
+      /* ----------------------------------------------------------------------
+         4. SUCCESS
+      ---------------------------------------------------------------------- */
+
       setStatus("success");
     } catch (error) {
       console.error(
@@ -75,6 +136,10 @@ export function ContactForm() {
       setStatus("error");
     }
   };
+
+  /* ==========================================================================
+     RENDER
+  ========================================================================== */
 
   return (
     <form
@@ -95,7 +160,6 @@ export function ContactForm() {
             text-sm
             font-medium
             text-slate-700
-
             dark:text-slate-300
           "
         >
@@ -107,6 +171,7 @@ export function ContactForm() {
           type="text"
           autoComplete="name"
           placeholder="Your name"
+          disabled={isSubmitting}
           {...register("name")}
           aria-invalid={Boolean(errors.name)}
           aria-describedby={
@@ -137,11 +202,16 @@ export function ContactForm() {
             focus:ring-2
             focus:ring-cyan-500/10
 
+            disabled:cursor-not-allowed
+            disabled:opacity-60
+
             dark:border-white/[0.08]
             dark:bg-white/[0.025]
             dark:text-white
             dark:placeholder:text-slate-600
+
             dark:hover:border-white/[0.12]
+
             dark:focus:border-cyan-400/50
             dark:focus:bg-white/[0.035]
             dark:focus:ring-cyan-400/10
@@ -151,11 +221,11 @@ export function ContactForm() {
         {errors.name && (
           <p
             id="name-error"
+            role="alert"
             className="
               mt-2
               text-xs
               text-red-600
-
               dark:text-red-400
             "
           >
@@ -177,7 +247,6 @@ export function ContactForm() {
             text-sm
             font-medium
             text-slate-700
-
             dark:text-slate-300
           "
         >
@@ -189,6 +258,7 @@ export function ContactForm() {
           type="email"
           autoComplete="email"
           placeholder="you@example.com"
+          disabled={isSubmitting}
           {...register("email")}
           aria-invalid={Boolean(errors.email)}
           aria-describedby={
@@ -219,11 +289,16 @@ export function ContactForm() {
             focus:ring-2
             focus:ring-cyan-500/10
 
+            disabled:cursor-not-allowed
+            disabled:opacity-60
+
             dark:border-white/[0.08]
             dark:bg-white/[0.025]
             dark:text-white
             dark:placeholder:text-slate-600
+
             dark:hover:border-white/[0.12]
+
             dark:focus:border-cyan-400/50
             dark:focus:bg-white/[0.035]
             dark:focus:ring-cyan-400/10
@@ -233,11 +308,11 @@ export function ContactForm() {
         {errors.email && (
           <p
             id="email-error"
+            role="alert"
             className="
               mt-2
               text-xs
               text-red-600
-
               dark:text-red-400
             "
           >
@@ -259,7 +334,6 @@ export function ContactForm() {
             text-sm
             font-medium
             text-slate-700
-
             dark:text-slate-300
           "
         >
@@ -269,7 +343,9 @@ export function ContactForm() {
         <input
           id="subject"
           type="text"
+          autoComplete="off"
           placeholder="What would you like to discuss?"
+          disabled={isSubmitting}
           {...register("subject")}
           aria-invalid={Boolean(errors.subject)}
           aria-describedby={
@@ -300,11 +376,16 @@ export function ContactForm() {
             focus:ring-2
             focus:ring-cyan-500/10
 
+            disabled:cursor-not-allowed
+            disabled:opacity-60
+
             dark:border-white/[0.08]
             dark:bg-white/[0.025]
             dark:text-white
             dark:placeholder:text-slate-600
+
             dark:hover:border-white/[0.12]
+
             dark:focus:border-cyan-400/50
             dark:focus:bg-white/[0.035]
             dark:focus:ring-cyan-400/10
@@ -314,11 +395,11 @@ export function ContactForm() {
         {errors.subject && (
           <p
             id="subject-error"
+            role="alert"
             className="
               mt-2
               text-xs
               text-red-600
-
               dark:text-red-400
             "
           >
@@ -340,7 +421,6 @@ export function ContactForm() {
             text-sm
             font-medium
             text-slate-700
-
             dark:text-slate-300
           "
         >
@@ -351,6 +431,7 @@ export function ContactForm() {
           id="message"
           rows={6}
           placeholder="Tell me about your project..."
+          disabled={isSubmitting}
           {...register("message")}
           aria-invalid={Boolean(errors.message)}
           aria-describedby={
@@ -383,11 +464,16 @@ export function ContactForm() {
             focus:ring-2
             focus:ring-cyan-500/10
 
+            disabled:cursor-not-allowed
+            disabled:opacity-60
+
             dark:border-white/[0.08]
             dark:bg-white/[0.025]
             dark:text-white
             dark:placeholder:text-slate-600
+
             dark:hover:border-white/[0.12]
+
             dark:focus:border-cyan-400/50
             dark:focus:bg-white/[0.035]
             dark:focus:ring-cyan-400/10
@@ -397,11 +483,11 @@ export function ContactForm() {
         {errors.message && (
           <p
             id="message-error"
+            role="alert"
             className="
               mt-2
               text-xs
               text-red-600
-
               dark:text-red-400
             "
           >
@@ -490,13 +576,17 @@ export function ContactForm() {
           justify-center
           gap-2
           rounded-xl
+
           bg-cyan-500
           px-5
           py-3
+
           text-sm
           font-semibold
           text-slate-950
+
           shadow-[0_8px_24px_rgba(6,182,212,0.12)]
+
           transition-all
           duration-200
 
@@ -504,20 +594,22 @@ export function ContactForm() {
           hover:bg-cyan-400
           hover:shadow-[0_12px_30px_rgba(6,182,212,0.18)]
 
+          active:translate-y-0
+
           focus-visible:outline-none
           focus-visible:ring-2
           focus-visible:ring-cyan-500/40
           focus-visible:ring-offset-2
           focus-visible:ring-offset-slate-50
 
-          active:translate-y-0
-
           disabled:cursor-not-allowed
           disabled:opacity-60
           disabled:hover:translate-y-0
+          disabled:hover:bg-cyan-500
 
           dark:bg-cyan-400
           dark:hover:bg-cyan-300
+          dark:disabled:hover:bg-cyan-400
           dark:focus-visible:ring-cyan-400/40
           dark:focus-visible:ring-offset-[#070b14]
         "
@@ -527,15 +619,19 @@ export function ContactForm() {
             <Loader2
               size={17}
               className="animate-spin"
+              aria-hidden="true"
             />
 
-            Sending...
+            <span>Sending...</span>
           </>
         ) : (
           <>
-            Send Message
+            <span>Send Message</span>
 
-            <Send size={16} />
+            <Send
+              size={16}
+              aria-hidden="true"
+            />
           </>
         )}
       </button>
