@@ -1,26 +1,328 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+/* =========================================
+   KHEL THEME SYSTEM
+========================================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Main surfaces */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+
+  --surface: #ffffff;
+  --surface-light: #f1f5f9;
+
+  /* Borders */
+  --border: rgba(15, 23, 42, 0.10);
+
+  /* Brand */
+  --navy: #0f172a;
+  --blue: #2563eb;
+  --purple: #7c3aed;
+  --cyan: #06b6d4;
+  --pink: #ec4899;
+
+  /* Text */
+  --muted: #64748b;
+
+  /* Navigation */
+  --nav-background: rgba(248, 250, 252, 0.78);
+  --nav-background-scrolled: rgba(248, 250, 252, 0.92);
+  --nav-border: rgba(15, 23, 42, 0.08);
+
+  /* Technical grid */
+  --grid-color: rgba(15, 23, 42, 0.045);
+
+  /* Scrollbar */
+  --scrollbar-track: #f8fafc;
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
+
+  /* Selection */
+  --selection-background: rgba(6, 182, 212, 0.20);
+  --selection-foreground: #0f172a;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* =========================================
+   DARK MODE
+========================================= */
+
+.dark {
+  /* Main surfaces */
+  --background: #070b14;
+  --foreground: #e2e8f0;
+
+  --surface: #0b1220;
+  --surface-light: #111827;
+
+  /* Borders */
+  --border: rgba(148, 163, 184, 0.14);
+
+  /* Brand */
+  --navy: #0f172a;
+  --blue: #2563eb;
+  --purple: #7c3aed;
+  --cyan: #06b6d4;
+  --pink: #ec4899;
+
+  /* Text */
+  --muted: #94a3b8;
+
+  /* Navigation */
+  --nav-background: rgba(7, 11, 20, 0.35);
+  --nav-background-scrolled: rgba(7, 11, 20, 0.85);
+  --nav-border: rgba(255, 255, 255, 0.07);
+
+  /* Technical grid */
+  --grid-color: rgba(148, 163, 184, 0.045);
+
+  /* Scrollbar */
+  --scrollbar-track: #070b14;
+  --scrollbar-thumb: #1e293b;
+  --scrollbar-thumb-hover: #334155;
+
+  /* Selection */
+  --selection-background: rgba(6, 182, 212, 0.25);
+  --selection-foreground: white;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =========================================
+   GLOBAL RESET
+========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+
+  /*
+   * Smooth theme transition for surfaces/text.
+   * next-themes temporarily disables transitions
+   * during theme switching because of
+   * disableTransitionOnChange.
+   */
+  transition:
+    background-color 300ms ease,
+    color 300ms ease;
+}
+
+/* =========================================
+   SELECTION
+========================================= */
+
+::selection {
+  background: var(--selection-background);
+  color: var(--selection-foreground);
+}
+
+/* =========================================
+   LINKS / BUTTONS
+========================================= */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* =========================================
+   TECHNICAL GRID
+========================================= */
+
+.technical-grid {
+  background-image:
+    linear-gradient(
+      var(--grid-color) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      var(--grid-color) 1px,
+      transparent 1px
+    );
+
+  background-size: 48px 48px;
+}
+
+/* =========================================
+   GLOW
+========================================= */
+
+.glow-cyan {
+  box-shadow:
+    0 0 80px rgba(6, 182, 212, 0.08),
+    0 0 25px rgba(6, 182, 212, 0.05);
+}
+
+.glow-blue {
+  box-shadow:
+    0 0 80px rgba(37, 99, 235, 0.08),
+    0 0 25px rgba(37, 99, 235, 0.05);
+}
+
+/* =========================================
+   SCROLLBAR
+========================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* =========================================
+   CONTAINER
+========================================= */
+
+.container-khel {
+  width: min(1180px, calc(100% - 40px));
+  margin-inline: auto;
+}
+
+@media (max-width: 640px) {
+  .container-khel {
+    width: min(100% - 28px, 1180px);
+  }
+}
+
+/* =========================================
+   ACCESSIBILITY
+========================================= */
+
+:focus-visible {
+  outline: 2px solid rgba(6, 182, 212, 0.8);
+  outline-offset: 3px;
+}
+
+/* =========================================
+   REDUCED MOTION
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================
+   KHEL HERO SPACE EFFECTS
+========================================= */
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+
+  50% {
+    opacity: 0.9;
+  }
+}
+
+.hero-star {
+  animation: star-twinkle 4s ease-in-out infinite;
+}
+
+/* =========================================
+   LIGHT MODE HERO ADJUSTMENTS
+========================================= */
+
+:not(.dark) .hero-star {
+  opacity: 0.45;
+}
+
+/*
+ * Keep the futuristic atmosphere in light mode,
+ * but make it considerably softer.
+ */
+
+:not(.dark) .glow-cyan {
+  box-shadow:
+    0 0 80px rgba(6, 182, 212, 0.05),
+    0 0 25px rgba(6, 182, 212, 0.03);
+}
+
+:not(.dark) .glow-blue {
+  box-shadow:
+    0 0 80px rgba(37, 99, 235, 0.05),
+    0 0 25px rgba(37, 99, 235, 0.03);
+}
+
+/* =========================================
+   DARK MODE HERO ATMOSPHERE
+========================================= */
+
+.dark .technical-grid {
+  background-image:
+    linear-gradient(
+      rgba(148, 163, 184, 0.045) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(148, 163, 184, 0.045) 1px,
+      transparent 1px
+    );
+}
+
+/* =========================================
+   LIGHT MODE TECHNICAL GRID
+========================================= */
+
+:not(.dark) .technical-grid {
+  background-image:
+    linear-gradient(
+      rgba(15, 23, 42, 0.035) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(15, 23, 42, 0.035) 1px,
+      transparent 1px
+    );
+}
+
+/* =========================================
+   DARK MODE
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-star {
+    animation: none;
+  }
 }
