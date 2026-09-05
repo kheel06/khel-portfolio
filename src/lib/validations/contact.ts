@@ -11,18 +11,18 @@ export const contactSchema = z.object({
     .string()
     .trim()
     .email("Please enter a valid email address.")
-    .max(320, "Email address is too long."),
+    .max(254, "Email is too long."),
 
   subject: z
     .string()
     .trim()
     .min(2, "Please enter a subject.")
-    .max(200, "Subject is too long."),
+    .max(150, "Subject is too long."),
 
   message: z
     .string()
     .trim()
-    .min(10, "Message must be at least 10 characters.")
+    .min(10, "Please enter at least 10 characters.")
     .max(5000, "Message is too long."),
 });
 

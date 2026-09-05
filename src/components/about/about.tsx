@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
+import type { Variants } from "motion/react";
 
 const capabilities = [
   {
@@ -49,7 +50,7 @@ const capabilities = [
    MOTION
 ========================================================= */
 
-const introContainer = {
+const introContainer: Variants = {
   hidden: {},
   visible: {
     transition: {
@@ -59,7 +60,7 @@ const introContainer = {
   },
 };
 
-const introItem = {
+const introItem: Variants = {
   hidden: {
     opacity: 0,
     y: 24,
@@ -69,12 +70,12 @@ const introItem = {
     y: 0,
     transition: {
       duration: 0.7,
-      ease: [0.22, 1, 0.36, 1],
+      ease: "easeOut",
     },
   },
 };
 
-const cardsContainer = {
+const cardsContainer: Variants = {
   hidden: {},
   visible: {
     transition: {
@@ -84,7 +85,7 @@ const cardsContainer = {
   },
 };
 
-const cardItem = {
+const cardItem: Variants = {
   hidden: {
     opacity: 0,
     y: 30,
@@ -94,7 +95,7 @@ const cardItem = {
     y: 0,
     transition: {
       duration: 0.65,
-      ease: [0.22, 1, 0.36, 1],
+      ease: "easeOut",
     },
   },
 };
@@ -106,28 +107,28 @@ const cardItem = {
 export function About() {
   const reducedMotion = useReducedMotion();
 
-  const containerVariants = reducedMotion
+  const containerVariants: Variants = reducedMotion
     ? {
         hidden: {},
         visible: {},
       }
     : introContainer;
 
-  const itemVariants = reducedMotion
+  const itemVariants: Variants = reducedMotion
     ? {
         hidden: {},
         visible: {},
       }
     : introItem;
 
-  const cardsVariants = reducedMotion
+  const cardsVariants: Variants = reducedMotion
     ? {
         hidden: {},
         visible: {},
       }
     : cardsContainer;
 
-  const cardVariants = reducedMotion
+  const cardVariants: Variants = reducedMotion
     ? {
         hidden: {},
         visible: {},
@@ -317,7 +318,7 @@ export function About() {
               transition={{
                 duration: 0.8,
                 delay: 0.25,
-                ease: [0.22, 1, 0.36, 1],
+                ease: "easeOut",
               }}
               className="
                 mt-8
@@ -421,7 +422,7 @@ export function About() {
                           y: -6,
                           transition: {
                             duration: 0.25,
-                            ease: [0.22, 1, 0.36, 1],
+                            ease: "easeOut",
                           },
                         }
                   }
@@ -603,12 +604,10 @@ export function About() {
                           }}
                           transition={{
                             duration: 0.35,
-                            delay:
-                              reducedMotion
-                                ? 0
-                                : 0.35 +
-                                  technologyIndex * 0.04,
-                            ease: [0.22, 1, 0.36, 1],
+                            delay: reducedMotion
+                              ? 0
+                              : 0.35 + technologyIndex * 0.04,
+                            ease: "easeOut",
                           }}
                           className="
                             rounded-md
@@ -685,3 +684,4 @@ export function About() {
     </section>
   );
 }
+
