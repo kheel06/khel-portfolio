@@ -1,723 +1,1558 @@
 "use client";
 
 import { useState } from "react";
+
 import {
-  CheckCircle2,
+  Check,
   Loader2,
   Send,
 } from "lucide-react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+} from "motion/react";
+
 import { Turnstile } from "@marsidev/react-turnstile";
 
-import { db } from "@/lib/firebase";
 import {
-  contactSchema,
-  type ContactFormData,
-} from "@/lib/validations/contact";
+  useForm,
+} from "react-hook-form";
 
-/* ============================================================================
-   TYPES
-============================================================================ */
+import {
+  zodResolver,
+} from "@hookform/resolvers/zod";
 
-type FormStatus = "idle" | "success" | "error";
+import { z } from "zod";
 
-/* ============================================================================
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+} from "firebase/firestore";
+
+import { db } from "@/lib/firebase";
+
+/* =========================================================
+   VALIDATION
+========================================================= */
+
+const contactSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Please enter your name.")
+    .max(100, "Name is too long."),
+
+  email: z
+    .string()
+    .trim()
+    .email("Please enter a valid email address.")
+    .max(254, "Email is too long."),
+
+  subject: z
+    .string()
+    .trim()
+    .min(2, "Please enter a subject.")
+    .max(150, "Subject is too long."),
+
+  message: z
+    .string()
+    .trim()
+    .min(
+      10,
+      "Please enter at least 10 characters."
+    )
+    .max(
+      5000,
+      "Message is too long."
+    ),
+
+  /*
+   * Honeypot field.
+   *
+   * Normal users never see this.
+   */
+  website: z
+    .string()
+    .max(
+      0,
+      "Invalid submission."
+    )
+    .optional(),
+});
+
+type ContactFormData =
+  z.infer<typeof contactSchema>;
+
+/* =========================================================
+   MOTION
+========================================================= */
+
+const easing = [
+  0.22,
+  1,
+  0.36,
+  1,
+] as const;
+
+/* =========================================================
+   ANIMATED FIELD
+========================================================= */
+
+function AnimatedField({
+  children,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) {
+  const shouldReduceMotion =
+    useReducedMotion();
+
+  return (
+    <motion.div
+      initial={
+        shouldReduceMotion
+          ? {
+              opacity: 0,
+            }
+          : {
+              opacity: 0,
+              y: 14,
+            }
+      }
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      transition={{
+        duration: 0.55,
+        delay,
+        ease: easing,
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* =========================================================
+   SUCCESS MESSAGE
+========================================================= */
+
+function SuccessMessage({
+  onReset,
+}: {
+  onReset: () => void;
+}) {
+  const shouldReduceMotion =
+    useReducedMotion();
+
+  return (
+    <motion.div
+      key="success"
+      initial={
+        shouldReduceMotion
+          ? {
+              opacity: 0,
+            }
+          : {
+              opacity: 0,
+              y: 24,
+              scale: 0.985,
+            }
+      }
+      animate={{
+        opacity: 1,
+        y: 0,
+        scale: 1,
+      }}
+      exit={{
+        opacity: 0,
+        y: -20,
+        scale: 0.985,
+      }}
+      transition={{
+        duration: 0.65,
+        ease: easing,
+      }}
+      className="
+        relative
+        flex
+        min-h-[520px]
+        w-full
+        flex-col
+        items-center
+        justify-center
+        overflow-hidden
+        rounded-2xl
+
+        border
+        border-cyan-500/20
+
+        bg-slate-950
+
+        px-6
+        py-16
+
+        text-center
+
+        dark:border-cyan-400/15
+      "
+    >
+      {/* =====================================================
+          BACKGROUND GLOW
+      ===================================================== */}
+
+      <motion.div
+        initial={{
+          opacity: 0,
+          scale: 0.5,
+        }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+        }}
+        transition={{
+          duration: 1,
+          ease: easing,
+        }}
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-1/2
+          h-80
+          w-80
+          -translate-x-1/2
+          -translate-y-1/2
+          rounded-full
+
+          bg-cyan-500/[0.07]
+
+          blur-3xl
+        "
+      />
+
+      {/* =====================================================
+          ORBITAL RING
+      ===================================================== */}
+
+      <motion.div
+        initial={{
+          opacity: 0,
+          scale: 0.5,
+          rotate: -20,
+        }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+          rotate: 0,
+        }}
+        transition={{
+          duration: 1,
+          delay: 0.1,
+          ease: easing,
+        }}
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-[35%]
+
+          h-44
+          w-44
+
+          -translate-x-1/2
+          -translate-y-1/2
+
+          rounded-full
+
+          border
+          border-cyan-400/[0.10]
+        "
+      />
+
+      <motion.div
+        initial={{
+          opacity: 0,
+          scale: 0.5,
+        }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+        }}
+        transition={{
+          duration: 0.8,
+          delay: 0.2,
+          ease: easing,
+        }}
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-[35%]
+
+          h-28
+          w-28
+
+          -translate-x-1/2
+          -translate-y-1/2
+
+          rounded-full
+
+          border
+          border-cyan-400/[0.15]
+        "
+      />
+
+      {/* =====================================================
+          HORIZONTAL LIGHT
+      ===================================================== */}
+
+      <motion.div
+        initial={{
+          opacity: 0,
+          scaleX: 0,
+        }}
+        animate={{
+          opacity: 1,
+          scaleX: 1,
+        }}
+        transition={{
+          duration: 0.8,
+          delay: 0.25,
+          ease: easing,
+        }}
+        className="
+          pointer-events-none
+          absolute
+          left-1/2
+          top-[35%]
+
+          h-px
+          w-64
+
+          -translate-x-1/2
+
+          bg-gradient-to-r
+          from-transparent
+          via-cyan-400/[0.14]
+          to-transparent
+        "
+      />
+
+      {/* =====================================================
+          ICON
+      ===================================================== */}
+
+      <div
+        className="
+          relative
+          mb-10
+          flex
+          h-28
+          w-28
+          items-center
+          justify-center
+        "
+      >
+        {/* Ripple 1 */}
+
+        {!shouldReduceMotion && (
+          <motion.span
+            initial={{
+              opacity: 0,
+              scale: 0.4,
+            }}
+            animate={{
+              opacity: [
+                0,
+                0.4,
+                0,
+              ],
+              scale: [
+                0.55,
+                1.3,
+                1.65,
+              ],
+            }}
+            transition={{
+              delay: 0.65,
+              duration: 1.3,
+              ease: "easeOut",
+            }}
+            className="
+              absolute
+              inset-1
+              rounded-full
+              border
+              border-cyan-400/30
+            "
+          />
+        )}
+
+        {/* Ripple 2 */}
+
+        {!shouldReduceMotion && (
+          <motion.span
+            initial={{
+              opacity: 0,
+              scale: 0.4,
+            }}
+            animate={{
+              opacity: [
+                0,
+                0.25,
+                0,
+              ],
+              scale: [
+                0.55,
+                1.5,
+                1.9,
+              ],
+            }}
+            transition={{
+              delay: 0.85,
+              duration: 1.4,
+              ease: "easeOut",
+            }}
+            className="
+              absolute
+              inset-1
+              rounded-full
+              border
+              border-cyan-400/20
+            "
+          />
+        )}
+
+        {/* ===================================================
+            MAIN ICON CIRCLE
+        =================================================== */}
+
+        <motion.div
+          initial={{
+            opacity: 0,
+            scale: 0.4,
+          }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+          }}
+          transition={{
+            delay: 0.2,
+            duration: 0.6,
+            ease: easing,
+          }}
+          className="
+            relative
+            z-10
+            flex
+            h-20
+            w-20
+            items-center
+            justify-center
+            rounded-full
+
+            bg-cyan-400
+
+            shadow-[0_0_45px_rgba(34,211,238,0.22)]
+          "
+        >
+          {/* =================================================
+              PAPER AIRPLANE
+          ================================================= */}
+
+          <motion.div
+            initial={
+              shouldReduceMotion
+                ? {
+                    opacity: 0,
+                  }
+                : {
+                    opacity: 0,
+                    x: -5,
+                    y: 8,
+                    rotate: -12,
+                    scale: 0.6,
+                  }
+            }
+            animate={
+              shouldReduceMotion
+                ? {
+                    opacity: 0,
+                  }
+                : {
+                    opacity: [
+                      0,
+                      1,
+                      1,
+                      0,
+                    ],
+
+                    x: [
+                      -5,
+                      0,
+                      14,
+                      40,
+                    ],
+
+                    y: [
+                      8,
+                      0,
+                      -12,
+                      -36,
+                    ],
+
+                    rotate: [
+                      -12,
+                      0,
+                      8,
+                      16,
+                    ],
+
+                    scale: [
+                      0.6,
+                      1,
+                      1,
+                      0.78,
+                    ],
+                  }
+            }
+            transition={{
+              delay: 0.5,
+              duration: 1.05,
+              times: [
+                0,
+                0.18,
+                0.68,
+                1,
+              ],
+              ease: easing,
+            }}
+            className="
+              absolute
+              z-30
+            "
+          >
+            <Send
+              className="
+                h-8
+                w-8
+                fill-white
+                text-white
+              "
+              strokeWidth={1.8}
+            />
+          </motion.div>
+
+          {/* =================================================
+              CHECK
+          ================================================= */}
+
+          <motion.div
+            initial={{
+              opacity: 0,
+              scale: 0.4,
+            }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+            }}
+            transition={{
+              delay: 1.45,
+              duration: 0.45,
+              ease: easing,
+            }}
+            className="
+              absolute
+              z-20
+            "
+          >
+            <Check
+              className="
+                h-9
+                w-9
+                text-white
+              "
+              strokeWidth={2.5}
+            />
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* =====================================================
+          TITLE
+      ===================================================== */}
+
+      <motion.h3
+        initial={{
+          opacity: 0,
+          y: 15,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        transition={{
+          delay: 1.05,
+          duration: 0.6,
+          ease: easing,
+        }}
+        className="
+          relative
+          z-10
+
+          text-3xl
+          font-semibold
+          tracking-[-0.03em]
+
+          text-white
+
+          sm:text-4xl
+        "
+      >
+        THANK YOU
+        <span className="text-cyan-400">
+          .
+        </span>
+      </motion.h3>
+
+      {/* =====================================================
+          DESCRIPTION
+      ===================================================== */}
+
+      <motion.p
+        initial={{
+          opacity: 0,
+          y: 10,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        transition={{
+          delay: 1.2,
+          duration: 0.6,
+          ease: easing,
+        }}
+        className="
+          relative
+          z-10
+
+          mt-5
+
+          max-w-[470px]
+
+          text-sm
+          leading-7
+
+          text-slate-400
+        "
+      >
+        Your project request has been
+        submitted successfully. I&apos;ll
+        review the details and get back
+        to you as soon as possible.
+      </motion.p>
+
+      {/* =====================================================
+          STATUS
+      ===================================================== */}
+
+      <motion.div
+        initial={{
+          opacity: 0,
+          y: 6,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        transition={{
+          delay: 1.35,
+          duration: 0.5,
+          ease: easing,
+        }}
+        className="
+          relative
+          z-10
+
+          mt-5
+
+          flex
+          items-center
+          gap-2
+
+          text-[10px]
+          font-semibold
+          uppercase
+          tracking-[0.18em]
+
+          text-slate-500
+        "
+      >
+        <span
+          className="
+            h-1.5
+            w-1.5
+            rounded-full
+
+            bg-cyan-400
+
+            shadow-[0_0_10px_rgba(34,211,238,0.65)]
+          "
+        />
+
+        MESSAGE DELIVERED
+      </motion.div>
+
+      {/* =====================================================
+          ANOTHER REQUEST
+      ===================================================== */}
+
+      <motion.button
+        type="button"
+        onClick={onReset}
+        initial={{
+          opacity: 0,
+          y: 10,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        transition={{
+          delay: 1.5,
+          duration: 0.6,
+          ease: easing,
+        }}
+        whileHover={
+          shouldReduceMotion
+            ? undefined
+            : {
+                y: -2,
+              }
+        }
+        whileTap={
+          shouldReduceMotion
+            ? undefined
+            : {
+                scale: 0.97,
+              }
+        }
+        className="
+          relative
+          z-10
+
+          mt-8
+
+          text-[11px]
+          font-semibold
+          uppercase
+          tracking-[0.2em]
+
+          text-white
+
+          transition-colors
+          duration-300
+
+          hover:text-cyan-400
+        "
+      >
+        Submit another request
+      </motion.button>
+    </motion.div>
+  );
+}
+
+/* =========================================================
    CONTACT FORM
-============================================================================ */
+========================================================= */
 
 export function ContactForm() {
-  const [status, setStatus] = useState<FormStatus>("idle");
-  const [turnstileToken, setTurnstileToken] = useState("");
+  const [
+    isSubmitting,
+    setIsSubmitting,
+  ] = useState(false);
+
+  const [
+    isSuccess,
+    setIsSuccess,
+  ] = useState(false);
+
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] = useState("");
+
+  const [
+    turnstileToken,
+    setTurnstileToken,
+  ] = useState("");
+
+  const shouldReduceMotion =
+    useReducedMotion();
 
   const {
     register,
     handleSubmit,
     reset,
+    watch,
     formState: {
       errors,
-      isSubmitting,
     },
   } = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema),
+    resolver:
+      zodResolver(contactSchema),
+
     defaultValues: {
       name: "",
       email: "",
       subject: "",
       message: "",
+      website: "",
     },
+
+    mode: "onBlur",
   });
 
-  /* ==========================================================================
-     SUBMIT
-  ========================================================================== */
+  const messageValue =
+    watch("message") ?? "";
 
-  const onSubmit = async (data: ContactFormData) => {
+  /* =======================================================
+     RESET
+  ======================================================= */
+
+  const handleReset = () => {
+    reset();
+
+    setErrorMessage("");
+    setTurnstileToken("");
+    setIsSubmitting(false);
+    setIsSuccess(false);
+  };
+
+  /* =======================================================
+     SUBMIT
+  ======================================================= */
+
+  const onSubmit = async (
+    data: ContactFormData
+  ) => {
     if (isSubmitting) {
       return;
     }
 
-    setStatus("idle");
+    setErrorMessage("");
 
-    /*
-     * Turnstile must be completed before submitting.
-     */
+    /* =====================================================
+       TURNSTILE
+    ===================================================== */
+
     if (!turnstileToken) {
-      setStatus("error");
+      setErrorMessage(
+        "Please complete the security verification."
+      );
+
       return;
     }
 
-    const payload = {
-      name: data.name.trim(),
-      email: data.email.trim(),
-      subject: data.subject.trim(),
-      message: data.message.trim(),
-
-      /*
-       * Honeypot.
-       *
-       * This field is intentionally never rendered visibly.
-       * Bots that automatically fill every input may populate it.
-       */
-      website: "",
-      
-      /*
-       * Cloudflare Turnstile token.
-       */
-      turnstileToken,
-    };
+    setIsSubmitting(true);
 
     try {
-      /* ----------------------------------------------------------------------
-         1. SEND TO SECURE SERVER API
+      /* =====================================================
+         1. SERVER API
+      ===================================================== */
 
-         The API performs:
+      const response = await fetch(
+        "/api/contact",
+        {
+          method: "POST",
 
-         - Turnstile verification
-         - Honeypot validation
-         - Rate limiting
-         - Server-side validation
-         - Spam checks
-         - Brevo email delivery
-      ---------------------------------------------------------------------- */
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
 
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+          body: JSON.stringify({
+            name: data.name.trim(),
 
-      const result = await response.json().catch(() => null);
+            email:
+              data.email.trim(),
 
-      if (!response.ok) {
-        console.error(
-          "Contact API rejected submission:",
-          result,
+            subject:
+              data.subject.trim(),
+
+            message:
+              data.message.trim(),
+
+            website:
+              data.website ?? "",
+
+            turnstileToken,
+          }),
+        }
+      );
+
+      const result =
+        await response
+          .json()
+          .catch(() => null);
+
+      if (
+        !response.ok ||
+        !result?.success
+      ) {
+        throw new Error(
+          result?.error ||
+            "Unable to send your message."
         );
-
-        setStatus("error");
-
-        return;
       }
 
-      /* ----------------------------------------------------------------------
-         2. SAVE VERIFIED MESSAGE TO FIRESTORE
-
-         IMPORTANT:
-
-         We only save after the server accepts the submission.
-      ---------------------------------------------------------------------- */
+      /* =====================================================
+         2. SAVE TO FIRESTORE
+      ===================================================== */
 
       await addDoc(
         collection(db, "messages"),
         {
-          name: payload.name,
-          email: payload.email,
-          subject: payload.subject,
-          message: payload.message,
-          createdAt: serverTimestamp(),
-        },
+          name: data.name.trim(),
+
+          email:
+            data.email.trim(),
+
+          subject:
+            data.subject.trim(),
+
+          message:
+            data.message.trim(),
+
+          createdAt:
+            serverTimestamp(),
+        }
       );
 
-      /* ----------------------------------------------------------------------
+      console.log(
+        "Contact message saved to Firestore."
+      );
+
+      /* =====================================================
          3. RESET FORM
-      ---------------------------------------------------------------------- */
+      ===================================================== */
 
       reset();
 
-      /*
-       * Turnstile tokens are single-use.
-       *
-       * Clear our local token so another submission requires
-       * a fresh token.
-       */
       setTurnstileToken("");
+      setErrorMessage("");
+      setIsSubmitting(false);
 
-      /* ----------------------------------------------------------------------
-         4. SUCCESS
-      ---------------------------------------------------------------------- */
+      /* =====================================================
+         4. SUCCESS ANIMATION
+      ===================================================== */
 
-      setStatus("success");
+      requestAnimationFrame(() => {
+        setIsSuccess(true);
+      });
     } catch (error) {
       console.error(
-        "Contact form submission failed:",
-        error,
+        "Contact form submission error:",
+        error
       );
 
-      setStatus("error");
+      setIsSubmitting(false);
+
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again."
+      );
     }
   };
 
-  /* ==========================================================================
+  /* =========================================================
+     INPUT STYLES
+  ========================================================= */
+
+  const inputClass = `
+    w-full
+    rounded-xl
+
+    border
+    border-white/[0.09]
+
+    bg-white/[0.025]
+
+    px-4
+    py-3.5
+
+    text-sm
+    text-white
+
+    outline-none
+
+    transition-all
+    duration-300
+
+    placeholder:text-slate-600
+
+    hover:border-white/[0.16]
+
+    focus:border-cyan-400
+    focus:bg-white/[0.035]
+    focus:ring-4
+    focus:ring-cyan-400/10
+
+    disabled:cursor-not-allowed
+    disabled:opacity-60
+  `;
+
+  const fieldErrorClass = `
+    mt-1.5
+    text-xs
+    text-red-400
+  `;
+
+  /* =========================================================
      RENDER
-  ========================================================================== */
+  ========================================================= */
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-5"
-      noValidate
+    <AnimatePresence
+      mode="wait"
+      initial={false}
     >
-      {/* ======================================================================
-          HONEYPOT
-      ====================================================================== */}
-
-      <div
-        className="absolute -left-[9999px] h-px w-px overflow-hidden"
-        aria-hidden="true"
-      >
-        <label htmlFor="website">
-          Website
-        </label>
-
-        <input
-          id="website"
-          type="text"
-          tabIndex={-1}
-          autoComplete="off"
-          {...register("website")}
+      {isSuccess ? (
+        <SuccessMessage
+          key="success-state"
+          onReset={handleReset}
         />
-      </div>
-
-      {/* ======================================================================
-          NAME
-      ====================================================================== */}
-
-      <div>
-        <label
-          htmlFor="name"
-          className="
-            mb-2
-            block
-            text-sm
-            font-medium
-            text-slate-700
-            dark:text-slate-300
-          "
-        >
-          Name
-        </label>
-
-        <input
-          id="name"
-          type="text"
-          autoComplete="name"
-          placeholder="Your name"
-          disabled={isSubmitting}
-          {...register("name")}
-          aria-invalid={Boolean(errors.name)}
-          aria-describedby={
-            errors.name
-              ? "name-error"
-              : undefined
+      ) : (
+        <motion.form
+          key="contact-form"
+          onSubmit={
+            handleSubmit(onSubmit)
           }
-          className="
-            w-full
-            rounded-xl
-            border
-            border-slate-900/[0.10]
-            bg-slate-50
-            px-4
-            py-3
-            text-sm
-            text-slate-950
-            outline-none
-            transition-all
-            duration-200
-
-            placeholder:text-slate-400
-
-            hover:border-slate-900/[0.15]
-
-            focus:border-cyan-500/50
-            focus:bg-white
-            focus:ring-2
-            focus:ring-cyan-500/10
-
-            disabled:cursor-not-allowed
-            disabled:opacity-60
-
-            dark:border-white/[0.08]
-            dark:bg-white/[0.025]
-            dark:text-white
-            dark:placeholder:text-slate-600
-
-            dark:hover:border-white/[0.12]
-
-            dark:focus:border-cyan-400/50
-            dark:focus:bg-white/[0.035]
-            dark:focus:ring-cyan-400/10
-          "
-        />
-
-        {errors.name && (
-          <p
-            id="name-error"
-            role="alert"
-            className="
-              mt-2
-              text-xs
-              text-red-600
-              dark:text-red-400
-            "
-          >
-            {errors.name.message}
-          </p>
-        )}
-      </div>
-
-      {/* ======================================================================
-          EMAIL
-      ====================================================================== */}
-
-      <div>
-        <label
-          htmlFor="email"
-          className="
-            mb-2
-            block
-            text-sm
-            font-medium
-            text-slate-700
-            dark:text-slate-300
-          "
-        >
-          Email
-        </label>
-
-        <input
-          id="email"
-          type="email"
-          autoComplete="email"
-          placeholder="you@example.com"
-          disabled={isSubmitting}
-          {...register("email")}
-          aria-invalid={Boolean(errors.email)}
-          aria-describedby={
-            errors.email
-              ? "email-error"
-              : undefined
+          noValidate
+          exit={
+            shouldReduceMotion
+              ? {
+                  opacity: 0,
+                }
+              : {
+                  opacity: 0,
+                  y: -18,
+                  scale: 0.985,
+                }
           }
-          className="
-            w-full
-            rounded-xl
-            border
-            border-slate-900/[0.10]
-            bg-slate-50
-            px-4
-            py-3
-            text-sm
-            text-slate-950
-            outline-none
-            transition-all
-            duration-200
-
-            placeholder:text-slate-400
-
-            hover:border-slate-900/[0.15]
-
-            focus:border-cyan-500/50
-            focus:bg-white
-            focus:ring-2
-            focus:ring-cyan-500/10
-
-            disabled:cursor-not-allowed
-            disabled:opacity-60
-
-            dark:border-white/[0.08]
-            dark:bg-white/[0.025]
-            dark:text-white
-            dark:placeholder:text-slate-600
-
-            dark:hover:border-white/[0.12]
-
-            dark:focus:border-cyan-400/50
-            dark:focus:bg-white/[0.035]
-            dark:focus:ring-cyan-400/10
-          "
-        />
-
-        {errors.email && (
-          <p
-            id="email-error"
-            role="alert"
-            className="
-              mt-2
-              text-xs
-              text-red-600
-              dark:text-red-400
-            "
-          >
-            {errors.email.message}
-          </p>
-        )}
-      </div>
-
-      {/* ======================================================================
-          SUBJECT
-      ====================================================================== */}
-
-      <div>
-        <label
-          htmlFor="subject"
-          className="
-            mb-2
-            block
-            text-sm
-            font-medium
-            text-slate-700
-            dark:text-slate-300
-          "
-        >
-          Subject
-        </label>
-
-        <input
-          id="subject"
-          type="text"
-          autoComplete="off"
-          placeholder="What would you like to discuss?"
-          disabled={isSubmitting}
-          {...register("subject")}
-          aria-invalid={Boolean(errors.subject)}
-          aria-describedby={
-            errors.subject
-              ? "subject-error"
-              : undefined
-          }
-          className="
-            w-full
-            rounded-xl
-            border
-            border-slate-900/[0.10]
-            bg-slate-50
-            px-4
-            py-3
-            text-sm
-            text-slate-950
-            outline-none
-            transition-all
-            duration-200
-
-            placeholder:text-slate-400
-
-            hover:border-slate-900/[0.15]
-
-            focus:border-cyan-500/50
-            focus:bg-white
-            focus:ring-2
-            focus:ring-cyan-500/10
-
-            disabled:cursor-not-allowed
-            disabled:opacity-60
-
-            dark:border-white/[0.08]
-            dark:bg-white/[0.025]
-            dark:text-white
-            dark:placeholder:text-slate-600
-
-            dark:hover:border-white/[0.12]
-
-            dark:focus:border-cyan-400/50
-            dark:focus:bg-white/[0.035]
-            dark:focus:ring-cyan-400/10
-          "
-        />
-
-        {errors.subject && (
-          <p
-            id="subject-error"
-            role="alert"
-            className="
-              mt-2
-              text-xs
-              text-red-600
-              dark:text-red-400
-            "
-          >
-            {errors.subject.message}
-          </p>
-        )}
-      </div>
-
-      {/* ======================================================================
-          MESSAGE
-      ====================================================================== */}
-
-      <div>
-        <label
-          htmlFor="message"
-          className="
-            mb-2
-            block
-            text-sm
-            font-medium
-            text-slate-700
-            dark:text-slate-300
-          "
-        >
-          Message
-        </label>
-
-        <textarea
-          id="message"
-          rows={6}
-          placeholder="Tell me about your project..."
-          disabled={isSubmitting}
-          {...register("message")}
-          aria-invalid={Boolean(errors.message)}
-          aria-describedby={
-            errors.message
-              ? "message-error"
-              : undefined
-          }
-          className="
-            w-full
-            resize-none
-            rounded-xl
-            border
-            border-slate-900/[0.10]
-            bg-slate-50
-            px-4
-            py-3
-            text-sm
-            leading-6
-            text-slate-950
-            outline-none
-            transition-all
-            duration-200
-
-            placeholder:text-slate-400
-
-            hover:border-slate-900/[0.15]
-
-            focus:border-cyan-500/50
-            focus:bg-white
-            focus:ring-2
-            focus:ring-cyan-500/10
-
-            disabled:cursor-not-allowed
-            disabled:opacity-60
-
-            dark:border-white/[0.08]
-            dark:bg-white/[0.025]
-            dark:text-white
-            dark:placeholder:text-slate-600
-
-            dark:hover:border-white/[0.12]
-
-            dark:focus:border-cyan-400/50
-            dark:focus:bg-white/[0.035]
-            dark:focus:ring-cyan-400/10
-          "
-        />
-
-        {errors.message && (
-          <p
-            id="message-error"
-            role="alert"
-            className="
-              mt-2
-              text-xs
-              text-red-600
-              dark:text-red-400
-            "
-          >
-            {errors.message.message}
-          </p>
-        )}
-      </div>
-
-      {/* ======================================================================
-          TURNSTILE
-      ====================================================================== */}
-
-      <div className="pt-1">
-        <Turnstile
-          siteKey={
-            process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""
-          }
-          options={{
-            theme: "auto",
-            size: "flexible",
+          transition={{
+            duration: 0.45,
+            ease: easing,
           }}
-          onSuccess={(token) => {
-            setTurnstileToken(token);
-            setStatus("idle");
-          }}
-          onError={() => {
-            setTurnstileToken("");
-            setStatus("error");
-          }}
-          onExpire={() => {
-            setTurnstileToken("");
-          }}
-        />
-      </div>
-
-      {/* ======================================================================
-          SUCCESS
-      ====================================================================== */}
-
-      {status === "success" && (
-        <div
-          role="status"
-          aria-live="polite"
           className="
-            flex
-            items-center
-            gap-3
-            rounded-xl
-            border
-            border-emerald-500/20
-            bg-emerald-50
-            px-4
-            py-3
-            text-sm
-            text-emerald-700
-
-            dark:border-emerald-400/20
-            dark:bg-emerald-400/[0.06]
-            dark:text-emerald-300
+            relative
+            w-full
           "
         >
-          <CheckCircle2
-            size={18}
-            className="shrink-0"
-          />
+          <div className="space-y-6">
 
-          <span>
-            Message sent successfully. I&apos;ll get
-            back to you soon.
-          </span>
-        </div>
-      )}
+            {/* =================================================
+                NAME
+            ================================================= */}
 
-      {/* ======================================================================
-          ERROR
-      ====================================================================== */}
+            <AnimatedField delay={0.05}>
+              <div>
+                <label
+                  htmlFor="name"
+                  className="
+                    mb-2
+                    block
 
-      {status === "error" && (
-        <div
-          role="alert"
-          aria-live="assertive"
-          className="
-            rounded-xl
-            border
-            border-red-500/20
-            bg-red-50
-            px-4
-            py-3
-            text-sm
-            text-red-700
+                    text-xs
+                    font-semibold
+                    uppercase
+                    tracking-[0.14em]
 
-            dark:border-red-400/20
-            dark:bg-red-400/[0.06]
-            dark:text-red-300
-          "
-        >
-          {!turnstileToken
-            ? "Please complete the security verification and try again."
-            : "Something went wrong while sending your message. Please try again."}
-        </div>
-      )}
+                    text-slate-400
+                  "
+                >
+                  Name
+                </label>
 
-      {/* ======================================================================
-          SUBMIT
-      ====================================================================== */}
+                <input
+                  id="name"
+                  type="text"
+                  autoComplete="name"
+                  placeholder="Your name"
+                  disabled={isSubmitting}
+                  {...register("name")}
+                  className={inputClass}
+                />
 
-      <button
-        type="submit"
-        disabled={isSubmitting || !turnstileToken}
-        className="
-          inline-flex
-          w-full
-          items-center
-          justify-center
-          gap-2
-          rounded-xl
+                {errors.name && (
+                  <p
+                    className={
+                      fieldErrorClass
+                    }
+                  >
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
+            </AnimatedField>
 
-          bg-cyan-500
-          px-5
-          py-3
+            {/* =================================================
+                EMAIL
+            ================================================= */}
 
-          text-sm
-          font-semibold
-          text-slate-950
+            <AnimatedField delay={0.1}>
+              <div>
+                <label
+                  htmlFor="email"
+                  className="
+                    mb-2
+                    block
 
-          shadow-[0_8px_24px_rgba(6,182,212,0.12)]
+                    text-xs
+                    font-semibold
+                    uppercase
+                    tracking-[0.14em]
 
-          transition-all
-          duration-200
+                    text-slate-400
+                  "
+                >
+                  Email
+                </label>
 
-          hover:-translate-y-0.5
-          hover:bg-cyan-400
-          hover:shadow-[0_12px_30px_rgba(6,182,212,0.18)]
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  disabled={isSubmitting}
+                  {...register("email")}
+                  className={inputClass}
+                />
 
-          active:translate-y-0
+                {errors.email && (
+                  <p
+                    className={
+                      fieldErrorClass
+                    }
+                  >
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+            </AnimatedField>
 
-          focus-visible:outline-none
-          focus-visible:ring-2
-          focus-visible:ring-cyan-500/40
-          focus-visible:ring-offset-2
-          focus-visible:ring-offset-slate-50
+            {/* =================================================
+                SUBJECT
+            ================================================= */}
 
-          disabled:cursor-not-allowed
-          disabled:opacity-50
-          disabled:hover:translate-y-0
-          disabled:hover:bg-cyan-500
+            <AnimatedField delay={0.15}>
+              <div>
+                <label
+                  htmlFor="subject"
+                  className="
+                    mb-2
+                    block
 
-          dark:bg-cyan-400
-          dark:hover:bg-cyan-300
-          dark:disabled:hover:bg-cyan-400
-          dark:focus-visible:ring-cyan-400/40
-          dark:focus-visible:ring-offset-[#070b14]
-        "
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2
-              size={17}
-              className="animate-spin"
+                    text-xs
+                    font-semibold
+                    uppercase
+                    tracking-[0.14em]
+
+                    text-slate-400
+                  "
+                >
+                  Subject
+                </label>
+
+                <input
+                  id="subject"
+                  type="text"
+                  placeholder="What would you like to build?"
+                  disabled={isSubmitting}
+                  {...register("subject")}
+                  className={inputClass}
+                />
+
+                {errors.subject && (
+                  <p
+                    className={
+                      fieldErrorClass
+                    }
+                  >
+                    {errors.subject.message}
+                  </p>
+                )}
+              </div>
+            </AnimatedField>
+
+            {/* =================================================
+                MESSAGE
+            ================================================= */}
+
+            <AnimatedField delay={0.2}>
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <label
+                    htmlFor="message"
+                    className="
+                      block
+
+                      text-xs
+                      font-semibold
+                      uppercase
+                      tracking-[0.14em]
+
+                      text-slate-400
+                    "
+                  >
+                    Message
+                  </label>
+
+                  <span
+                    className="
+                      text-[10px]
+                      tabular-nums
+                      text-slate-600
+                    "
+                  >
+                    {messageValue.length}/5000
+                  </span>
+                </div>
+
+                <textarea
+                  id="message"
+                  rows={7}
+                  placeholder="Tell me a little about your project..."
+                  disabled={isSubmitting}
+                  {...register("message")}
+                  className={`
+                    ${inputClass}
+                    min-h-[170px]
+                    resize-y
+                  `}
+                />
+
+                {errors.message && (
+                  <p
+                    className={
+                      fieldErrorClass
+                    }
+                  >
+                    {errors.message.message}
+                  </p>
+                )}
+              </div>
+            </AnimatedField>
+
+            {/* =================================================
+                HONEYPOT
+            ================================================= */}
+
+            <div
               aria-hidden="true"
-            />
+              className="
+                absolute
+                left-[-9999px]
+                h-0
+                w-0
+                overflow-hidden
+              "
+            >
+              <label htmlFor="website">
+                Website
+              </label>
 
-            <span>Sending...</span>
-          </>
-        ) : (
-          <>
-            <span>Send Message</span>
+              <input
+                id="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                {...register("website")}
+              />
+            </div>
 
-            <Send
-              size={16}
-              aria-hidden="true"
-            />
-          </>
-        )}
-      </button>
-    </form>
+            {/* =================================================
+                TURNSTILE
+            ================================================= */}
+
+            <AnimatedField delay={0.25}>
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  y: 8,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                transition={{
+                  duration: 0.5,
+                  ease: easing,
+                }}
+                className="
+                  flex
+                  min-h-[65px]
+                  items-center
+                  justify-start
+                  overflow-hidden
+                  rounded-xl
+
+                  border
+                  border-cyan-400/10
+
+                  bg-white/[0.02]
+
+                  p-3
+                "
+              >
+                {process.env
+                  .NEXT_PUBLIC_TURNSTILE_SITE_KEY ? (
+                  <Turnstile
+                    siteKey={
+                      process.env
+                        .NEXT_PUBLIC_TURNSTILE_SITE_KEY
+                    }
+                    options={{
+                      theme: "dark",
+                      size: "flexible",
+                    }}
+                    onSuccess={(
+                      token
+                    ) => {
+                      setTurnstileToken(
+                        token
+                      );
+
+                      setErrorMessage("");
+                    }}
+                    onExpire={() => {
+                      setTurnstileToken(
+                        ""
+                      );
+                    }}
+                    onError={() => {
+                      setTurnstileToken(
+                        ""
+                      );
+
+                      setErrorMessage(
+                        "Security verification failed. Please try again."
+                      );
+                    }}
+                  />
+                ) : (
+                  <p
+                    className="
+                      text-xs
+                      text-red-400
+                    "
+                  >
+                    Turnstile site key is
+                    not configured.
+                  </p>
+                )}
+              </motion.div>
+            </AnimatedField>
+
+            {/* =================================================
+                ERROR
+            ================================================= */}
+
+            <AnimatePresence
+              mode="wait"
+            >
+              {errorMessage && (
+                <motion.div
+                  key="form-error"
+                  initial={{
+                    opacity: 0,
+                    height: 0,
+                    y: -5,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    height: "auto",
+                    y: 0,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    height: 0,
+                    y: -5,
+                  }}
+                  transition={{
+                    duration: 0.35,
+                    ease: easing,
+                  }}
+                  className="overflow-hidden"
+                >
+                  <div
+                    role="alert"
+                    className="
+                      rounded-xl
+
+                      border
+                      border-red-400/20
+
+                      bg-red-400/[0.05]
+
+                      px-4
+                      py-3
+
+                      text-sm
+                      leading-6
+
+                      text-red-400
+                    "
+                  >
+                    {errorMessage}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* =================================================
+                SUBMIT
+            ================================================= */}
+
+            <AnimatedField delay={0.3}>
+              <motion.button
+                type="submit"
+                disabled={
+                  isSubmitting ||
+                  !turnstileToken
+                }
+                whileHover={
+                  shouldReduceMotion ||
+                  isSubmitting ||
+                  !turnstileToken
+                    ? undefined
+                    : {
+                        y: -2,
+                      }
+                }
+                whileTap={
+                  shouldReduceMotion ||
+                  isSubmitting ||
+                  !turnstileToken
+                    ? undefined
+                    : {
+                        scale: 0.985,
+                      }
+                }
+                className="
+                  group
+                  relative
+                  flex
+                  w-full
+                  items-center
+                  justify-center
+                  gap-2.5
+                  overflow-hidden
+                  rounded-xl
+
+                  bg-cyan-400
+
+                  px-6
+                  py-4
+
+                  text-sm
+                  font-semibold
+
+                  text-slate-950
+
+                  shadow-[0_12px_35px_rgba(34,211,238,0.16)]
+
+                  transition-all
+                  duration-300
+
+                  hover:bg-cyan-300
+
+                  hover:shadow-[0_16px_45px_rgba(34,211,238,0.24)]
+
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                  disabled:shadow-none
+                "
+              >
+                {!shouldReduceMotion && (
+                  <motion.span
+                    initial={{
+                      x: "-120%",
+                    }}
+                    animate={{
+                      x: "120%",
+                    }}
+                    transition={{
+                      duration: 1.4,
+                      repeat: Infinity,
+                      repeatDelay: 4,
+                      ease: "easeInOut",
+                    }}
+                    className="
+                      pointer-events-none
+                      absolute
+                      inset-y-0
+                      w-1/3
+                      skew-x-[-20deg]
+                      bg-white/[0.12]
+                    "
+                  />
+                )}
+
+                {isSubmitting ? (
+                  <>
+                    <Loader2
+                      className="
+                        h-4
+                        w-4
+                        animate-spin
+                      "
+                    />
+
+                    <span>
+                      Sending message...
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span>
+                      Send message
+                    </span>
+
+                    <Send
+                      className="
+                        h-4
+                        w-4
+
+                        transition-transform
+                        duration-300
+
+                        group-hover:translate-x-1
+                        group-hover:-translate-y-0.5
+                      "
+                      strokeWidth={2}
+                    />
+                  </>
+                )}
+              </motion.button>
+            </AnimatedField>
+          </div>
+        </motion.form>
+      )}
+    </AnimatePresence>
   );
 }
+
+/* =========================================================
+   DEFAULT EXPORT
+========================================================= */
+
+export default ContactForm;

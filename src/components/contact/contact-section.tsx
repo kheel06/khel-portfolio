@@ -10,7 +10,7 @@ import {
   useReducedMotion,
 } from "motion/react";
 
-import { ContactForm } from "./contact-form";
+import ContactForm from "./contact-form";
 
 const easing = [0.22, 1, 0.36, 1] as const;
 
@@ -94,6 +94,7 @@ export function ContactSection() {
         text-slate-950
         transition-colors
         duration-300
+
         sm:py-32
 
         dark:border-white/[0.06]
@@ -102,16 +103,14 @@ export function ContactSection() {
       "
     >
       {/* ======================================================================
-          ATMOSPHERIC BACKGROUND
+          BACKGROUND
       ====================================================================== */}
 
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
       >
-        {/* ------------------------------------------------------------------
-            MAIN CYAN ATMOSPHERE
-        ------------------------------------------------------------------ */}
+        {/* CYAN ATMOSPHERE */}
 
         <motion.div
           animate={
@@ -145,9 +144,7 @@ export function ContactSection() {
           "
         />
 
-        {/* ------------------------------------------------------------------
-            SECONDARY BLUE ATMOSPHERE
-        ------------------------------------------------------------------ */}
+        {/* BLUE ATMOSPHERE */}
 
         <div
           className="
@@ -158,16 +155,13 @@ export function ContactSection() {
             w-80
             rounded-full
             bg-blue-600/[0.025]
+            blur-3xl
 
             dark:bg-blue-600/[0.02]
-
-            blur-3xl
           "
         />
 
-        {/* ------------------------------------------------------------------
-            TECHNICAL GRID — LIGHT MODE
-        ------------------------------------------------------------------ */}
+        {/* LIGHT GRID */}
 
         <div
           className="
@@ -196,9 +190,7 @@ export function ContactSection() {
           }}
         />
 
-        {/* ------------------------------------------------------------------
-            TECHNICAL GRID — DARK MODE
-        ------------------------------------------------------------------ */}
+        {/* DARK GRID */}
 
         <div
           className="
@@ -228,9 +220,7 @@ export function ContactSection() {
           }}
         />
 
-        {/* ------------------------------------------------------------------
-            TOP VIGNETTE
-        ------------------------------------------------------------------ */}
+        {/* TOP VIGNETTE */}
 
         <div
           className="
@@ -247,9 +237,7 @@ export function ContactSection() {
           "
         />
 
-        {/* ------------------------------------------------------------------
-            BOTTOM VIGNETTE
-        ------------------------------------------------------------------ */}
+        {/* BOTTOM VIGNETTE */}
 
         <div
           className="
@@ -300,13 +288,11 @@ export function ContactSection() {
           "
         >
           {/* ==================================================================
-              LEFT — CONTACT INFORMATION
+              LEFT
           ================================================================== */}
 
           <div>
-            {/* ----------------------------------------------------------------
-                SECTION LABEL
-            ---------------------------------------------------------------- */}
+            {/* LABEL */}
 
             <motion.div
               variants={
@@ -341,6 +327,7 @@ export function ContactSection() {
                 className="
                   h-px
                   bg-cyan-600/70
+
                   dark:bg-cyan-400/70
                 "
               />
@@ -360,9 +347,7 @@ export function ContactSection() {
               </p>
             </motion.div>
 
-            {/* ----------------------------------------------------------------
-                HEADING
-            ---------------------------------------------------------------- */}
+            {/* HEADING */}
 
             <motion.h2
               variants={
@@ -387,9 +372,7 @@ export function ContactSection() {
               SOMETHING.
             </motion.h2>
 
-            {/* ----------------------------------------------------------------
-                DESCRIPTION
-            ---------------------------------------------------------------- */}
+            {/* DESCRIPTION */}
 
             <motion.p
               variants={
@@ -414,9 +397,7 @@ export function ContactSection() {
               I&apos;ll get back to you.
             </motion.p>
 
-            {/* ================================================================
-                CONTACT DETAILS
-            ================================================================ */}
+            {/* CONTACT DETAILS */}
 
             <motion.div
               variants={
@@ -429,14 +410,14 @@ export function ContactSection() {
               <ContactDetail
                 icon={<Mail size={17} />}
                 label="Email"
-                value="your@email.com"
+                value="petrasmichael06@gmail.com"
                 reducedMotion={shouldReduceMotion}
               />
 
               <ContactDetail
                 icon={<MapPin size={17} />}
                 label="Location"
-                value="Philippines"
+                value="Quezon City, Philippines"
                 reducedMotion={shouldReduceMotion}
               />
 
@@ -454,7 +435,7 @@ export function ContactSection() {
           </div>
 
           {/* ==================================================================
-              RIGHT — CONTACT FORM
+              RIGHT — FORM
           ================================================================== */}
 
           <motion.div
@@ -463,29 +444,53 @@ export function ContactSection() {
                 ? undefined
                 : formVariants
             }
+            whileHover={
+              shouldReduceMotion
+                ? undefined
+                : {
+                    y: -3,
+                  }
+            }
+            transition={{
+              duration: 0.35,
+              ease: easing,
+            }}
             className="relative"
           >
-            {/* ----------------------------------------------------------------
-                OUTER GLOW
-            ---------------------------------------------------------------- */}
+            {/* OUTER GLOW */}
 
-            <div
+            <motion.div
               aria-hidden="true"
+              animate={
+                shouldReduceMotion
+                  ? undefined
+                  : {
+                      opacity: [0.4, 0.7, 0.4],
+                      scale: [0.98, 1.02, 0.98],
+                    }
+              }
+              transition={
+                shouldReduceMotion
+                  ? undefined
+                  : {
+                      duration: 5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }
+              }
               className="
                 pointer-events-none
                 absolute
-                -inset-4
-                rounded-3xl
-                bg-cyan-500/[0.018]
+                -inset-5
+                rounded-[2rem]
+                bg-cyan-500/[0.025]
                 blur-2xl
 
-                dark:bg-cyan-400/[0.025]
+                dark:bg-cyan-400/[0.035]
               "
             />
 
-            {/* ----------------------------------------------------------------
-                FORM CONTAINER
-            ---------------------------------------------------------------- */}
+            {/* FORM CONTAINER */}
 
             <div
               className="
@@ -497,19 +502,23 @@ export function ContactSection() {
                 bg-white
                 p-5
                 shadow-[0_20px_70px_rgba(15,23,42,0.06)]
-                transition-colors
-                duration-300
+                transition-all
+                duration-500
+
+                hover:border-cyan-500/20
+                hover:shadow-[0_25px_80px_rgba(15,23,42,0.08)]
 
                 sm:p-7
 
                 dark:border-white/[0.08]
                 dark:bg-white/[0.025]
                 dark:shadow-none
+
+                dark:hover:border-cyan-400/20
+                dark:hover:bg-white/[0.03]
               "
             >
-              {/* --------------------------------------------------------------
-                  TOP ACCENT
-              -------------------------------------------------------------- */}
+              {/* TOP ACCENT */}
 
               <motion.div
                 initial={{
@@ -541,6 +550,62 @@ export function ContactSection() {
                   dark:via-cyan-400/70
                 "
               />
+
+              {/* CORNER STATUS MARKER */}
+
+              <div
+                aria-hidden="true"
+                className="
+                  pointer-events-none
+                  absolute
+                  right-5
+                  top-5
+                  flex
+                  items-center
+                  gap-1.5
+                "
+              >
+                <motion.span
+                  animate={
+                    shouldReduceMotion
+                      ? undefined
+                      : {
+                          opacity: [0.35, 1, 0.35],
+                          scale: [0.9, 1.1, 0.9],
+                        }
+                  }
+                  transition={
+                    shouldReduceMotion
+                      ? undefined
+                      : {
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }
+                  }
+                  className="
+                    h-1.5
+                    w-1.5
+                    rounded-full
+                    bg-emerald-500
+                    dark:bg-emerald-400
+                  "
+                />
+
+                <span
+                  className="
+                    text-[9px]
+                    font-medium
+                    uppercase
+                    tracking-[0.16em]
+                    text-slate-400
+
+                    dark:text-slate-600
+                  "
+                >
+                  Online
+                </span>
+              </div>
 
               <ContactForm />
             </div>
@@ -586,7 +651,23 @@ export function ContactSection() {
           "
         >
           <div className="flex items-center gap-3">
-            <span
+            <motion.span
+              animate={
+                shouldReduceMotion
+                  ? undefined
+                  : {
+                      opacity: [0.4, 1, 0.4],
+                    }
+              }
+              transition={
+                shouldReduceMotion
+                  ? undefined
+                  : {
+                      duration: 2.2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }
+              }
               className="
                 h-1.5
                 w-1.5
@@ -676,9 +757,7 @@ function ContactDetail({
       }}
       className="group flex items-center gap-4"
     >
-      {/* ======================================================================
-          ICON
-      ====================================================================== */}
+      {/* ICON */}
 
       <motion.div
         whileHover={
@@ -713,6 +792,7 @@ function ContactDetail({
           dark:border-white/[0.08]
           dark:bg-white/[0.025]
           dark:shadow-none
+
           dark:group-hover:border-cyan-400/20
           dark:group-hover:bg-cyan-400/[0.05]
         "
@@ -720,7 +800,6 @@ function ContactDetail({
         <span
           className="
             text-cyan-600
-
             dark:text-cyan-300
           "
         >
@@ -728,9 +807,7 @@ function ContactDetail({
         </span>
       </motion.div>
 
-      {/* ======================================================================
-          TEXT
-      ====================================================================== */}
+      {/* TEXT */}
 
       <div>
         <p
