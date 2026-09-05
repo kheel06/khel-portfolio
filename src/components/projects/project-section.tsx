@@ -19,7 +19,11 @@ import {
   type ProjectCategory,
 } from "@/data/projects";
 
-import { ProjectCard } from "./project-card";
+import {
+  FeaturedProjectCard,
+  ProjectListRow,
+  SelectedProjectCard,
+} from "./project-card";
 import { ProjectDialog } from "./project-dialog";
 
 import {
@@ -1108,84 +1112,58 @@ export function ProjectSection() {
           </div>
 
           {/* ===================================================
-              EDITORIAL PROJECT GRID
+              FEATURED / SELECTED / PROJECT INDEX
           ==================================================== */}
 
-          <div
-            data-projects-grid
-            className="
-              mt-12
-              grid
-              grid-cols-1
-              gap-5
+          {filteredProjects.length > 0 && (
+            <div data-projects-grid className="mt-12 space-y-10 sm:space-y-12">
+              <div data-projects-card className="will-change-transform">
+                <FeaturedProjectCard
+                  project={filteredProjects[0]}
+                  index={0}
+                  onOpen={setSelectedProject}
+                />
+              </div>
 
-              sm:gap-6
-
-              lg:grid-cols-12
-            "
-          >
-            {filteredProjects.map(
-              (project, index) => {
-                /*
-                 * Editorial layout:
-                 *
-                 * 01 → 8 columns
-                 * 02 → 4 columns
-                 * 03 → 4 columns
-                 * 04 → 4 columns
-                 * 05 → 4 columns
-                 * 06 → 8 columns
-                 *
-                 * Then repeats.
-                 */
-
-                const isFeatured =
-                  index === 0;
-
-                const isWide =
-                  index === 0 ||
-                  index % 5 === 0;
-
-                /*
-                 * IMPORTANT:
-                 *
-                 * Do NOT use:
-                 *
-                 * lg:col-span-${...}
-                 *
-                 * Tailwind cannot reliably detect
-                 * dynamically generated class names.
-                 *
-                 * Use complete static class names.
-                 */
-
-                const gridClass = isWide
-                  ? "col-span-1 lg:col-span-8"
-                  : "col-span-1 lg:col-span-4";
-
-                return (
-                  <div
-                    key={project.id}
-                    data-projects-card
-                    className={`
-                      min-w-0
-                      will-change-transform
-                      ${gridClass}
-                    `}
-                  >
-                    <ProjectCard
-                      project={project}
-                      index={index}
-                      featured={isFeatured}
-                      onOpen={
-                        setSelectedProject
-                      }
-                    />
+              {filteredProjects.length > 1 && (
+                <section aria-label="More selected projects">
+                  <p className="mb-4 font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:text-cyan-400">
+                    More selected projects
+                  </p>
+                  <div className="grid gap-5 sm:gap-6 lg:grid-cols-2">
+                    {filteredProjects.slice(1, 3).map((project, offset) => (
+                      <div key={project.id} data-projects-card className="min-w-0 will-change-transform">
+                        <SelectedProjectCard
+                          project={project}
+                          index={offset + 1}
+                          onOpen={setSelectedProject}
+                        />
+                      </div>
+                    ))}
                   </div>
-                );
-              },
-            )}
-          </div>
+                </section>
+              )}
+
+              {filteredProjects.length > 3 && (
+                <section aria-label="All projects">
+                  <p className="mb-4 font-mono text-[9px] font-semibold uppercase tracking-[0.18em] text-cyan-700 dark:text-cyan-400">
+                    All projects
+                  </p>
+                  <div className="overflow-hidden rounded-2xl border border-slate-900/[0.10] bg-white shadow-[0_12px_40px_rgba(15,23,42,0.04)] dark:border-white/[0.08] dark:bg-white/[0.018] dark:shadow-none">
+                    {filteredProjects.slice(3).map((project, offset) => (
+                      <div key={project.id} data-projects-card className="will-change-transform last:[&>button]:border-b-0">
+                        <ProjectListRow
+                          project={project}
+                          index={offset + 3}
+                          onOpen={setSelectedProject}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+          )}
 
           {/* ===================================================
               EMPTY STATE

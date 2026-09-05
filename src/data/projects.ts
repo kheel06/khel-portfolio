@@ -6,6 +6,7 @@ export type ProjectCategory =
 export interface Project {
   id: string;
   title: string;
+  caseStudyTitle?: string;
   category: ProjectCategory;
   shortDescription: string;
   description: string;
@@ -35,399 +36,306 @@ function createCaseStudyImages(
 export const projects: Project[] = [
   {
     id: "soliera",
-    title: "Soliera Administrative",
+    title: "Soliera Hotel & Restaurant Admin System",
+    caseStudyTitle:
+      "Soliera: Administrative Management System With Intelligent Legal Text Analysis Using Gemini AI for Document Classification",
     category: "Administrative",
-
     shortDescription:
-      "A modern administrative platform designed to organize business operations and management workflows.",
-
+      "An administrative management system with intelligent legal text analysis and document classification.",
     description:
-      "A full-stack administrative system focused on providing structured workflows, centralized information, and a modern management experience.",
-
+      "A centralized administrative platform for hotel and restaurant operations, featuring Gemini AI-assisted legal text analysis and document classification.",
     image: "/projects/soliera/1.png",
     caseStudyImages: createCaseStudyImages("soliera", 34),
-
     technologies: [
-      "Next.js",
-      "React",
-      "TypeScript",
-      "Firebase",
-      "Firestore",
+      "Laravel",
+      "PHP",
+      "JavaScript ES6",
       "Tailwind CSS",
+      "DaisyUI",
+      "Postman",
+      "Gemini AI",
+      "MySQL",
     ],
-
     features: [
-      "Administrative dashboard",
-      "Data management",
-      "Responsive interface",
-      "Structured workflows",
-      "Reusable components",
+      "Legal Management",
+      "Facilities Reservation",
+      "User Management",
+      "Document Management",
+      "Visitor Management",
     ],
-
     problem:
-      "Business workflows can become difficult to manage when information is scattered across disconnected processes and interfaces.",
-
+      "Administrative, legal, and document workflows need a single, organized system.",
     solution:
-      "The system brings core workflows into a centralized web application with structured interfaces, reusable components, and a responsive user experience.",
-
-    architecture: [
-      "Next.js application",
-      "React component architecture",
-      "TypeScript application logic",
-      "Firebase services",
-      "Firestore data layer",
-    ],
-
-    challenges: [
-      "Designing reusable management interfaces",
-      "Keeping application state predictable",
-      "Creating a responsive experience across screen sizes",
-      "Structuring the project for future expansion",
-    ],
-
-    results: [
-      "Centralized administrative workflows",
-      "More structured information management",
-      "Responsive management experience",
-      "Maintainable application architecture",
-    ],
-
-    github:
-      "https://github.com/kheel06/soliera-administrative",
+      "Soliera centralizes management workflows and applies Gemini AI to legal-text analysis and document classification.",
+    architecture: ["Laravel application", "MySQL database", "Gemini AI integration"],
+    challenges: ["Organizing administrative workflows", "Classifying legal documents"],
+    results: ["Centralized operations", "AI-assisted document handling"],
+    github: "https://github.com/kheel06/soliera-administrative",
   },
-
+  {
+    id: "alvion-core-transaction-1",
+    title: "Alvion Core Transaction 1",
+    caseStudyTitle:
+      "Hospital 2: Core 1 Digital Patient Access and Emergency Management Platform With AI-Powered Triage and Telehealth Support",
+    category: "Full Stack",
+    shortDescription:
+      "A digital patient-access and emergency management platform with AI-assisted triage and telehealth support.",
+    description:
+      "A hospital management platform for digital patient access, emergency workflows, AI-powered triage, and telehealth support.",
+    image: "/projects/core1/1.png",
+    caseStudyImages: createCaseStudyImages("core1", 39),
+    technologies: [
+      "PHP",
+      "JavaScript ES6",
+      "HTML",
+      "Tailwind CSS",
+      "Flowbite",
+      "Postman",
+      "MySQL",
+    ],
+    features: [
+      "Smart Patient Registration System",
+      "Appointment and Scheduling System",
+      "Telehealth and Outpatient Care System",
+      "Emergency and ER Triage System",
+      "Inpatient and Bed Management System",
+    ],
+    problem:
+      "Hospital teams need connected patient-access and emergency workflows.",
+    solution:
+      "The platform connects registration, scheduling, telehealth, and AI-supported triage in one system.",
+    architecture: ["PHP application", "MySQL database", "AI triage services"],
+    challenges: ["Coordinating emergency workflows", "Supporting patient access"],
+    results: ["Streamlined triage", "Connected patient services"],
+  },
   {
     id: "cybershield",
     title: "CyberShield",
+    caseStudyTitle: "Cybershield",
     category: "Web",
-
     shortDescription:
       "An AI-assisted cyber hygiene assessment experience for Philippine e-commerce sellers.",
-
     description:
-      "A visual case study for CyberShield, presenting its cyber hygiene assessment and related product views.",
-
+      "A cybersecurity awareness web application that presents security concepts, protection practices, and educational content through an accessible interface.",
     image: "/projects/cybershield/1.png",
     caseStudyImages: createCaseStudyImages("cybershield", 12),
-
-    technologies: [],
-
+    technologies: ["HTML", "CSS", "Bootstrap", "JavaScript ES6", "MySQL", "REST API"],
     features: [
       "Cyber hygiene assessment",
       "Risk ranking",
       "Personalized recommendations",
     ],
-
     problem:
-      "The captured product focuses on helping Philippine e-commerce sellers understand cyber risk.",
-
+      "E-commerce sellers need an approachable way to understand cyber risk.",
     solution:
-      "The interface presents a question-based assessment with a risk rank and personalized recommendations.",
-
-    architecture: [],
-    challenges: [],
-    results: [],
+      "CyberShield uses a guided assessment to surface risk levels and personalized recommendations.",
+    architecture: ["Web application", "REST API", "MySQL database"],
+    challenges: ["Explaining security clearly", "Providing actionable assessment results"],
+    results: ["Accessible cyber education", "Personalized risk guidance"],
   },
-
   {
-    id: "portfolio",
-    title: "KHEL Portfolio",
-    category: "Web",
-
-    shortDescription:
-      "A performance-focused personal portfolio built to present engineering work through interactive case studies.",
-
-    description:
-      "A modern portfolio experience built with Next.js, TypeScript, Tailwind CSS, Motion, and Firebase.",
-
-    image: "/projects/portfolio/hero.webp",
-
-    technologies: [
-      "Next.js",
-      "React",
-      "TypeScript",
-      "Tailwind CSS",
-      "Motion",
-      "Firebase",
-    ],
-
-    features: [
-      "Responsive design",
-      "Animated interactions",
-      "Project case studies",
-      "Contact form",
-      "Firebase integration",
-    ],
-
-    problem:
-      "A developer portfolio should communicate more than a list of technologies. It should demonstrate how the developer thinks, builds, and solves problems.",
-
-    solution:
-      "The portfolio treats the website itself as a software product, combining structured content, interactive project presentations, responsive engineering, and a Firebase-backed contact workflow.",
-
-    architecture: [
-      "Next.js App Router",
-      "Server Components by default",
-      "Client Components for interactive UI",
-      "Motion animation layer",
-      "Firebase contact service",
-    ],
-
-    challenges: [
-      "Balancing visual design with performance",
-      "Keeping animations subtle and purposeful",
-      "Designing reusable project components",
-      "Maintaining a clean component architecture",
-    ],
-
-    results: [
-      "Professional project presentation",
-      "Interactive case studies",
-      "Responsive user experience",
-      "Modern engineering-focused design",
-    ],
-
-    github: "https://github.com/kheel06",
-    live: "https://khel-pied.vercel.app/",
-  },
-
-  {
-    id: "avion-care",
-    title: "Avion Care",
-    category: "Web",
-
-    shortDescription:
-      "A web-based platform designed to provide a structured digital experience for service-oriented workflows.",
-
-    description:
-      "A responsive web application focused on presenting services, organizing information, and creating a clean digital experience for users.",
-
-    image: "/projects/core1/1.png",
-    caseStudyImages: createCaseStudyImages("core1", 39),
-
-    technologies: [
-      "Next.js",
-      "React",
-      "TypeScript",
-      "Tailwind CSS",
-      "REST API",
-    ],
-
-    features: [
-      "Responsive web interface",
-      "Service presentation",
-      "Structured information",
-      "Reusable UI components",
-      "Mobile-friendly layout",
-    ],
-
-    problem:
-      "Users need a clear and accessible way to understand services and interact with a digital platform without navigating through unnecessarily complicated interfaces.",
-
-    solution:
-      "The application organizes important information into a responsive interface with reusable components and a clear user flow.",
-
-    architecture: [
-      "Next.js application",
-      "React component system",
-      "TypeScript application logic",
-      "Reusable UI components",
-      "API-ready architecture",
-    ],
-
-    challenges: [
-      "Designing a simple user experience",
-      "Keeping layouts responsive",
-      "Creating reusable components",
-      "Maintaining consistent visual hierarchy",
-    ],
-
-    results: [
-      "Clearer digital experience",
-      "Responsive interface",
-      "Reusable frontend architecture",
-      "Structured presentation of information",
-    ],
-  },
-
-  {
-    id: "avion-logistics",
-    title: "Avion Logistics",
+    id: "alvion-core-transaction-2",
+    title: "Alvion Core Transaction 2",
+    caseStudyTitle:
+      "Smart Hospital Treatment System with Real-Time Surgery Scheduling, Lab Coordination, Pharmacy Management, and AI Powered Microsoft Azure Health Bot Integration.",
     category: "Full Stack",
-
     shortDescription:
-      "A logistics-focused application designed around structured operational workflows and centralized information.",
-
+      "A smart treatment system for coordinated surgery, laboratory, pharmacy, and patient-support workflows.",
     description:
-      "A full-stack-oriented logistics platform concept focused on organizing operational information and creating a more structured workflow for users.",
-
-    image: "",
-
-    technologies: [
-      "Next.js",
-      "React",
-      "TypeScript",
-      "API",
-      "Database",
-      "Tailwind CSS",
-    ],
-
+      "A smart hospital treatment system with real-time surgery scheduling, laboratory coordination, pharmacy management, and Microsoft Azure Health Bot integration.",
+    image: "/projects/core-transaction-2/1.png",
+    technologies: ["PHP", "MySQL", "JavaScript ES6", "Bootstrap", "Microsoft Azure Health Bot"],
     features: [
-      "Operational dashboard",
-      "Data management",
-      "Workflow organization",
-      "Responsive interface",
-      "API integration",
+      "Laboratory Information System",
+      "Radiology and Imaging System",
+      "Pharmacy Management System",
+      "Surgery and Operating Room Scheduler",
     ],
-
     problem:
-      "Operational workflows become difficult to manage when important information is distributed across multiple systems and manual processes.",
-
+      "Clinical treatment teams need connected scheduling and service coordination.",
     solution:
-      "The application provides a centralized interface for organizing operational information while keeping the frontend structured for API and database integration.",
-
-    architecture: [
-      "Next.js App Router",
-      "React frontend",
-      "TypeScript business logic",
-      "API integration layer",
-      "Database-backed workflow",
-    ],
-
-    challenges: [
-      "Structuring operational information",
-      "Designing reusable dashboard components",
-      "Handling data-driven interfaces",
-      "Keeping workflows easy to understand",
-    ],
-
-    results: [
-      "Centralized operational information",
-      "More structured workflows",
-      "Reusable application components",
-      "Scalable application foundation",
-    ],
+      "The system centralizes treatment operations and connects patients with Azure Health Bot support.",
+    architecture: ["PHP application", "MySQL database", "Azure Health Bot integration"],
+    challenges: ["Coordinating clinical departments", "Scheduling operating rooms"],
+    results: ["Connected treatment workflows", "Real-time schedule visibility"],
   },
-
   {
-    id: "merchandising-logistics",
-    title: "Merchandising Logistics",
-    category: "Administrative",
-
+    id: "alvion-core-transaction-3",
+    title: "Alvion Core Transaction 3",
+    caseStudyTitle:
+      "Hospital 2: Core 3 – Enhancing Patient Experience Through Virtual Assistants and AI Automation Banking Process Using Olive AI",
+    category: "Full Stack",
     shortDescription:
-      "An administrative logistics solution focused on organizing merchandising operations and information.",
-
+      "A hospital operations platform focused on patient experience, virtual assistance, and AI automation.",
     description:
-      "A management-oriented application designed around administrative workflows, information organization, and operational visibility.",
-
-    image: "",
-
-    technologies: [
-      "Next.js",
-      "React",
-      "TypeScript",
-      "API",
-      "Database",
-      "Tailwind CSS",
-    ],
-
+      "A hospital operations platform that improves patient experience through virtual assistants and Olive AI-powered process automation.",
+    image: "/projects/core-transaction-3/1.png",
+    technologies: ["PHP", "MySQL", "JavaScript ES6", "Bootstrap", "Olive AI"],
     features: [
-      "Administrative dashboard",
-      "Inventory-oriented workflows",
-      "Data organization",
-      "Operational tracking",
-      "Responsive interface",
+      "HMO and Insurance Claims System",
+      "Billing and Discharge Management System",
+      "Electronic Medical Records System",
+      "Healthcare Analytics and Dashboard System",
     ],
-
     problem:
-      "Administrative and merchandising workflows can become inefficient when information is manually tracked across disconnected tools.",
-
+      "Patient-facing and hospital financial workflows can be fragmented and manual.",
     solution:
-      "The application centralizes operational information into structured screens and reusable components designed around management workflows.",
-
-    architecture: [
-      "Next.js application",
-      "React component architecture",
-      "TypeScript logic",
-      "API integration",
-      "Database-oriented data layer",
-    ],
-
-    challenges: [
-      "Organizing large amounts of information",
-      "Creating efficient management interfaces",
-      "Maintaining consistent UI patterns",
-      "Designing for future workflow expansion",
-    ],
-
-    results: [
-      "More structured administrative workflow",
-      "Centralized information",
-      "Improved operational visibility",
-      "Reusable management interface",
-    ],
+      "The platform combines virtual assistance, records, billing, and Olive AI-powered automation.",
+    architecture: ["PHP application", "MySQL database", "Olive AI integration"],
+    challenges: ["Improving patient experience", "Automating operational processes"],
+    results: ["AI-assisted service delivery", "Streamlined patient workflows"],
   },
-
+  {
+    id: "alvion-human-resource-3",
+    title: "Alvion Human Resource 3",
+    caseStudyTitle:
+      "Hospital 2: Human Resources 3 – Streamlining Organizational Processes Through Integrated Claim, Reimbursement, Attendance, Scheduling, and Leave Management Using Azure AI",
+    category: "Administrative",
+    shortDescription:
+      "An HR platform that connects claims, reimbursement, attendance, schedules, and leave management.",
+    description:
+      "A hospital HR management platform that streamlines organizational processes with integrated claims, reimbursement, attendance, scheduling, leave management, and Azure AI.",
+    image: "/projects/human-resource-3/1.png",
+    technologies: ["PHP", "MySQL", "JavaScript ES6", "Bootstrap", "Azure AI"],
+    features: [
+      "Time and Attendance System",
+      "Shift and Schedule Management",
+      "Timesheet Management",
+      "Leave Management",
+      "Claims and Reimbursement",
+    ],
+    problem:
+      "HR processes become difficult to manage when time, leave, claims, and schedules are disconnected.",
+    solution:
+      "The system integrates daily HR workflows with Azure AI support.",
+    architecture: ["PHP application", "MySQL database", "Azure AI integration"],
+    challenges: ["Coordinating workforce information", "Managing staff schedules"],
+    results: ["Integrated HR processes", "Improved organizational visibility"],
+  },
+  {
+    id: "alvion-financial-transaction",
+    title: "Alvion Financial Transaction",
+    caseStudyTitle:
+      "Hospital 2: Financials With Automatic Financial Report Generation and KPI Monitoring Dashboards, Powered by GPT-4 and PyTorch",
+    category: "Full Stack",
+    shortDescription:
+      "A financial platform with automatic reporting, KPI dashboards, GPT-4, and PyTorch support.",
+    description:
+      "A hospital financial management platform for accounting workflows, automatic report generation, and KPI monitoring dashboards powered by GPT-4 and PyTorch.",
+    image: "/projects/financial-transaction/1.png",
+    technologies: ["PHP", "MySQL", "JavaScript ES6", "Bootstrap", "GPT-4", "PyTorch"],
+    features: ["Disbursement", "Budget Management", "Collection", "General Ledger"],
+    problem:
+      "Financial teams need timely reports and clear KPI visibility across hospital operations.",
+    solution:
+      "The platform centralizes financial records and automates reporting and KPI monitoring.",
+    architecture: ["PHP application", "MySQL database", "GPT-4 and PyTorch services"],
+    challenges: ["Automating financial reporting", "Monitoring performance indicators"],
+    results: ["Faster report generation", "Centralized KPI monitoring"],
+  },
+  {
+    id: "alvion-logistics-1",
+    title: "Alvion Logistics 1",
+    caseStudyTitle:
+      "Leveraging AI-Driven Strategies to Build Hospital Chains for Continuous Access to Critical Medical",
+    category: "Full Stack",
+    shortDescription:
+      "A hospital logistics platform for procurement, warehousing, assets, and continuous access to critical medical resources.",
+    description:
+      "A hospital logistics platform that applies AI-driven strategies to support continuous access to critical medical resources across hospital chains.",
+    image: "/projects/logistics-1/1.png",
+    technologies: ["PHP", "MySQL", "JavaScript ES6", "Bootstrap"],
+    features: [
+      "Smart Warehousing System",
+      "Procurement and Sourcing Management",
+      "Project Logistics Tracker",
+      "Asset Lifecycle and Maintenance",
+    ],
+    problem:
+      "Hospital chains require reliable logistics operations to maintain access to critical medical resources.",
+    solution:
+      "The platform centralizes warehousing, procurement, asset, and project logistics workflows.",
+    architecture: ["PHP application", "MySQL database", "Operational dashboards"],
+    challenges: ["Maintaining medical supply continuity", "Coordinating hospital-chain logistics"],
+    results: ["Improved logistics visibility", "Structured medical-resource workflows"],
+  },
+  {
+    id: "alvion-logistics-2",
+    title: "Alvion Logistics 2",
+    caseStudyTitle:
+      "Hospital 2: Logistic 2 – A Web-Based Executive Information System for Hospital Transport and Dispatch Modules With Intelligent Vehicle Availability and Stock Accuracy Monitoring Using Intelligent Transport Management AI (ITMA) and Scikit-Learn",
+    category: "Full Stack",
+    shortDescription:
+      "An executive information system for hospital transport, dispatch, vehicle availability, and stock monitoring.",
+    description:
+      "A web-based executive information system for hospital transport and dispatch with intelligent vehicle availability and stock-accuracy monitoring using ITMA and Scikit-Learn.",
+    image: "/projects/logistics-2/1.png",
+    technologies: [
+      "PHP",
+      "MySQL",
+      "JavaScript ES6",
+      "Bootstrap",
+      "Intelligent Transport Management AI (ITMA)",
+      "Scikit-Learn",
+    ],
+    features: [
+      "Fleet and Vehicle Management",
+      "Vehicle Reservation and Dispatch System",
+      "Vehicle Availability Monitoring",
+      "Stock Accuracy Monitoring",
+    ],
+    problem:
+      "Transport teams need reliable dispatch information and accurate stock visibility.",
+    solution:
+      "The system unifies transport operations with ITMA- and Scikit-Learn-assisted monitoring.",
+    architecture: ["PHP application", "MySQL database", "ITMA and Scikit-Learn services"],
+    challenges: ["Coordinating dispatch", "Monitoring vehicle availability"],
+    results: ["Improved transport visibility", "More accurate stock monitoring"],
+  },
+  {
+    id: "prime-merch",
+    title: "PrimeMerch",
+    caseStudyTitle:
+      "Merchandising System: Smart Merchandising Supply Chain Optimization System (AI-Powered)",
+    category: "Administrative",
+    shortDescription:
+      "An AI-powered merchandising system for supply-chain optimization.",
+    description:
+      "A smart merchandising supply-chain optimization system for coordinating inventory, warehousing, procurement, and logistics workflows.",
+    image: "/projects/prime-merch/1.png",
+    technologies: ["Vanilla PHP", "HTML", "CSS", "MySQL", "JavaScript ES6", "Bootstrap", "REST API"],
+    features: [
+      "Smart Warehousing System",
+      "Procurement and Sourcing Management",
+      "Project Logistics Tracker",
+      "Asset Lifecycle and Maintenance",
+    ],
+    problem:
+      "Merchandising supply-chain data can become difficult to coordinate across disconnected workflows.",
+    solution:
+      "PrimeMerch provides a centralized, AI-powered operational workspace for supply-chain optimization.",
+    architecture: ["Vanilla PHP application", "MySQL database", "REST API integration"],
+    challenges: ["Coordinating supply-chain workflows", "Maintaining inventory visibility"],
+    results: ["More structured merchandising operations", "Improved supply-chain oversight"],
+  },
   {
     id: "hop-fabrications",
-    title: "HOP Fabrications",
+    title: "HOP Fabrications Inc.",
+    caseStudyTitle: "HOP Fabrications Inc.",
     category: "Full Stack",
-
     shortDescription:
-      "A business website and digital experience for a custom fabrication company serving food concepts, kiosks, carts, and growing businesses.",
-
+      "A business website for a custom fabrication company serving food concepts, kiosks, carts, and growing businesses.",
     description:
-      "A modern business platform created to showcase fabrication work, communicate services, present clients and projects, and support customer inquiries through an interactive web experience.",
-
-    image: "",
-
-    technologies: [
-      "Next.js",
-      "React",
-      "TypeScript",
-      "Tailwind CSS",
-      "Supabase",
-      "API",
-    ],
-
-    features: [
-      "Project showcase",
-      "Responsive business website",
-      "AI project assistant",
-      "Contact workflow",
-      "Service presentation",
-      "Interactive project sections",
-    ],
-
+      "A responsive business website showcasing custom fabrication services, collapsible carts, mall kiosks, company information, and customer inquiry touchpoints.",
+    image: "/projects/hop-fabrications/1.png",
+    technologies: ["Next.js", "shadcn/ui", "Framer Motion", "Lucide Icons"],
+    features: ["Project showcase", "Responsive business website", "AI project assistant", "Customer inquiries"],
     problem:
-      "Custom fabrication businesses need a digital presence that can clearly communicate their capabilities while making it easier for potential clients to understand services and start a project.",
-
+      "Custom fabrication businesses need a clear digital presence for communicating their capabilities and starting customer projects.",
     solution:
-      "The website combines a modern visual system, project presentation, service-focused content, responsive interfaces, and interactive customer communication into one digital experience.",
-
-    architecture: [
-      "Next.js App Router",
-      "React component architecture",
-      "TypeScript",
-      "Tailwind CSS",
-      "Supabase-backed services",
-      "API integrations",
-    ],
-
-    challenges: [
-      "Presenting physical fabrication work digitally",
-      "Creating a premium business-oriented interface",
-      "Building responsive sections",
-      "Integrating interactive customer communication",
-      "Balancing animation and performance",
-    ],
-
-    results: [
-      "Professional digital presence",
-      "Improved project presentation",
-      "Interactive customer experience",
-      "Responsive business website",
-      "Scalable frontend architecture",
-    ],
+      "The website combines a premium visual system, service content, project presentation, and interactive customer communication.",
+    architecture: ["Next.js App Router", "React components", "Tailwind CSS"],
+    challenges: ["Presenting physical work digitally", "Creating a premium responsive experience"],
+    results: ["Professional digital presence", "Improved project presentation"],
   },
 ];

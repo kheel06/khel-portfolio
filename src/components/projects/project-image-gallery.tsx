@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Image from "next/image";
+
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,11 +11,15 @@ import {
   X,
 } from "lucide-react";
 
+/* ============================================================
+   TYPES
+============================================================ */
+
 interface ProjectImageGalleryProps {
   images: string[];
-  imageOffset: number;
-  totalImages: number;
-  onImageSelect: (index: number) => void;
+  imageOffset?: number;
+  totalImages?: number;
+  onImageSelect?: (index: number) => void;
 }
 
 interface CaseStudyImageProps {
@@ -23,8 +28,6 @@ interface CaseStudyImageProps {
   totalImages: number;
   onSelect: () => void;
   priority?: boolean;
-  sizes: string;
-  className?: string;
 }
 
 interface ImageLightboxProps {
@@ -35,66 +38,178 @@ interface ImageLightboxProps {
   onNext: () => void;
 }
 
-type GalleryLayout = "full" | "feature" | "trio" | "pair";
-
-const galleryLayouts: Array<{
-  kind: GalleryLayout;
-  count: number;
-}> = [
-  { kind: "full", count: 1 },
-  { kind: "feature", count: 2 },
-  { kind: "trio", count: 3 },
-  { kind: "pair", count: 2 },
-];
+/* ============================================================
+   PROJECT IMAGE GALLERY
+============================================================ */
 
 /**
- * Presents consecutive project captures in a repeating editorial rhythm.
- * Each image keeps its natural aspect ratio; the layout only controls its
- * place in the story rather than forcing it into a crop.
+ * Displays ALL project screenshots.
+ *
+ * Important:
+ * `images` must contain every screenshot you want displayed.
+ *
+ * Example:
+ *
+ * images={[
+ *   "/images/soliera/01.jpg",
+ *   "/images/soliera/02.jpg",
+ *   "/images/soliera/03.jpg",
+ *   ...
+ *   "/images/soliera/34.jpg",
+ * ]}
  */
 export function ProjectImageGallery({
   images,
-  imageOffset,
+  imageOffset = 0,
   totalImages,
   onImageSelect,
 }: ProjectImageGalleryProps) {
-  const rows = buildGalleryRows(images);
+  /*
+   * Remove empty paths and duplicate entries.
+   *
+   * This prevents broken/duplicate entries from making the
+   * gallery counter confusing.
+   */
+  const cleanImages = Array.from(
+    new Set(
+      images.filter(
+        (image): image is string =>
+          typeof image === "string" && image.trim().length > 0,
+      ),
+    ),
+  );
 
-  if (rows.length === 0) {
-    return null;
+  if (cleanImages.length === 0) {
+    return (
+      <div
+        className="
+          technical-grid
+          flex
+          min-h-[240px]
+          items-center
+          justify-center
+          rounded-2xl
+          border
+          border-white/[0.08]
+          bg-white/[0.025]
+        "
+      >
+        <span
+          className="
+            font-mono
+            text-[9px]
+            uppercase
+            tracking-[0.18em]
+            text-slate-500
+          "
+        >
+          No project screenshots available
+        </span>
+      </div>
+    );
   }
 
-  return (
-    <div className="space-y-4 sm:space-y-5">
-      {rows.map((row, rowIndex) => (
-        <div
-          key={`${row.kind}-${rowIndex}-${row.images[0]}`}
-          className={getRowClassName(row.kind, row.images.length)}
-        >
-          {row.images.map((src, imageIndex) => {
-            const absoluteIndex = imageOffset + row.startIndex + imageIndex;
+  /*
+   * Use the supplied total only when it is greater than the
+   * actual number of images.
+   *
+   * Normally this will simply be cleanImages.length.
+   */
+  const displayTotal =
+    typeof totalImages === "number" && totalImages > 0
+      ? totalImages
+      : cleanImages.length;
 
-            return (
-              <CaseStudyImage
-                key={src}
-                src={src}
-                index={absoluteIndex}
-                totalImages={totalImages}
-                onSelect={() => onImageSelect(absoluteIndex)}
-                sizes={getImageSizes(row.kind, row.images.length, imageIndex)}
-                className={getImageClassName(
-                  row.kind,
-                  row.images.length,
-                  imageIndex,
-                )}
-              />
-            );
-          })}
+  return (
+    <section className="w-full">
+      {/* ========================================================
+          GALLERY HEADER
+      ========================================================= */}
+
+      <div
+        className="
+          mb-4
+          flex
+          items-end
+          justify-between
+          gap-4
+        "
+      >
+        <div>
+          <p
+            className="
+              mb-1
+              font-mono
+              text-[8px]
+              font-semibold
+              uppercase
+              tracking-[0.2em]
+              text-cyan-400
+            "
+          >
+            Project Gallery
+          </p>
+
+          <p
+            className="
+              text-[9px]
+              leading-5
+              text-slate-500
+            "
+          >
+            Complete interface and system screenshots
+          </p>
         </div>
-      ))}
-    </div>
+
+        <span
+          className="
+            shrink-0
+            rounded-full
+            border
+            border-white/[0.08]
+            bg-white/[0.025]
+            px-2.5
+            py-1
+            font-mono
+            text-[8px]
+            font-semibold
+            tracking-[0.1em]
+            text-cyan-400
+          "
+        >
+          {cleanImages.length} Screens
+        </span>
+      </div>
+
+      {/* ========================================================
+          ALL IMAGES
+      ========================================================= */}
+
+      <div className="space-y-5">
+        {cleanImages.map((src, index) => {
+          const absoluteIndex = imageOffset + index;
+
+          return (
+            <CaseStudyImage
+              key={`${src}-${index}`}
+              src={src}
+              index={absoluteIndex}
+              totalImages={displayTotal}
+              priority={index < 2}
+              onSelect={() => {
+                onImageSelect?.(absoluteIndex);
+              }}
+            />
+          );
+        })}
+      </div>
+    </section>
   );
 }
+
+/* ============================================================
+   SINGLE CASE STUDY IMAGE
+============================================================ */
 
 export function CaseStudyImage({
   src,
@@ -102,25 +217,65 @@ export function CaseStudyImage({
   totalImages,
   onSelect,
   priority = false,
-  sizes,
-  className = "",
 }: CaseStudyImageProps) {
-  const [failedSource, setFailedSource] = useState<string | null>(null);
-  const hasFailed = failedSource === src;
+  const [failed, setFailed] = useState(false);
 
   const imageNumber = String(index + 1).padStart(2, "0");
-  const imageCounter = `${imageNumber} / ${String(totalImages).padStart(2, "0")}`;
 
-  if (hasFailed) {
+  const imageCounter =
+    `${imageNumber} / ` +
+    `${String(totalImages).padStart(2, "0")}`;
+
+  /*
+   * If an image fails, show a clear placeholder instead of
+   * silently removing the image from the gallery.
+   */
+  if (failed) {
     return (
       <div
-        className={`technical-grid relative flex min-h-40 items-end overflow-hidden rounded-2xl border border-slate-900/[0.08] bg-slate-100 p-4 dark:border-white/[0.08] dark:bg-white/[0.025] ${className}`}
+        className="
+          technical-grid
+          relative
+          flex
+          min-h-[220px]
+          w-full
+          items-end
+          overflow-hidden
+          rounded-2xl
+          border
+          border-white/[0.08]
+          bg-white/[0.025]
+          p-4
+        "
         role="img"
         aria-label={`Project image ${imageCounter} could not be loaded`}
       >
-        <span className="font-mono text-[9px] uppercase tracking-[0.17em] text-slate-500 dark:text-slate-500">
-          Image unavailable · {imageCounter}
-        </span>
+        <div>
+          <p
+            className="
+              mb-1
+              font-mono
+              text-[8px]
+              uppercase
+              tracking-[0.16em]
+              text-cyan-400
+            "
+          >
+            Screenshot {imageCounter}
+          </p>
+
+          <span
+            className="
+              font-mono
+              text-[9px]
+              uppercase
+              tracking-[0.14em]
+              text-slate-500
+            "
+          >
+            Image unavailable
+          </span>
+        </div>
       </div>
     );
   }
@@ -129,31 +284,146 @@ export function CaseStudyImage({
     <button
       type="button"
       onClick={onSelect}
-      className={`group relative block min-w-0 overflow-hidden rounded-2xl border border-slate-900/[0.08] bg-slate-100 text-left shadow-[0_12px_30px_rgba(15,23,42,0.05)] transition-[border-color,box-shadow] duration-300 hover:border-cyan-500/35 hover:shadow-[0_18px_42px_rgba(15,23,42,0.10)] dark:border-white/[0.08] dark:bg-white/[0.025] dark:shadow-none dark:hover:border-cyan-400/35 ${className}`}
+      className="
+        group
+        relative
+        block
+        w-full
+        overflow-hidden
+        rounded-2xl
+        border
+        border-white/[0.08]
+        bg-[#0b1220]
+        text-left
+        shadow-none
+        transition-all
+        duration-300
+        hover:border-cyan-400/35
+        hover:shadow-[0_18px_45px_rgba(0,0,0,0.25)]
+        focus:outline-none
+        focus-visible:border-cyan-400/50
+        focus-visible:ring-2
+        focus-visible:ring-cyan-400/20
+      "
       aria-label={`Expand project image ${imageCounter}`}
     >
-      <Image
-        src={src}
-        alt=""
-        width={1920}
-        height={900}
-        sizes={sizes}
-        loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
-        onError={() => setFailedSource(src)}
-        className="block h-auto w-full transition-[transform,filter] duration-500 ease-out motion-reduce:transition-none group-hover:scale-[1.015] group-hover:brightness-[1.025]"
-      />
+      {/* ======================================================
+          IMAGE
+      ====================================================== */}
 
-      <span className="pointer-events-none absolute bottom-3 left-3 rounded-md border border-white/15 bg-slate-950/75 px-2 py-1 font-mono text-[9px] tracking-[0.12em] text-white/80 backdrop-blur-md">
-        {imageCounter}
-      </span>
+      <div className="relative w-full">
+        <Image
+          src={src}
+          alt={`Project screenshot ${imageCounter}`}
+          width={1920}
+          height={1080}
+          sizes="
+            (max-width: 640px) 100vw,
+            (max-width: 1024px) 90vw,
+            900px
+          "
+          priority={priority}
+          loading={priority ? "eager" : "lazy"}
+          onError={() => setFailed(true)}
+          className="
+            block
+            h-auto
+            w-full
+            object-contain
+            transition-transform
+            duration-500
+            ease-out
+            group-hover:scale-[1.01]
+          "
+        />
 
-      <span className="pointer-events-none absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-slate-950/70 text-white/85 opacity-0 shadow-sm backdrop-blur-md transition-opacity duration-300 motion-reduce:transition-none group-hover:opacity-100">
-        <Maximize2 size={14} aria-hidden="true" />
-      </span>
+        {/* IMAGE OVERLAY */}
+
+        <div
+          className="
+            pointer-events-none
+            absolute
+            inset-0
+            bg-gradient-to-t
+            from-black/40
+            via-transparent
+            to-transparent
+            opacity-60
+            transition-opacity
+            duration-300
+            group-hover:opacity-80
+          "
+        />
+
+        {/* ====================================================
+            IMAGE NUMBER
+        ==================================================== */}
+
+        <span
+          className="
+            pointer-events-none
+            absolute
+            bottom-3
+            left-3
+            rounded-md
+            border
+            border-white/15
+            bg-slate-950/80
+            px-2
+            py-1
+            font-mono
+            text-[9px]
+            font-semibold
+            tracking-[0.12em]
+            text-white/90
+            backdrop-blur-md
+          "
+        >
+          {imageCounter}
+        </span>
+
+        {/* ====================================================
+            EXPAND BUTTON
+        ==================================================== */}
+
+        <span
+          className="
+            pointer-events-none
+            absolute
+            right-3
+            top-3
+            flex
+            h-8
+            w-8
+            items-center
+            justify-center
+            rounded-full
+            border
+            border-white/15
+            bg-slate-950/75
+            text-white
+            opacity-0
+            backdrop-blur-md
+            transition-all
+            duration-300
+            group-hover:opacity-100
+            group-hover:scale-100
+            scale-90
+          "
+        >
+          <Maximize2
+            size={14}
+            aria-hidden="true"
+          />
+        </span>
+      </div>
     </button>
   );
 }
+
+/* ============================================================
+   IMAGE LIGHTBOX
+============================================================ */
 
 export function ImageLightbox({
   images,
@@ -162,167 +432,329 @@ export function ImageLightbox({
   onPrevious,
   onNext,
 }: ImageLightboxProps) {
-  const [failedSource, setFailedSource] = useState<string | null>(null);
-  const src = activeIndex === null ? undefined : images[activeIndex];
+  const [failedSource, setFailedSource] = useState<string | null>(
+    null,
+  );
 
-  if (activeIndex === null || !src) {
+  const src =
+    activeIndex === null
+      ? undefined
+      : images[activeIndex];
+
+  /*
+   * Keyboard controls
+   *
+   * Esc   = close
+   */
+  useEffect(() => {
+    if (activeIndex === null) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+
+    };
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown,
+    );
+
+    /*
+     * Prevent the page behind the lightbox from scrolling.
+     */
+    const previousOverflow =
+      document.body.style.overflow;
+
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown,
+      );
+
+      document.body.style.overflow =
+        previousOverflow;
+    };
+  }, [activeIndex, onClose]);
+
+  /*
+   * Nothing selected.
+   */
+  if (
+    activeIndex === null ||
+    !src
+  ) {
     return null;
   }
 
   const hasFailed = failedSource === src;
-  const imageCounter = `${String(activeIndex + 1).padStart(2, "0")} / ${String(images.length).padStart(2, "0")}`;
+
+  const imageCounter =
+    `${String(activeIndex + 1).padStart(2, "0")} / ` +
+    `${String(images.length).padStart(2, "0")}`;
 
   return (
     <div
-      className="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/95 p-3 backdrop-blur-sm sm:p-6"
+      className="
+        fixed
+        inset-0
+        z-[200]
+        flex
+        items-center
+        justify-center
+        bg-black/95
+        p-3
+        backdrop-blur-xl
+        sm:p-5
+      "
       role="dialog"
       aria-modal="true"
       aria-label={`Expanded project image ${imageCounter}`}
     >
+      {/* ======================================================
+          BACKDROP
+      ====================================================== */}
+
       <button
         type="button"
         aria-label="Close expanded image"
-        className="absolute inset-0 cursor-default"
+        className="
+          absolute
+          inset-0
+          cursor-default
+        "
         onClick={onClose}
       />
 
-      <div className="relative z-10 flex h-full w-full max-w-7xl flex-col">
-        <div className="mb-3 flex shrink-0 items-center justify-between gap-4 text-white sm:mb-4">
-          <p className="font-mono text-[10px] tracking-[0.18em] text-white/65">
-            {imageCounter}
-          </p>
+      {/* ======================================================
+          LIGHTBOX CONTENT
+      ====================================================== */}
+
+      <div
+        className="
+          relative
+          z-10
+          flex
+          h-full
+          w-full
+          max-w-[1500px]
+          flex-col
+        "
+      >
+        {/* ====================================================
+            TOP BAR
+        ==================================================== */}
+
+        <div
+          className="
+            flex
+            shrink-0
+            items-center
+            justify-between
+            gap-4
+            pb-3
+          "
+        >
+          <div>
+            <p
+              className="
+                font-mono
+                text-[9px]
+                font-semibold
+                uppercase
+                tracking-[0.18em]
+                text-cyan-400
+              "
+            >
+              Project Screenshot
+            </p>
+
+            <p
+              className="
+                mt-1
+                font-mono
+                text-[9px]
+                tracking-[0.14em]
+                text-white/50
+              "
+            >
+              {imageCounter}
+            </p>
+          </div>
+
+          {/* CLOSE */}
 
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white transition-colors hover:bg-white/[0.13]"
+            className="
+              flex
+              h-9
+              w-9
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-white/15
+              bg-white/[0.06]
+              text-white
+              transition-colors
+              hover:bg-white/[0.13]
+            "
             aria-label="Close expanded image"
           >
             <X size={17} />
           </button>
         </div>
 
-        <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/30">
+        {/* ====================================================
+            IMAGE CONTAINER
+        ==================================================== */}
+
+        <div
+          className="
+            relative
+            flex
+            min-h-0
+            flex-1
+            items-center
+            justify-center
+            overflow-hidden
+            rounded-2xl
+            border
+            border-white/10
+            bg-black/30
+          "
+        >
+          {images.length > 1 && (
+            <button
+              type="button"
+              onClick={onPrevious}
+              aria-label="Previous image"
+              className="
+                absolute
+                left-3
+                top-1/2
+                z-20
+                flex
+                h-10
+                w-10
+                -translate-y-1/2
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-white/15
+                bg-black/60
+                text-white
+                backdrop-blur-md
+                transition-all
+                hover:scale-105
+                hover:bg-black/80
+              "
+            >
+              <ChevronLeft size={20} />
+            </button>
+          )}
+
+          {/* IMAGE */}
+
           {hasFailed ? (
-            <div className="technical-grid flex h-full w-full items-center justify-center p-6 text-center">
-              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/55">
-                Image unavailable · {imageCounter}
-              </span>
+            <div
+              className="
+                technical-grid
+                flex
+                h-full
+                w-full
+                items-center
+                justify-center
+              "
+            >
+              <div className="text-center">
+                <p
+                  className="
+                    mb-2
+                    font-mono
+                    text-[10px]
+                    uppercase
+                    tracking-[0.16em]
+                    text-cyan-400
+                  "
+                >
+                  {imageCounter}
+                </p>
+
+                <span
+                  className="
+                    font-mono
+                    text-[9px]
+                    uppercase
+                    tracking-[0.14em]
+                    text-white/50
+                  "
+                >
+                  Image unavailable
+                </span>
+              </div>
             </div>
           ) : (
             <Image
               src={src}
-              alt={`Expanded project image ${imageCounter}`}
-              width={1920}
-              height={900}
+              alt={`Expanded project screenshot ${imageCounter}`}
+              width={2560}
+              height={1440}
               sizes="100vw"
+              priority
               loading="eager"
-              fetchPriority="high"
               onError={() => setFailedSource(src)}
-              className="max-h-full w-auto max-w-full object-contain"
+              className="
+                max-h-full
+                max-w-full
+                object-contain
+              "
             />
           )}
-        </div>
 
-        <div className="mt-3 flex shrink-0 items-center justify-between gap-3 sm:mt-4">
-          <button
-            type="button"
-            onClick={onPrevious}
-            className="inline-flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white"
-          >
-            <ChevronLeft size={16} />
-            Previous
-          </button>
+          {images.length > 1 && (
+            <button
+              type="button"
+              onClick={onNext}
+              aria-label="Next image"
+              className="
+                absolute
+                right-3
+                top-1/2
+                z-20
+                flex
+                h-10
+                w-10
+                -translate-y-1/2
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-white/15
+                bg-black/60
+                text-white
+                backdrop-blur-md
+                transition-all
+                hover:scale-105
+                hover:bg-black/80
+              "
+            >
+              <ChevronRight size={20} />
+            </button>
+          )}
 
-          <span className="hidden font-mono text-[9px] uppercase tracking-[0.17em] text-white/45 sm:inline">
-            Arrow keys to navigate · Esc to close
-          </span>
-
-          <button
-            type="button"
-            onClick={onNext}
-            className="inline-flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-white/70 transition-colors hover:bg-white/[0.08] hover:text-white"
-          >
-            Next
-            <ChevronRight size={16} />
-          </button>
         </div>
       </div>
     </div>
   );
-}
-
-function buildGalleryRows(images: string[]) {
-  const rows: Array<{
-    kind: GalleryLayout;
-    startIndex: number;
-    images: string[];
-  }> = [];
-
-  let cursor = 0;
-  let layoutIndex = 0;
-
-  while (cursor < images.length) {
-    const layout = galleryLayouts[layoutIndex % galleryLayouts.length];
-    const rowImages = images.slice(cursor, cursor + layout.count);
-
-    rows.push({
-      kind: layout.kind,
-      startIndex: cursor,
-      images: rowImages,
-    });
-
-    cursor += rowImages.length;
-    layoutIndex += 1;
-  }
-
-  return rows;
-}
-
-function getRowClassName(kind: GalleryLayout, count: number) {
-  if (count === 1 || kind === "full") {
-    return "grid grid-cols-1";
-  }
-
-  if (kind === "feature" && count === 2) {
-    return "grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-5";
-  }
-
-  if (kind === "trio" && count === 3) {
-    return "grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-5";
-  }
-
-  return "grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5";
-}
-
-function getImageClassName(
-  kind: GalleryLayout,
-  count: number,
-  imageIndex: number,
-) {
-  if (kind === "feature" && count === 2) {
-    return imageIndex === 0 ? "md:col-span-3" : "md:col-span-2";
-  }
-
-  return "";
-}
-
-function getImageSizes(
-  kind: GalleryLayout,
-  count: number,
-  imageIndex: number,
-) {
-  if (count === 1 || kind === "full") {
-    return "(max-width: 640px) 100vw, (max-width: 1200px) 88vw, 980px";
-  }
-
-  if (kind === "feature" && count === 2) {
-    return imageIndex === 0
-      ? "(max-width: 768px) 100vw, 58vw"
-      : "(max-width: 768px) 100vw, 38vw";
-  }
-
-  return count === 3
-    ? "(max-width: 640px) 100vw, 30vw"
-    : "(max-width: 640px) 100vw, 46vw";
 }
