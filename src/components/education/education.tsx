@@ -1,400 +1,605 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import {
   CheckCircle2,
   GraduationCap,
-  ArrowUpRight,
+  School,
+  BookOpen,
 } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 
 const education = [
   {
     period: "2022 — 2026",
-    level: "Higher Education",
-    degree: "Bachelor of Science in Information Technology",
-    school: "Bestlink College of the Philippines",
+    type: "HIGHER EDUCATION",
+    title: "Bachelor of Science in Information Technology",
+    institution: "Bestlink College of the Philippines",
     description:
       "Graduated May 7, 2026, with an academic foundation in software development, databases, information management, systems analysis, and problem-solving.",
     status: "Completed",
     current: true,
+    icon: GraduationCap,
   },
   {
     period: "2020 — 2022",
-    level: "Education",
-    degree: "Senior High School",
-    school: "San Jose Del Monte National Trade School",
+    type: "EDUCATION",
+    title: "Senior High School",
+    institution: "San Jose Del Monte National Trade School",
     description:
       "Completed senior high school education with a foundation for further technical and academic development.",
     status: "Academic Background",
     current: false,
+    icon: School,
   },
   {
     period: "2016 — 2020",
-    level: "Education",
-    degree: "Junior High School",
-    school: "San Jose Del Monte National Trade School",
+    type: "EDUCATION",
+    title: "Junior High School",
+    institution: "San Jose Del Monte National Trade School",
     description: "Completed junior high school education.",
     status: "Academic Background",
     current: false,
+    icon: BookOpen,
   },
   {
     period: "2010 — 2016",
-    level: "Education",
-    degree: "Elementary Education",
-    school: "Pias Elementary School",
+    type: "EDUCATION",
+    title: "Elementary Education",
+    institution: "Pias Elementary School",
     description: "Completed elementary education.",
     status: "Academic Background",
     current: false,
+    icon: BookOpen,
   },
 ];
 
-const ease = [0.22, 1, 0.36, 1] as const;
-
-/* =========================================================
-   EDUCATION
-========================================================= */
-
 export function Education() {
-  const reducedMotion = useReducedMotion();
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const timelineRef = useRef<HTMLDivElement | null>(null);
+  const progressLineRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const timeline = timelineRef.current;
+    const progressLine = progressLineRef.current;
+
+    if (!section || !timeline || !progressLine) return;
+
+    const cleanupListeners: Array<() => void> = [];
+
+    const ctx = gsap.context(() => {
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      const header = section.querySelector("[data-education-header]");
+      const items = gsap.utils.toArray<HTMLElement>(
+        "[data-education-item]",
+        section,
+      );
+
+      /*
+       * -----------------------------------------
+       * INITIAL STATES
+       * -----------------------------------------
+       */
+
+      if (!reducedMotion) {
+        if (header) {
+          gsap.set(header, {
+            opacity: 0,
+            y: 30,
+          });
+        }
+
+        gsap.set(progressLine, {
+          scaleY: 0,
+          transformOrigin: "top center",
+        });
+
+        items.forEach((item) => {
+          const card = item.querySelector<HTMLElement>(
+            "[data-education-card]",
+          );
+
+          const marker = item.querySelector<HTMLElement>(
+            "[data-education-marker]",
+          );
+
+          const period = item.querySelector<HTMLElement>(
+            "[data-education-period]",
+          );
+
+          if (card) {
+            gsap.set(card, {
+              opacity: 0,
+              y: 35,
+            });
+          }
+
+          if (marker) {
+            gsap.set(marker, {
+              opacity: 0,
+              scale: 0.4,
+            });
+          }
+
+          if (period) {
+            gsap.set(period, {
+              opacity: 0,
+              y: 8,
+            });
+          }
+        });
+      }
+
+      /*
+       * -----------------------------------------
+       * HEADER ENTRANCE
+       * -----------------------------------------
+       */
+
+      if (!reducedMotion && header) {
+        gsap.to(header, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: header,
+            start: "top 82%",
+            once: true,
+          },
+        });
+      }
+
+      /*
+       * -----------------------------------------
+       * CENTER TIMELINE LINE
+       * -----------------------------------------
+       */
+
+      if (!reducedMotion) {
+        gsap.to(progressLine, {
+          scaleY: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: timeline,
+            start: "top 72%",
+            end: "bottom 68%",
+            scrub: 1.1,
+          },
+        });
+      } else {
+        gsap.set(progressLine, {
+          scaleY: 1,
+        });
+      }
+
+      /*
+       * -----------------------------------------
+       * EDUCATION ITEMS
+       * -----------------------------------------
+       */
+
+      items.forEach((item) => {
+        const card = item.querySelector<HTMLElement>(
+          "[data-education-card]",
+        );
+
+        const marker = item.querySelector<HTMLElement>(
+          "[data-education-marker]",
+        );
+
+        const period = item.querySelector<HTMLElement>(
+          "[data-education-period]",
+        );
+
+        if (!card || !marker) return;
+
+        if (reducedMotion) {
+          gsap.set(card, {
+            opacity: 1,
+            y: 0,
+          });
+
+          gsap.set(marker, {
+            opacity: 1,
+            scale: 1,
+          });
+
+          if (period) {
+            gsap.set(period, {
+              opacity: 1,
+              y: 0,
+            });
+          }
+
+          return;
+        }
+
+        const isLeft = item.dataset.side === "left";
+
+        /*
+         * Card reveal
+         */
+
+        gsap.fromTo(
+          card,
+          {
+            opacity: 0,
+            x: isLeft ? -35 : 35,
+            y: 15,
+          },
+          {
+            opacity: 1,
+            x: 0,
+            y: 0,
+            duration: 0.75,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: item,
+              start: "top 78%",
+              once: true,
+            },
+          },
+        );
+
+        /*
+         * Marker reveal
+         */
+
+        gsap.fromTo(
+          marker,
+          {
+            opacity: 0,
+            scale: 0.3,
+          },
+          {
+            opacity: 1,
+            scale: 1,
+            duration: 0.5,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+              trigger: item,
+              start: "top 78%",
+              once: true,
+            },
+          },
+        );
+
+        /*
+         * Period reveal
+         */
+
+        if (period) {
+          gsap.fromTo(
+            period,
+            {
+              opacity: 0,
+              y: 8,
+            },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.5,
+              delay: 0.08,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: item,
+                start: "top 78%",
+                once: true,
+              },
+            },
+          );
+        }
+
+        /*
+         * Current education marker pulse
+         */
+
+        if (item.dataset.current === "true") {
+          const pulse = marker.querySelector<HTMLElement>(
+            "[data-current-pulse]",
+          );
+
+          if (pulse) {
+            gsap.to(pulse, {
+              scale: 1.8,
+              opacity: 0,
+              duration: 1.8,
+              repeat: -1,
+              ease: "power2.out",
+            });
+          }
+        }
+
+        /*
+         * -----------------------------------------
+         * CARD HOVER
+         * -----------------------------------------
+         */
+
+        const handleEnter = () => {
+          gsap.to(card, {
+            y: -5,
+            duration: 0.25,
+            ease: "power2.out",
+          });
+
+          gsap.to(marker, {
+            scale: 1.12,
+            duration: 0.25,
+            ease: "power2.out",
+          });
+        };
+
+        const handleLeave = () => {
+          gsap.to(card, {
+            y: 0,
+            duration: 0.25,
+            ease: "power2.out",
+          });
+
+          gsap.to(marker, {
+            scale: 1,
+            duration: 0.25,
+            ease: "power2.out",
+          });
+        };
+
+        card.addEventListener("mouseenter", handleEnter);
+        card.addEventListener("mouseleave", handleLeave);
+
+        cleanupListeners.push(() => {
+          card.removeEventListener("mouseenter", handleEnter);
+          card.removeEventListener("mouseleave", handleLeave);
+        });
+      });
+    }, section);
+
+    /*
+     * -----------------------------------------
+     * CLEANUP
+     * -----------------------------------------
+     */
+
+    return () => {
+      cleanupListeners.forEach((cleanup) => cleanup());
+
+      ScrollTrigger.getAll().forEach((trigger) => {
+        const triggerElement = trigger.trigger;
+
+        if (
+          triggerElement instanceof HTMLElement &&
+          section.contains(triggerElement)
+        ) {
+          trigger.kill();
+        }
+      });
+
+      ctx.revert();
+    };
+  }, []);
 
   return (
     <section
+      ref={sectionRef}
       id="education"
       className="
-        relative isolate overflow-hidden
-        border-b border-black/[0.07] dark:border-white/[0.06]
-        bg-[var(--background)]
-        py-28 sm:py-32
+        relative
+        overflow-hidden
+        border-t
+        border-slate-200/70
+        bg-white
+        py-24
+        dark:border-white/[0.06]
+        dark:bg-[#070B14]
+        sm:py-28
+        lg:py-32
       "
     >
-      {/* =====================================================
-          BACKGROUND ATMOSPHERE
-      ====================================================== */}
+      {/* -----------------------------------------
+          BACKGROUND
+      ----------------------------------------- */}
 
-      <motion.div
-        aria-hidden="true"
-        className="
-          pointer-events-none absolute
-          -right-56 top-[10%]
-          h-[520px] w-[520px]
-          rounded-full
-          bg-blue-500/[0.045]
-          blur-[110px]
-          dark:bg-blue-500/[0.025]
-        "
-        initial={
-          reducedMotion
-            ? false
-            : {
-                opacity: 0,
-                x: 80,
-              }
-        }
-        whileInView={
-          reducedMotion
-            ? undefined
-            : {
-                opacity: 1,
-                x: 0,
-              }
-        }
-        viewport={{
-          once: true,
-          amount: 0.1,
-        }}
-        transition={{
-          duration: 1.4,
-          ease,
-        }}
-      />
-
-      <motion.div
-        aria-hidden="true"
-        className="
-          pointer-events-none absolute
-          -left-48 bottom-[5%]
-          h-[420px] w-[420px]
-          rounded-full
-          bg-cyan-400/[0.025]
-          blur-[100px]
-          dark:bg-cyan-400/[0.018]
-        "
-        initial={
-          reducedMotion
-            ? false
-            : {
-                opacity: 0,
-              }
-        }
-        whileInView={
-          reducedMotion
-            ? undefined
-            : {
-                opacity: 1,
-              }
-        }
-        viewport={{
-          once: true,
-          amount: 0.1,
-        }}
-        transition={{
-          duration: 1.5,
-          delay: 0.1,
-          ease,
-        }}
-      />
-
-      {/* Technical grid */}
       <div
         aria-hidden="true"
         className="
-          technical-grid
-          pointer-events-none absolute inset-0
-          opacity-[0.18]
-          dark:opacity-[0.28]
+          pointer-events-none
+          absolute
+          inset-0
+          overflow-hidden
         "
-      />
+      >
+        <div
+          className="
+            absolute
+            left-1/2
+            top-[20%]
+            h-[500px]
+            w-[500px]
+            -translate-x-1/2
+            rounded-full
+            bg-blue-500/[0.035]
+            blur-[120px]
+            dark:bg-blue-500/[0.035]
+          "
+        />
 
-      <div className="container-khel relative z-10">
-        {/* =====================================================
+        <div
+          className="
+            absolute
+            right-[-180px]
+            top-[45%]
+            h-[400px]
+            w-[400px]
+            rounded-full
+            bg-purple-500/[0.025]
+            blur-[120px]
+            dark:bg-purple-500/[0.025]
+          "
+        />
+
+        <div
+          className="
+            absolute
+            left-[-180px]
+            bottom-[10%]
+            h-[400px]
+            w-[400px]
+            rounded-full
+            bg-cyan-500/[0.025]
+            blur-[120px]
+            dark:bg-cyan-500/[0.025]
+          "
+        />
+      </div>
+
+      {/* -----------------------------------------
+          CONTENT
+      ----------------------------------------- */}
+
+      <div className="relative mx-auto w-full max-w-6xl px-6 sm:px-8 lg:px-10">
+        {/* -----------------------------------------
             HEADER
-        ====================================================== */}
+        ----------------------------------------- */}
 
-        <motion.div
-          initial={
-            reducedMotion
-              ? false
-              : {
-                  opacity: 0,
-                  y: 28,
-                }
-          }
-          whileInView={
-            reducedMotion
-              ? undefined
-              : {
-                  opacity: 1,
-                  y: 0,
-                }
-          }
-          viewport={{
-            once: true,
-            amount: 0.3,
-          }}
-          transition={{
-            duration: 0.75,
-            ease,
-          }}
-          className="max-w-3xl"
+        <div
+          data-education-header
+          className="mb-20 max-w-2xl lg:mb-24"
         >
-          {/* Section label */}
-          <div className="flex items-center gap-3">
-            <motion.span
-              aria-hidden="true"
-              initial={
-                reducedMotion
-                  ? false
-                  : {
-                      width: 0,
-                      opacity: 0,
-                    }
-              }
-              whileInView={
-                reducedMotion
-                  ? undefined
-                  : {
-                      width: 24,
-                      opacity: 1,
-                    }
-              }
-              viewport={{
-                once: true,
-                amount: 0.5,
-              }}
-              transition={{
-                duration: 0.55,
-                ease,
-              }}
-              className="h-px bg-cyan-500 dark:bg-cyan-400"
+          <div className="mb-5 flex items-center gap-3">
+            <span
+              className="
+                h-px
+                w-8
+                bg-cyan-500
+                dark:bg-cyan-400
+              "
             />
 
-            <p
+            <span
               className="
-                text-[11px]
+                text-[10px]
                 font-semibold
                 uppercase
-                tracking-[0.25em]
+                tracking-[0.28em]
                 text-cyan-600
                 dark:text-cyan-400
               "
             >
-              02 — Education
-            </p>
+              02 — EDUCATION
+            </span>
           </div>
 
-          {/* Heading */}
-          <motion.h2
-            initial={
-              reducedMotion
-                ? false
-                : {
-                    opacity: 0,
-                    y: 18,
-                  }
-            }
-            whileInView={
-              reducedMotion
-                ? undefined
-                : {
-                    opacity: 1,
-                    y: 0,
-                  }
-            }
-            viewport={{
-              once: true,
-              amount: 0.35,
-            }}
-            transition={{
-              duration: 0.7,
-              delay: 0.08,
-              ease,
-            }}
+          <h2
             className="
-              mt-5
-              text-4xl
-              font-bold
-              leading-[1.02]
+              text-3xl
+              font-semibold
               tracking-[-0.04em]
-              text-[var(--foreground)]
-              sm:text-5xl
+              text-slate-950
+              sm:text-4xl
+              lg:text-5xl
+              dark:text-white
             "
           >
-            A STRONG TECHNICAL
-            <br />
-            <span className="text-slate-400 dark:text-slate-500">
-              FOUNDATION.
-            </span>
-          </motion.h2>
+            Academic foundation.
+          </h2>
 
-          {/* Description */}
-          <motion.p
-            initial={
-              reducedMotion
-                ? false
-                : {
-                    opacity: 0,
-                    y: 16,
-                  }
-            }
-            whileInView={
-              reducedMotion
-                ? undefined
-                : {
-                    opacity: 1,
-                    y: 0,
-                  }
-            }
-            viewport={{
-              once: true,
-              amount: 0.35,
-            }}
-            transition={{
-              duration: 0.65,
-              delay: 0.16,
-              ease,
-            }}
+          <p
             className="
-              mt-6
-              max-w-2xl
+              mt-5
+              max-w-xl
               text-sm
               leading-7
               text-slate-600
-              dark:text-slate-400
               sm:text-base
+              dark:text-slate-400
             "
           >
-            My academic background in Information Technology strengthened
-            my foundation in software development, databases, information
-            management, systems analysis, and problem-solving.
-          </motion.p>
-        </motion.div>
+            A timeline of the academic experiences that built the
+            foundation for my work in software development and
+            information technology.
+          </p>
+        </div>
 
-        {/* =====================================================
+        {/* -----------------------------------------
             TIMELINE
-        ====================================================== */}
+        ----------------------------------------- */}
 
-        <div className="relative mt-16 sm:mt-20">
-          {/* Static timeline */}
+        <div
+          ref={timelineRef}
+          className="
+            relative
+            mx-auto
+            max-w-5xl
+          "
+        >
+          {/* -----------------------------------------
+              CENTER LINE
+              ----------------------------------------- */}
+
           <div
             aria-hidden="true"
             className="
+              pointer-events-none
               absolute
               bottom-0
-              left-[18px]
+              left-[28px]
               top-0
-              hidden
               w-px
-              bg-black/[0.08]
-              dark:bg-white/[0.07]
-              md:block
+              md:left-1/2
+              md:-translate-x-1/2
             "
-          />
+          >
+            {/* Base line */}
 
-          {/* Animated timeline */}
-          <motion.div
-            aria-hidden="true"
-            initial={
-              reducedMotion
-                ? false
-                : {
-                    scaleY: 0,
-                  }
-            }
-            whileInView={
-              reducedMotion
-                ? undefined
-                : {
-                    scaleY: 1,
-                  }
-            }
-            viewport={{
-              once: true,
-              amount: 0.05,
-            }}
-            transition={{
-              duration: 1.8,
-              ease: [0.16, 1, 0.3, 1],
-            }}
-            style={{
-              transformOrigin: "top",
-            }}
-            className="
-              absolute
-              bottom-0
-              left-[18px]
-              top-0
-              hidden
-              w-px
-              bg-gradient-to-b
-              from-cyan-500/80
-              via-blue-500/30
-              to-transparent
-              dark:from-cyan-400/70
-              dark:via-blue-500/30
-              md:block
-            "
-          />
+            <div
+              className="
+                absolute
+                inset-0
+                bg-slate-200
+                dark:bg-white/[0.07]
+              "
+            />
 
-          {/* Education items */}
-          <div className="space-y-6 sm:space-y-7">
-            {education.map((item, index) => (
-              <EducationItem
-                key={item.degree}
-                item={item}
-                index={index}
-                reducedMotion={reducedMotion}
-              />
-            ))}
+            {/* Animated progress */}
+
+            <div
+              ref={progressLineRef}
+              className="
+                absolute
+                inset-x-0
+                top-0
+                h-full
+                origin-top
+                bg-gradient-to-b
+                from-cyan-400
+                via-blue-500
+                to-purple-500
+              "
+            />
+          </div>
+
+          {/* -----------------------------------------
+              ITEMS
+          ----------------------------------------- */}
+
+          <div className="space-y-14 md:space-y-20">
+            {education.map((item, index) => {
+              const isLeft = index % 2 === 0;
+
+              return (
+                <EducationItem
+                  key={`${item.title}-${item.period}`}
+                  item={item}
+                  isLeft={isLeft}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
@@ -402,536 +607,485 @@ export function Education() {
   );
 }
 
-/* =========================================================
+/* ==================================================
    EDUCATION ITEM
-========================================================= */
+   ================================================== */
 
 function EducationItem({
   item,
-  index,
-  reducedMotion,
+  isLeft,
 }: {
   item: (typeof education)[number];
-  index: number;
-  reducedMotion: boolean | null;
+  isLeft: boolean;
 }) {
   return (
-    <motion.article
-      initial={
-        reducedMotion
-          ? false
-          : {
-              opacity: 0,
-              x: -24,
-              y: 16,
-            }
-      }
-      whileInView={
-        reducedMotion
-          ? undefined
-          : {
-              opacity: 1,
-              x: 0,
-              y: 0,
-            }
-      }
-      viewport={{
-        once: true,
-        amount: 0.2,
-        margin: "0px 0px -10% 0px",
-      }}
-      transition={{
-        duration: 0.7,
-        delay: index * 0.08,
-        ease,
-      }}
-      className="relative md:pl-14"
+    <article
+      data-education-item
+      data-side={isLeft ? "left" : "right"}
+      data-current={item.current}
+      className="
+        relative
+        min-h-[230px]
+        md:grid
+        md:grid-cols-[1fr_72px_1fr]
+        md:items-center
+      "
     >
-      {/* =====================================================
-          TIMELINE MARKER
-      ====================================================== */}
+      {/* -----------------------------------------
+          LEFT DESKTOP CARD
+      ----------------------------------------- */}
 
-      <motion.div
-        aria-hidden="true"
-        initial={
-          reducedMotion
-            ? false
-            : {
-                scale: 0,
-                opacity: 0,
-              }
-        }
-        whileInView={
-          reducedMotion
-            ? undefined
-            : {
-                scale: 1,
-                opacity: 1,
-              }
-        }
-        viewport={{
-          once: true,
-          amount: 0.5,
-        }}
-        transition={{
-          duration: 0.45,
-          delay: 0.12 + index * 0.08,
-          ease,
-        }}
-        className="
-          absolute
-          left-0
-          top-7
+      <div
+        className={`
           hidden
-          h-9
-          w-9
-          items-center
-          justify-center
-          rounded-full
-          border
-          border-black/[0.08]
-          bg-[var(--background)]
-          shadow-sm
-          dark:border-white/[0.08]
-          md:flex
-        "
+          md:block
+          ${
+            isLeft
+              ? "md:col-start-1 md:pr-10 lg:pr-14"
+              : "md:col-start-1"
+          }
+        `}
       >
-        <span
-          className={`
-            h-2.5
-            w-2.5
-            rounded-full
-            ${
-              item.current
-                ? "bg-cyan-500 shadow-[0_0_14px_rgba(6,182,212,0.65)] dark:bg-cyan-400 dark:shadow-[0_0_14px_rgba(6,182,212,0.7)]"
-                : "bg-slate-400 dark:bg-slate-600"
-            }
-          `}
-        />
-      </motion.div>
-
-      {/* =====================================================
-          CARD
-      ====================================================== */}
-
-      <motion.div
-        whileHover={
-          reducedMotion
-            ? undefined
-            : {
-                y: -4,
-                transition: {
-                  duration: 0.25,
-                  ease: "easeOut",
-                },
-              }
-        }
-        className="
-          group
-          relative
-          overflow-hidden
-          rounded-2xl
-          border
-          border-black/[0.08]
-          bg-black/[0.015]
-          p-6
-          shadow-[0_8px_35px_rgba(15,23,42,0.035)]
-          transition-all
-          duration-300
-          hover:border-cyan-500/20
-          hover:bg-cyan-500/[0.018]
-          dark:border-white/[0.08]
-          dark:bg-white/[0.025]
-          dark:shadow-none
-          dark:hover:border-cyan-400/20
-          dark:hover:bg-white/[0.032]
-          sm:p-7
-        "
-      >
-        {/* =====================================================
-            ACTIVE CARD ATMOSPHERE
-        ====================================================== */}
-
-        {item.current && (
-          <motion.div
-            aria-hidden="true"
-            initial={
-              reducedMotion
-                ? false
-                : {
-                    opacity: 0,
-                  }
-            }
-            whileInView={
-              reducedMotion
-                ? undefined
-                : {
-                    opacity: 1,
-                  }
-            }
-            viewport={{
-              once: true,
-              amount: 0.3,
-            }}
-            transition={{
-              duration: 1,
-              delay: 0.35,
-            }}
-            className="
-              pointer-events-none
-              absolute
-              -right-24
-              -top-24
-              h-48
-              w-48
-              rounded-full
-              bg-cyan-400/[0.07]
-              blur-3xl
-              dark:bg-cyan-400/[0.045]
-            "
-          />
+        {isLeft ? (
+          <EducationCard item={item} />
+        ) : (
+          <div aria-hidden="true" />
         )}
+      </div>
 
-        {/* =====================================================
-            LEFT ACCENT
-        ====================================================== */}
+      {/* -----------------------------------------
+          CENTER MARKER
+      ----------------------------------------- */}
+
+      <div
+        className="
+          relative
+          hidden
+          h-full
+          md:col-start-2
+          md:block
+        "
+      >
+        <div
+          data-education-marker
+          className="
+            absolute
+            left-1/2
+            top-1/2
+            z-20
+            flex
+            h-6
+            w-6
+            -translate-x-1/2
+            -translate-y-1/2
+            items-center
+            justify-center
+            rounded-full
+            border
+            border-slate-300
+            bg-white
+            shadow-[0_0_0_5px_rgba(255,255,255,0.8)]
+            dark:border-white/[0.14]
+            dark:bg-[#0B1120]
+            dark:shadow-[0_0_0_5px_rgba(7,11,20,0.9)]
+          "
+        >
+          {/* Pulse */}
+
+          {item.current && (
+            <span
+              data-current-pulse
+              aria-hidden="true"
+              className="
+                absolute
+                inset-0
+                rounded-full
+                border
+                border-cyan-400/50
+              "
+            />
+          )}
+
+          {/* Core */}
+
+          <span
+            className={`
+              relative
+              h-2
+              w-2
+              rounded-full
+              ${
+                item.current
+                  ? "bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.8)]"
+                  : "bg-slate-400 dark:bg-slate-500"
+              }
+            `}
+          />
+        </div>
+      </div>
+
+      {/* -----------------------------------------
+          RIGHT DESKTOP CARD
+      ----------------------------------------- */}
+
+      <div
+        className={`
+          hidden
+          md:block
+          ${
+            !isLeft
+              ? "md:col-start-3 md:pl-10 lg:pl-14"
+              : "md:col-start-3"
+          }
+        `}
+      >
+        {!isLeft ? (
+          <EducationCard item={item} />
+        ) : (
+          <div aria-hidden="true" />
+        )}
+      </div>
+
+      {/* -----------------------------------------
+          MOBILE
+      ----------------------------------------- */}
+
+      <div className="relative pl-[60px] md:hidden">
+        {/* Mobile marker */}
 
         <div
-          aria-hidden="true"
-          className={`
+          data-education-marker
+          className="
             absolute
-            left-0
-            top-0
-            h-full
-            w-px
-            bg-gradient-to-b
-            from-cyan-500/80
-            via-blue-500/30
-            to-transparent
-            transition-opacity
-            duration-300
-            dark:from-cyan-400/70
-            dark:via-blue-500/20
-            ${
-              item.current
-                ? "opacity-100"
-                : "opacity-0 group-hover:opacity-100"
-            }
-          `}
-        />
-
-        <div className="relative">
-          {/* ===================================================
-              MAIN CONTENT
-          ==================================================== */}
-
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-3xl">
-              {/* Level + period */}
-              <div className="flex flex-wrap items-center gap-3">
-                <motion.span
-                  initial={
-                    reducedMotion
-                      ? false
-                      : {
-                          opacity: 0,
-                          y: 6,
-                        }
-                  }
-                  whileInView={
-                    reducedMotion
-                      ? undefined
-                      : {
-                          opacity: 1,
-                          y: 0,
-                        }
-                  }
-                  viewport={{
-                    once: true,
-                    amount: 0.5,
-                  }}
-                  transition={{
-                    duration: 0.4,
-                    delay: 0.2,
-                    ease,
-                  }}
-                  className="
-                    rounded-full
-                    border
-                    border-cyan-500/15
-                    bg-cyan-500/[0.06]
-                    px-3
-                    py-1
-                    text-[10px]
-                    font-semibold
-                    uppercase
-                    tracking-[0.16em]
-                    text-cyan-600
-                    dark:border-cyan-400/10
-                    dark:bg-cyan-400/[0.06]
-                    dark:text-cyan-300
-                  "
-                >
-                  {item.level}
-                </motion.span>
-
-                <span
-                  className="
-                    text-xs
-                    font-medium
-                    text-slate-500
-                    dark:text-slate-600
-                  "
-                >
-                  {item.period}
-                </span>
-              </div>
-
-              {/* Degree */}
-              <motion.h3
-                initial={
-                  reducedMotion
-                    ? false
-                    : {
-                        opacity: 0,
-                        y: 10,
-                      }
-                }
-                whileInView={
-                  reducedMotion
-                    ? undefined
-                    : {
-                        opacity: 1,
-                        y: 0,
-                      }
-                }
-                viewport={{
-                  once: true,
-                  amount: 0.3,
-                }}
-                transition={{
-                  duration: 0.55,
-                  delay: 0.14,
-                  ease,
-                }}
-                className="
-                  mt-5
-                  text-xl
-                  font-semibold
-                  tracking-tight
-                  text-[var(--foreground)]
-                  sm:text-2xl
-                "
-              >
-                {item.degree}
-              </motion.h3>
-
-              {/* School */}
-              <p
-                className="
-                  mt-2
-                  text-sm
-                  font-medium
-                  text-slate-700
-                  dark:text-slate-300
-                "
-              >
-                {item.school}
-              </p>
-
-              {/* Description */}
-              <motion.p
-                initial={
-                  reducedMotion
-                    ? false
-                    : {
-                        opacity: 0,
-                        y: 10,
-                      }
-                }
-                whileInView={
-                  reducedMotion
-                    ? undefined
-                    : {
-                        opacity: 1,
-                        y: 0,
-                      }
-                }
-                viewport={{
-                  once: true,
-                  amount: 0.35,
-                }}
-                transition={{
-                  duration: 0.5,
-                  delay: 0.25,
-                  ease,
-                }}
-                className="
-                  mt-5
-                  max-w-2xl
-                  text-sm
-                  leading-7
-                  text-slate-600
-                  dark:text-slate-400
-                "
-              >
-                {item.description}
-              </motion.p>
-            </div>
-
-            {/* =================================================
-                STATUS
-            ================================================== */}
-
-            <motion.div
-              initial={
-                reducedMotion
-                  ? false
-                  : {
-                      opacity: 0,
-                      x: 10,
-                    }
-              }
-              whileInView={
-                reducedMotion
-                  ? undefined
-                  : {
-                      opacity: 1,
-                      x: 0,
-                    }
-              }
-              viewport={{
-                once: true,
-                amount: 0.4,
-              }}
-              transition={{
-                duration: 0.45,
-                delay: 0.28,
-                ease,
-              }}
+            left-[16px]
+            top-1/2
+            z-20
+            flex
+            h-6
+            w-6
+            -translate-x-1/2
+            -translate-y-1/2
+            items-center
+            justify-center
+            rounded-full
+            border
+            border-slate-300
+            bg-white
+            shadow-[0_0_0_5px_rgba(255,255,255,0.85)]
+            dark:border-white/[0.14]
+            dark:bg-[#0B1120]
+            dark:shadow-[0_0_0_5px_rgba(7,11,20,0.9)]
+          "
+        >
+          {item.current && (
+            <span
+              data-current-pulse
+              aria-hidden="true"
               className="
-                flex
-                shrink-0
-                items-center
-                gap-2
-                text-xs
-                lg:pt-1
+                absolute
+                inset-0
+                rounded-full
+                border
+                border-cyan-400/50
               "
-            >
-              {item.current ? (
-                <>
-                  <CheckCircle2
-                    size={16}
-                    className="text-emerald-500 dark:text-emerald-400"
-                  />
+            />
+          )}
 
-                  <span className="text-emerald-600 dark:text-emerald-400">
-                    {item.status}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <GraduationCap
-                    size={16}
-                    className="text-slate-400 dark:text-slate-600"
-                  />
+          <span
+            className={`
+              relative
+              h-2
+              w-2
+              rounded-full
+              ${
+                item.current
+                  ? "bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.8)]"
+                  : "bg-slate-400 dark:bg-slate-500"
+              }
+            `}
+          />
+        </div>
 
-                  <span className="text-slate-500 dark:text-slate-500">
-                    {item.status}
-                  </span>
-                </>
-              )}
-            </motion.div>
-          </div>
+        <EducationCard item={item} />
+      </div>
+    </article>
+  );
+}
 
-          {/* =====================================================
-              BOTTOM METADATA
-          ====================================================== */}
+/* ==================================================
+   EDUCATION CARD
+   ================================================== */
 
-          <motion.div
-            initial={
-              reducedMotion
-                ? false
-                : {
-                    opacity: 0,
-                  }
-            }
-            whileInView={
-              reducedMotion
-                ? undefined
-                : {
-                    opacity: 1,
-                  }
-            }
-            viewport={{
-              once: true,
-              amount: 0.3,
-            }}
-            transition={{
-              duration: 0.45,
-              delay: 0.3,
-            }}
+function EducationCard({
+  item,
+}: {
+  item: (typeof education)[number];
+}) {
+  const Icon = item.icon;
+
+  return (
+    <div
+      data-education-card
+      tabIndex={0}
+      className="
+        group
+        relative
+        w-full
+        overflow-hidden
+        rounded-xl
+        border
+        border-slate-200
+        bg-white/90
+        p-5
+        shadow-sm
+        outline-none
+        transition-[border-color,box-shadow,background-color]
+        duration-300
+        hover:border-cyan-400/40
+        hover:shadow-[0_18px_50px_rgba(15,23,42,0.08)]
+        focus-visible:border-cyan-400/60
+        focus-visible:ring-2
+        focus-visible:ring-cyan-400/30
+        sm:p-6
+        dark:border-white/[0.08]
+        dark:bg-[#0B1120]/80
+        dark:hover:border-cyan-400/30
+        dark:hover:shadow-[0_18px_50px_rgba(0,0,0,0.25)]
+        dark:focus-visible:border-cyan-400/50
+      "
+    >
+      {/* -----------------------------------------
+          TOP ACCENT
+      ----------------------------------------- */}
+
+      <div
+        className="
+          absolute
+          inset-x-0
+          top-0
+          h-px
+          bg-gradient-to-r
+          from-transparent
+          via-cyan-400/70
+          to-transparent
+          opacity-0
+          transition-opacity
+          duration-300
+          group-hover:opacity-100
+        "
+      />
+
+      {/* -----------------------------------------
+          HEADER
+      ----------------------------------------- */}
+
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-2">
+          <span
             className="
-              mt-7
-              flex
+              inline-flex
               items-center
-              justify-between
-              border-t
-              border-black/[0.06]
-              pt-5
-              dark:border-white/[0.06]
+              rounded-full
+              border
+              border-cyan-500/20
+              bg-cyan-500/[0.06]
+              px-2.5
+              py-1
+              text-[8px]
+              font-semibold
+              uppercase
+              tracking-[0.18em]
+              text-cyan-600
+              dark:border-cyan-400/20
+              dark:bg-cyan-400/[0.06]
+              dark:text-cyan-400
             "
           >
-            <span
-              className="
-                text-[10px]
-                font-semibold
-                uppercase
-                tracking-[0.2em]
-                text-slate-500
-                dark:text-slate-600
-              "
-            >
-              Academic Background
-            </span>
+            {item.type}
+          </span>
 
-            <span
-              className="
-                hidden
-                items-center
-                gap-1.5
-                text-[10px]
-                font-medium
-                uppercase
-                tracking-[0.15em]
-                text-slate-400
-                transition-colors
-                duration-300
-                group-hover:text-cyan-600
-                dark:text-slate-700
-                dark:group-hover:text-cyan-400
-                sm:flex
-              "
-            >
-              {item.period}
+          <span
+            data-education-period
+            className="
+              whitespace-nowrap
+              text-[9px]
+              font-medium
+              tracking-[0.12em]
+              text-slate-400
+              dark:text-slate-500
+            "
+          >
+            {item.period}
+          </span>
+        </div>
 
-              <ArrowUpRight
-                size={11}
+        <div
+          className="
+            flex
+            h-8
+            w-8
+            shrink-0
+            items-center
+            justify-center
+            rounded-lg
+            border
+            border-slate-200
+            bg-slate-50
+            text-slate-400
+            transition-colors
+            duration-300
+            group-hover:border-cyan-400/20
+            group-hover:text-cyan-500
+            dark:border-white/[0.06]
+            dark:bg-white/[0.025]
+            dark:text-slate-500
+            dark:group-hover:border-cyan-400/20
+            dark:group-hover:text-cyan-400
+          "
+        >
+          <Icon className="h-4 w-4" />
+        </div>
+      </div>
+
+      {/* -----------------------------------------
+          TITLE
+      ----------------------------------------- */}
+
+      <h3
+        className="
+          mt-5
+          text-lg
+          font-semibold
+          leading-snug
+          tracking-[-0.025em]
+          text-slate-950
+          transition-colors
+          duration-300
+          group-hover:text-cyan-600
+          sm:text-xl
+          dark:text-white
+          dark:group-hover:text-cyan-300
+        "
+      >
+        {item.title}
+      </h3>
+
+      {/* -----------------------------------------
+          INSTITUTION
+      ----------------------------------------- */}
+
+      <p
+        className="
+          mt-1.5
+          text-xs
+          font-medium
+          text-slate-600
+          dark:text-slate-400
+        "
+      >
+        {item.institution}
+      </p>
+
+      {/* -----------------------------------------
+          DESCRIPTION
+      ----------------------------------------- */}
+
+      <p
+        className="
+          mt-5
+          text-xs
+          leading-6
+          text-slate-500
+          sm:text-[13px]
+          dark:text-slate-400
+        "
+      >
+        {item.description}
+      </p>
+
+      {/* -----------------------------------------
+          FOOTER
+      ----------------------------------------- */}
+
+      <div
+        className="
+          mt-5
+          flex
+          items-center
+          justify-between
+          border-t
+          border-slate-200
+          pt-4
+          dark:border-white/[0.06]
+        "
+      >
+        <div className="flex items-center gap-2">
+          {item.current ? (
+            <>
+              <CheckCircle2
                 className="
-                  opacity-0
-                  -translate-x-1
-                  translate-y-1
-                  transition-all
-                  duration-300
-                  group-hover:translate-x-0
-                  group-hover:translate-y-0
-                  group-hover:opacity-100
+                  h-3.5
+                  w-3.5
+                  text-emerald-500
+                  dark:text-emerald-400
                 "
               />
-            </span>
-          </motion.div>
+
+              <span
+                className="
+                  text-[9px]
+                  font-semibold
+                  uppercase
+                  tracking-[0.14em]
+                  text-emerald-600
+                  dark:text-emerald-400
+                "
+              >
+                {item.status}
+              </span>
+            </>
+          ) : (
+            <>
+              <span
+                className="
+                  h-1.5
+                  w-1.5
+                  rounded-full
+                  bg-slate-400
+                  dark:bg-slate-600
+                "
+              />
+
+              <span
+                className="
+                  text-[9px]
+                  font-medium
+                  text-slate-400
+                  dark:text-slate-500
+                "
+              >
+                {item.status}
+              </span>
+            </>
+          )}
         </div>
-      </motion.div>
-    </motion.article>
+
+        <span
+          className="
+            text-[9px]
+            font-medium
+            tracking-[0.12em]
+            text-slate-400
+            transition-colors
+            duration-300
+            group-hover:text-cyan-500
+            dark:text-slate-600
+            dark:group-hover:text-cyan-400
+          "
+        >
+          {item.period} ↗
+        </span>
+      </div>
+    </div>
   );
 }

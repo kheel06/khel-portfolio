@@ -9,6 +9,7 @@ import { ProjectSection } from "@/components/projects/project-section";
 import { Skills } from "@/components/skills/skills";
 import { Education } from "@/components/education/education";
 
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#070b14]">

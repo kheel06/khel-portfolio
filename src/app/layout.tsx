@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-  title: "KHEL | Portfolio",
+  title: "KHEL | Software Engineer & Web Developer",
   description:
-    "Portfolio of KHEL — Software Engineer and Web Developer building modern web applications.",
+    "Portfolio of Khel — Software Engineer and Web Developer.",
 };
 
 export default function RootLayout({
