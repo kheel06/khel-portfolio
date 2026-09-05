@@ -6,17 +6,10 @@ import {
   Loader2,
   Send,
 } from "lucide-react";
-import {
-  addDoc,
-  collection,
-  serverTimestamp,
-} from "firebase/firestore";
-import {
-  useForm,
-} from "react-hook-form";
-import {
-  zodResolver,
-} from "@hookform/resolvers/zod";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 import { db } from "@/lib/firebase";
 import {
@@ -36,6 +29,7 @@ type FormStatus = "idle" | "success" | "error";
 
 export function ContactForm() {
   const [status, setStatus] = useState<FormStatus>("idle");
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   const {
     register,
@@ -66,36 +60,49 @@ export function ContactForm() {
 
     setStatus("idle");
 
+    /*
+     * Turnstile must be completed before submitting.
+     */
+    if (!turnstileToken) {
+      setStatus("error");
+      return;
+    }
+
     const payload = {
       name: data.name.trim(),
       email: data.email.trim(),
       subject: data.subject.trim(),
       message: data.message.trim(),
+
+      /*
+       * Honeypot.
+       *
+       * This field is intentionally never rendered visibly.
+       * Bots that automatically fill every input may populate it.
+       */
+      website: "",
+      
+      /*
+       * Cloudflare Turnstile token.
+       */
+      turnstileToken,
     };
 
     try {
       /* ----------------------------------------------------------------------
-         1. SAVE MESSAGE TO FIRESTORE
+         1. SEND TO SECURE SERVER API
+
+         The API performs:
+
+         - Turnstile verification
+         - Honeypot validation
+         - Rate limiting
+         - Server-side validation
+         - Spam checks
+         - Brevo email delivery
       ---------------------------------------------------------------------- */
 
-      await addDoc(
-        collection(db, "messages"),
-        {
-          ...payload,
-          createdAt: serverTimestamp(),
-        },
-      );
-
-      /* ----------------------------------------------------------------------
-         2. SEND EMAIL NOTIFICATION
-         
-         This calls:
-         /api/contact
-
-         Your API route should use Brevo SMTP + Nodemailer.
-      ---------------------------------------------------------------------- */
-
-      const emailResponse = await fetch("/api/contact", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -103,24 +110,51 @@ export function ContactForm() {
         body: JSON.stringify(payload),
       });
 
-      /*
-        If the email endpoint fails, the Firestore message has still
-        been saved successfully. We log the problem but don't tell
-        the visitor that their message was completely lost.
-      */
+      const result = await response.json().catch(() => null);
 
-      if (!emailResponse.ok) {
+      if (!response.ok) {
         console.error(
-          "Email notification failed:",
-          await emailResponse.text().catch(() => ""),
+          "Contact API rejected submission:",
+          result,
         );
+
+        setStatus("error");
+
+        return;
       }
+
+      /* ----------------------------------------------------------------------
+         2. SAVE VERIFIED MESSAGE TO FIRESTORE
+
+         IMPORTANT:
+
+         We only save after the server accepts the submission.
+      ---------------------------------------------------------------------- */
+
+      await addDoc(
+        collection(db, "messages"),
+        {
+          name: payload.name,
+          email: payload.email,
+          subject: payload.subject,
+          message: payload.message,
+          createdAt: serverTimestamp(),
+        },
+      );
 
       /* ----------------------------------------------------------------------
          3. RESET FORM
       ---------------------------------------------------------------------- */
 
       reset();
+
+      /*
+       * Turnstile tokens are single-use.
+       *
+       * Clear our local token so another submission requires
+       * a fresh token.
+       */
+      setTurnstileToken("");
 
       /* ----------------------------------------------------------------------
          4. SUCCESS
@@ -147,6 +181,27 @@ export function ContactForm() {
       className="space-y-5"
       noValidate
     >
+      {/* ======================================================================
+          HONEYPOT
+      ====================================================================== */}
+
+      <div
+        className="absolute -left-[9999px] h-px w-px overflow-hidden"
+        aria-hidden="true"
+      >
+        <label htmlFor="website">
+          Website
+        </label>
+
+        <input
+          id="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          {...register("website")}
+        />
+      </div>
+
       {/* ======================================================================
           NAME
       ====================================================================== */}
@@ -497,7 +552,34 @@ export function ContactForm() {
       </div>
 
       {/* ======================================================================
-          SUCCESS MESSAGE
+          TURNSTILE
+      ====================================================================== */}
+
+      <div className="pt-1">
+        <Turnstile
+          siteKey={
+            process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""
+          }
+          options={{
+            theme: "auto",
+            size: "flexible",
+          }}
+          onSuccess={(token) => {
+            setTurnstileToken(token);
+            setStatus("idle");
+          }}
+          onError={() => {
+            setTurnstileToken("");
+            setStatus("error");
+          }}
+          onExpire={() => {
+            setTurnstileToken("");
+          }}
+        />
+      </div>
+
+      {/* ======================================================================
+          SUCCESS
       ====================================================================== */}
 
       {status === "success" && (
@@ -535,7 +617,7 @@ export function ContactForm() {
       )}
 
       {/* ======================================================================
-          ERROR MESSAGE
+          ERROR
       ====================================================================== */}
 
       {status === "error" && (
@@ -557,18 +639,19 @@ export function ContactForm() {
             dark:text-red-300
           "
         >
-          Something went wrong while sending your
-          message. Please try again.
+          {!turnstileToken
+            ? "Please complete the security verification and try again."
+            : "Something went wrong while sending your message. Please try again."}
         </div>
       )}
 
       {/* ======================================================================
-          SUBMIT BUTTON
+          SUBMIT
       ====================================================================== */}
 
       <button
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || !turnstileToken}
         className="
           inline-flex
           w-full
@@ -603,7 +686,7 @@ export function ContactForm() {
           focus-visible:ring-offset-slate-50
 
           disabled:cursor-not-allowed
-          disabled:opacity-60
+          disabled:opacity-50
           disabled:hover:translate-y-0
           disabled:hover:bg-cyan-500
 

@@ -24,6 +24,19 @@ export const contactSchema = z.object({
     .trim()
     .min(10, "Please enter at least 10 characters.")
     .max(5000, "Message is too long."),
+
+  /*
+   * Honeypot anti-spam field.
+   *
+   * Normal visitors should leave this empty.
+   * Automated bots that fill hidden fields can be detected
+   * and rejected by /api/contact.
+   */
+  website: z
+    .string()
+    .max(0, "Invalid submission.")
+    .optional(),
 });
 
-export type ContactFormData = z.infer<typeof contactSchema>;
+export type ContactFormData =
+  z.infer<typeof contactSchema>;
