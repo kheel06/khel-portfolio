@@ -1401,7 +1401,7 @@ export function ContactForm() {
                         .NEXT_PUBLIC_TURNSTILE_SITE_KEY
                     }
                     options={{
-                      theme: "dark",
+                      theme: "auto",
                       size: "flexible",
                     }}
                     onSuccess={(

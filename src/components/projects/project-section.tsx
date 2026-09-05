@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
+
 import {
   AnimatePresence,
   motion,
@@ -20,7 +21,11 @@ import {
 
 import { ProjectCard } from "./project-card";
 import { ProjectDialog } from "./project-dialog";
-import { gsap, ScrollTrigger } from "@/lib/gsap";
+
+import {
+  gsap,
+  ScrollTrigger,
+} from "@/lib/gsap";
 
 /* =========================================================
    FILTERS
@@ -39,6 +44,7 @@ const filters: Array<"All" | ProjectCategory> = [
 
 export function ProjectSection() {
   const shouldReduceMotion = useReducedMotion();
+
   const sectionRef = useRef<HTMLElement>(null);
 
   const [activeFilter, setActiveFilter] =
@@ -47,31 +53,31 @@ export function ProjectSection() {
   const [selectedProject, setSelectedProject] =
     useState<Project | null>(null);
 
+  /* =======================================================
+     FILTER PROJECTS
+  ======================================================= */
+
   const filteredProjects = useMemo(() => {
     if (activeFilter === "All") {
       return projects;
     }
 
     return projects.filter(
-      (project) => project.category === activeFilter,
+      (project) =>
+        project.category === activeFilter,
     );
   }, [activeFilter]);
 
-  /* =========================================================
-     MASTER SECTION ANIMATION
-
-     Handles:
-     - Header reveal
-     - Heading reveal
-     - Filter entrance
-     - Background atmosphere
-     - Bottom technical marker
-  ========================================================= */
+  /* =======================================================
+     SECTION / HEADER ANIMATION
+  ======================================================= */
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
 
-    if (!section) return;
+    if (!section) {
+      return;
+    }
 
     const ctx = gsap.context(() => {
       const header =
@@ -119,9 +125,9 @@ export function ProjectSection() {
         return;
       }
 
-      /* -------------------------------------------------------
+      /* -----------------------------------------------------
          REDUCED MOTION
-      ------------------------------------------------------- */
+      ----------------------------------------------------- */
 
       if (shouldReduceMotion) {
         gsap.set(
@@ -142,9 +148,9 @@ export function ProjectSection() {
         return;
       }
 
-      /* -------------------------------------------------------
-         INITIAL STATES
-      ------------------------------------------------------- */
+      /* -----------------------------------------------------
+         INITIAL STATE
+      ----------------------------------------------------- */
 
       gsap.set(header, {
         opacity: 0,
@@ -162,7 +168,8 @@ export function ProjectSection() {
       gsap.set(heading, {
         opacity: 0,
         y: 24,
-        clipPath: "inset(0 0 100% 0)",
+        clipPath:
+          "inset(0 0 100% 0)",
       });
 
       gsap.set(description, {
@@ -189,17 +196,18 @@ export function ProjectSection() {
         });
       }
 
-      /* -------------------------------------------------------
+      /* -----------------------------------------------------
          HEADER REVEAL
-      ------------------------------------------------------- */
+      ----------------------------------------------------- */
 
-      const headerTimeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: header,
-          start: "top 82%",
-          once: true,
-        },
-      });
+      const headerTimeline =
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: header,
+            start: "top 82%",
+            once: true,
+          },
+        });
 
       headerTimeline
         .to(
@@ -228,7 +236,8 @@ export function ProjectSection() {
           {
             opacity: 1,
             y: 0,
-            clipPath: "inset(0 0 0% 0)",
+            clipPath:
+              "inset(0 0 0% 0)",
             duration: 0.8,
             ease: "power4.out",
           },
@@ -255,19 +264,20 @@ export function ProjectSection() {
           0.3,
         );
 
-      /* -------------------------------------------------------
-         ATMOSPHERE
-      ------------------------------------------------------- */
+      /* -----------------------------------------------------
+         BACKGROUND ATMOSPHERE
+      ----------------------------------------------------- */
 
       if (atmosphere.length) {
-        const atmosphereTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: "top 85%",
-            end: "bottom 15%",
-            scrub: 1.4,
-          },
-        });
+        const atmosphereTimeline =
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: section,
+              start: "top 85%",
+              end: "bottom 15%",
+              scrub: 1.4,
+            },
+          });
 
         atmosphereTimeline.to(
           atmosphere,
@@ -281,24 +291,31 @@ export function ProjectSection() {
           0,
         );
 
-        atmosphere.forEach((element, index) => {
-          gsap.to(element, {
-            xPercent: index % 2 === 0 ? 4 : -4,
-            yPercent: index % 2 === 0 ? -3 : 3,
-            ease: "none",
-            scrollTrigger: {
-              trigger: section,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: 1.8,
-            },
-          });
-        });
+        atmosphere.forEach(
+          (element, index) => {
+            gsap.to(element, {
+              xPercent:
+                index % 2 === 0 ? 4 : -4,
+
+              yPercent:
+                index % 2 === 0 ? -3 : 3,
+
+              ease: "none",
+
+              scrollTrigger: {
+                trigger: section,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1.8,
+              },
+            });
+          },
+        );
       }
 
-      /* -------------------------------------------------------
+      /* -----------------------------------------------------
          BOTTOM MARKER
-      ------------------------------------------------------- */
+      ----------------------------------------------------- */
 
       if (bottomMarker) {
         gsap.fromTo(
@@ -312,6 +329,7 @@ export function ProjectSection() {
             y: 0,
             duration: 0.65,
             ease: "power3.out",
+
             scrollTrigger: {
               trigger: bottomMarker,
               start: "top 88%",
@@ -321,9 +339,9 @@ export function ProjectSection() {
         );
       }
 
-      /* -------------------------------------------------------
-         REFRESH AFTER LAYOUT
-      ------------------------------------------------------- */
+      /* -----------------------------------------------------
+         REFRESH
+      ----------------------------------------------------- */
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -338,33 +356,31 @@ export function ProjectSection() {
   }, [shouldReduceMotion]);
 
   /* =========================================================
-     CARD GRID ANIMATION
-
-     IMPORTANT:
-     Event listeners are cleaned up separately.
-
-     DO NOT use:
-       ctx.add(...)
-
-     inside the gsap.context callback because ctx is not
-     initialized until gsap.context() returns.
+     CARD ANIMATION
   ========================================================= */
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
 
-    if (!section || shouldReduceMotion) {
+    if (
+      !section ||
+      shouldReduceMotion
+    ) {
       return;
     }
 
     /*
-     * Store DOM event cleanup functions here.
+     * Store DOM event cleanup functions
+     * independently from the GSAP context.
      *
-     * This is the important fix for:
+     * This prevents:
      *
      * Cannot access 'ctx' before initialization
      */
-    const eventCleanups: Array<() => void> = [];
+
+    const eventCleanups: Array<
+      () => void
+    > = [];
 
     const ctx = gsap.context(() => {
       const grid =
@@ -378,261 +394,282 @@ export function ProjectSection() {
           section,
         );
 
-      if (!grid || cards.length === 0) {
+      if (
+        !grid ||
+        cards.length === 0
+      ) {
         return;
       }
 
-      cards.forEach((card, index) => {
-        const image =
-          card.querySelector<HTMLElement>(
-            ".project-card-image",
-          );
+      /* ===================================================
+         CARD LOOP
+      =================================================== */
 
-        const glow =
-          card.querySelector<HTMLElement>(
-            ".project-card-glow",
-          );
+      cards.forEach(
+        (card, index) => {
+          const image =
+            card.querySelector<HTMLElement>(
+              ".project-card-image",
+            );
 
-        const isRight = index % 2 === 1;
+          const glow =
+            card.querySelector<HTMLElement>(
+              ".project-card-glow",
+            );
 
-        /* -----------------------------------------------------
-           INITIAL CARD STATE
-        ----------------------------------------------------- */
+          /*
+           * Alternate entrance direction.
+           */
 
-        gsap.set(card, {
-          opacity: 0,
-          y: 42,
-          x: isRight ? 24 : -24,
-          scale: 0.97,
-          rotate: isRight ? 0.7 : -0.7,
-          transformOrigin: "center center",
-          clipPath:
-            "inset(0 0 12% 0 round 1rem)",
-          force3D: true,
-        });
+          const isRight =
+            index % 2 === 1;
 
-        if (image) {
-          gsap.set(image, {
-            scale: 1.08,
-            yPercent: 2,
+          /* ===============================================
+             INITIAL CARD STATE
+          =============================================== */
+
+          gsap.set(card, {
+            opacity: 0,
+            y: 42,
+            x: isRight ? 24 : -24,
+            scale: 0.97,
+
+            rotate: isRight
+              ? 0.7
+              : -0.7,
+
+            transformOrigin:
+              "center center",
+
+            clipPath:
+              "inset(0 0 12% 0 round 1rem)",
+
             force3D: true,
           });
-        }
 
-        if (glow) {
-          gsap.set(glow, {
-            opacity: 0,
-            scale: 0.85,
-          });
-        }
+          if (image) {
+            gsap.set(image, {
+              scale: 1.08,
+              yPercent: 2,
+              force3D: true,
+            });
+          }
 
-        /* -----------------------------------------------------
-           CARD REVEAL
-        ----------------------------------------------------- */
+          if (glow) {
+            gsap.set(glow, {
+              opacity: 0,
+              scale: 0.85,
+            });
+          }
 
-        const reveal = gsap.timeline({
-          scrollTrigger: {
-            trigger: card,
-            start: "top 88%",
-            end: "top 52%",
-            scrub: 0.9,
-            invalidateOnRefresh: true,
-          },
-        });
+          /* ===============================================
+             CARD REVEAL
+          =============================================== */
 
-        reveal.to(
-          card,
-          {
-            opacity: 1,
-            y: 0,
-            x: 0,
-            scale: 1,
-            rotate: 0,
-            clipPath:
-              "inset(0 0 0% 0 round 1rem)",
-            duration: 1,
-            ease: "power3.out",
-          },
-          0,
-        );
-
-        if (image) {
-          reveal.to(
-            image,
-            {
-              scale: 1,
-              yPercent: 0,
-              duration: 1,
-              ease: "power2.out",
-            },
-            0.04,
-          );
-        }
-
-        if (glow) {
-          reveal.to(
-            glow,
-            {
-              opacity: 1,
-              scale: 1,
-              duration: 0.55,
-              ease: "power2.out",
-            },
-            0.25,
-          );
-        }
-
-        /* -----------------------------------------------------
-           IMAGE PARALLAX
-        ----------------------------------------------------- */
-
-        if (image) {
-          gsap.fromTo(
-            image,
-            {
-              yPercent: -3,
-            },
-            {
-              yPercent: 3,
-              ease: "none",
+          const reveal =
+            gsap.timeline({
               scrollTrigger: {
                 trigger: card,
-                start: "top bottom",
-                end: "bottom top",
-                scrub: 1.5,
+                start: "top 88%",
+                end: "top 52%",
+                scrub: 0.9,
                 invalidateOnRefresh: true,
+              },
+            });
+
+          reveal.to(
+            card,
+            {
+              opacity: 1,
+              y: 0,
+              x: 0,
+              scale: 1,
+              rotate: 0,
+
+              clipPath:
+                "inset(0 0 0% 0 round 1rem)",
+
+              duration: 1,
+              ease: "power3.out",
+            },
+            0,
+          );
+
+          if (image) {
+            reveal.to(
+              image,
+              {
+                scale: 1,
+                yPercent: 0,
+                duration: 1,
+                ease: "power2.out",
+              },
+              0.04,
+            );
+          }
+
+          if (glow) {
+            reveal.to(
+              glow,
+              {
+                opacity: 1,
+                scale: 1,
+                duration: 0.55,
+                ease: "power2.out",
+              },
+              0.25,
+            );
+          }
+
+          /* ===============================================
+             IMAGE PARALLAX
+          =============================================== */
+
+          if (image) {
+            gsap.fromTo(
+              image,
+              {
+                yPercent: -3,
+              },
+              {
+                yPercent: 3,
+                ease: "none",
+
+                scrollTrigger: {
+                  trigger: card,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: 1.5,
+                  invalidateOnRefresh: true,
+                },
+              },
+            );
+          }
+
+          /* ===============================================
+             VIEWPORT FOCUS
+          =============================================== */
+
+          gsap.fromTo(
+            card,
+            {
+              filter:
+                "brightness(0.94)",
+            },
+            {
+              filter:
+                "brightness(1)",
+
+              ease: "none",
+
+              scrollTrigger: {
+                trigger: card,
+                start: "top 72%",
+                end: "center 48%",
+                scrub: 1,
               },
             },
           );
-        }
 
-        /* -----------------------------------------------------
-           VIEWPORT FOCUS
-        ----------------------------------------------------- */
+          /* ===============================================
+             HOVER ENTER
+          =============================================== */
 
-        gsap.fromTo(
-          card,
-          {
-            filter: "brightness(0.94)",
-          },
-          {
-            filter: "brightness(1)",
-            ease: "none",
-            scrollTrigger: {
-              trigger: card,
-              start: "top 72%",
-              end: "center 48%",
-              scrub: 1,
-            },
-          },
-        );
-
-        /* -----------------------------------------------------
-           HOVER ENTER
-        ----------------------------------------------------- */
-
-        const handleEnter = () => {
-          gsap.to(card, {
-            y: -5,
-            duration: 0.35,
-            ease: "power3.out",
-            overwrite: "auto",
-          });
-
-          if (image) {
-            gsap.to(image, {
-              scale: 1.035,
-              duration: 0.6,
+          const handleEnter = () => {
+            gsap.to(card, {
+              y: -5,
+              duration: 0.35,
               ease: "power3.out",
               overwrite: "auto",
             });
-          }
 
-          if (glow) {
-            gsap.to(glow, {
-              opacity: 1,
-              scale: 1.05,
-              duration: 0.45,
-              ease: "power2.out",
-              overwrite: "auto",
-            });
-          }
-        };
+            if (image) {
+              gsap.to(image, {
+                scale: 1.035,
+                duration: 0.6,
+                ease: "power3.out",
+                overwrite: "auto",
+              });
+            }
 
-        /* -----------------------------------------------------
-           HOVER LEAVE
-        ----------------------------------------------------- */
+            if (glow) {
+              gsap.to(glow, {
+                opacity: 1,
+                scale: 1.05,
+                duration: 0.45,
+                ease: "power2.out",
+                overwrite: "auto",
+              });
+            }
+          };
 
-        const handleLeave = () => {
-          gsap.to(card, {
-            y: 0,
-            duration: 0.4,
-            ease: "power3.out",
-            overwrite: "auto",
-          });
+          /* ===============================================
+             HOVER LEAVE
+          =============================================== */
 
-          if (image) {
-            gsap.to(image, {
-              scale: 1,
-              duration: 0.7,
+          const handleLeave = () => {
+            gsap.to(card, {
+              y: 0,
+              duration: 0.4,
               ease: "power3.out",
               overwrite: "auto",
             });
-          }
 
-          if (glow) {
-            gsap.to(glow, {
-              opacity: 0.65,
-              scale: 1,
-              duration: 0.45,
-              ease: "power2.out",
-              overwrite: "auto",
-            });
-          }
-        };
+            if (image) {
+              gsap.to(image, {
+                scale: 1,
+                duration: 0.7,
+                ease: "power3.out",
+                overwrite: "auto",
+              });
+            }
 
-        /* -----------------------------------------------------
-           EVENT LISTENERS
-        ----------------------------------------------------- */
+            if (glow) {
+              gsap.to(glow, {
+                opacity: 0.65,
+                scale: 1,
+                duration: 0.45,
+                ease: "power2.out",
+                overwrite: "auto",
+              });
+            }
+          };
 
-        card.addEventListener(
-          "mouseenter",
-          handleEnter,
-        );
+          /* ===============================================
+             EVENT LISTENERS
+          =============================================== */
 
-        card.addEventListener(
-          "mouseleave",
-          handleLeave,
-        );
-
-        /*
-         * IMPORTANT:
-         *
-         * Do NOT do:
-         *
-         * ctx.add(() => {...})
-         *
-         * here.
-         *
-         * ctx doesn't exist until after gsap.context()
-         * has returned.
-         */
-        eventCleanups.push(() => {
-          card.removeEventListener(
+          card.addEventListener(
             "mouseenter",
             handleEnter,
           );
 
-          card.removeEventListener(
+          card.addEventListener(
             "mouseleave",
             handleLeave,
           );
-        });
-      });
 
-      /* -------------------------------------------------------
+          /*
+           * Store cleanup separately.
+           */
+
+          eventCleanups.push(() => {
+            card.removeEventListener(
+              "mouseenter",
+              handleEnter,
+            );
+
+            card.removeEventListener(
+              "mouseleave",
+              handleLeave,
+            );
+          });
+        },
+      );
+
+      /* ===============================================
          REFRESH AFTER CARD LAYOUT
-      ------------------------------------------------------- */
+      =============================================== */
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -641,23 +678,31 @@ export function ProjectSection() {
       });
     }, section);
 
-    /* ---------------------------------------------------------
+    /* =====================================================
        COMPLETE CLEANUP
-
-       1. Remove DOM listeners.
-       2. Revert GSAP context.
-    --------------------------------------------------------- */
+    ===================================================== */
 
     return () => {
-      eventCleanups.forEach((cleanup) => {
-        cleanup();
-      });
+      /*
+       * Remove event listeners.
+       */
+
+      eventCleanups.forEach(
+        (cleanup) => cleanup(),
+      );
 
       eventCleanups.length = 0;
 
+      /*
+       * Revert GSAP context.
+       */
+
       ctx.revert();
     };
-  }, [activeFilter, shouldReduceMotion]);
+  }, [
+    activeFilter,
+    shouldReduceMotion,
+  ]);
 
   /* =========================================================
      RENDER
@@ -678,13 +723,15 @@ export function ProjectSection() {
           text-[var(--foreground)]
           transition-colors
           duration-300
+
           dark:border-white/[0.06]
+
           sm:py-36
         "
       >
-        {/* =====================================================
-            ATMOSPHERIC BACKGROUND
-        ====================================================== */}
+        {/* ===================================================
+            BACKGROUND ATMOSPHERE
+        ==================================================== */}
 
         <div
           aria-hidden="true"
@@ -694,52 +741,63 @@ export function ProjectSection() {
             inset-0
           "
         >
+          {/* Cyan */}
+
           <div
             data-projects-atmosphere
             className="
               absolute
-              left-[15%]
-              top-[12%]
+              left-[10%]
+              top-[10%]
               h-72
               w-72
               rounded-full
               bg-cyan-500/[0.025]
               blur-3xl
+
               dark:bg-cyan-500/[0.035]
             "
           />
+
+          {/* Blue */}
 
           <div
             data-projects-atmosphere
             className="
               absolute
-              right-[8%]
-              top-[42%]
+              right-[5%]
+              top-[38%]
               h-96
               w-96
               rounded-full
               bg-blue-600/[0.018]
               blur-3xl
+
               dark:bg-blue-600/[0.025]
             "
           />
+
+          {/* Purple */}
 
           <div
             data-projects-atmosphere
             className="
               absolute
-              bottom-[10%]
-              left-[25%]
+              bottom-[8%]
+              left-[20%]
               h-64
               w-64
               rounded-full
               bg-purple-500/[0.014]
               blur-3xl
+
               dark:bg-purple-500/[0.018]
             "
           />
 
-          {/* LIGHT MODE GRID */}
+          {/* =================================================
+              LIGHT GRID
+          ================================================== */}
 
           <div
             className="
@@ -760,15 +818,21 @@ export function ProjectSection() {
                   transparent 1px
                 )
               `,
-              backgroundSize: "64px 64px",
+
+              backgroundSize:
+                "64px 64px",
+
               maskImage:
                 "linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)",
+
               WebkitMaskImage:
                 "linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)",
             }}
           />
 
-          {/* DARK MODE GRID */}
+          {/* =================================================
+              DARK GRID
+          ================================================== */}
 
           <div
             className="
@@ -790,23 +854,28 @@ export function ProjectSection() {
                   transparent 1px
                 )
               `,
-              backgroundSize: "64px 64px",
+
+              backgroundSize:
+                "64px 64px",
+
               maskImage:
                 "linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)",
+
               WebkitMaskImage:
                 "linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)",
             }}
           />
         </div>
 
-        {/* =====================================================
-            MAIN CONTENT
-        ====================================================== */}
+        {/* ===================================================
+            CONTENT
+        ==================================================== */}
 
         <div className="container-khel relative z-10">
-          {/* ===================================================
+
+          {/* =================================================
               HEADER
-          ==================================================== */}
+          ================================================== */}
 
           <div
             data-projects-header
@@ -815,14 +884,22 @@ export function ProjectSection() {
               flex-col
               justify-between
               gap-10
+
               lg:flex-row
               lg:items-end
             "
           >
             <div>
+
+              {/* Eyebrow */}
+
               <div
                 data-projects-label
-                className="flex items-center gap-3"
+                className="
+                  flex
+                  items-center
+                  gap-3
+                "
               >
                 <span
                   aria-hidden="true"
@@ -830,6 +907,7 @@ export function ProjectSection() {
                     h-px
                     w-8
                     bg-cyan-500/70
+
                     dark:bg-cyan-400/70
                   "
                 />
@@ -841,6 +919,7 @@ export function ProjectSection() {
                     uppercase
                     tracking-[0.25em]
                     text-cyan-600
+
                     dark:text-cyan-400
                   "
                 >
@@ -848,18 +927,23 @@ export function ProjectSection() {
                 </p>
               </div>
 
+              {/* Heading */}
+
               <h2
                 data-projects-title
                 className="
                   mt-5
-                  max-w-3xl
+                  max-w-4xl
                   text-4xl
                   font-bold
                   leading-[1.05]
                   tracking-[-0.035em]
                   text-slate-950
+
                   sm:text-5xl
+
                   lg:text-6xl
+
                   dark:text-white
                 "
               >
@@ -867,6 +951,8 @@ export function ProjectSection() {
                 <br />
                 FOR REAL WORKFLOWS.
               </h2>
+
+              {/* Description */}
 
               <p
                 data-projects-description
@@ -876,30 +962,43 @@ export function ProjectSection() {
                   text-sm
                   leading-7
                   text-slate-600
+
                   sm:text-base
+
                   dark:text-slate-400
                 "
               >
-                A selection of projects focused on solving
-                practical problems through thoughtful design
-                and reliable engineering.
+                A selection of projects focused on
+                solving practical problems through
+                thoughtful design and reliable
+                engineering.
               </p>
             </div>
 
-            {/* FILTERS */}
+            {/* =================================================
+                FILTERS
+            ================================================== */}
 
             <motion.div
               data-projects-filters
-              className="relative flex flex-wrap gap-2"
+              className="
+                relative
+                flex
+                flex-wrap
+                gap-2
+              "
             >
               {filters.map((filter) => {
-                const active = activeFilter === filter;
+                const active =
+                  activeFilter === filter;
 
                 return (
                   <motion.button
                     key={filter}
                     type="button"
-                    onClick={() => setActiveFilter(filter)}
+                    onClick={() =>
+                      setActiveFilter(filter)
+                    }
                     whileHover={
                       shouldReduceMotion
                         ? undefined
@@ -926,12 +1025,15 @@ export function ProjectSection() {
                       text-slate-500
                       transition-all
                       duration-300
+
                       hover:border-slate-900/[0.14]
                       hover:bg-white
                       hover:text-slate-900
+
                       dark:border-white/[0.07]
                       dark:bg-white/[0.01]
                       dark:text-slate-500
+
                       dark:hover:border-white/[0.12]
                       dark:hover:bg-white/[0.025]
                       dark:hover:text-white
@@ -945,6 +1047,7 @@ export function ProjectSection() {
                           inset-0
                           rounded-lg
                           bg-cyan-500/[0.07]
+
                           dark:bg-cyan-400/[0.08]
                         "
                         transition={
@@ -969,6 +1072,7 @@ export function ProjectSection() {
                           right-2
                           h-px
                           bg-cyan-500/70
+
                           dark:bg-cyan-400/70
                         "
                         transition={
@@ -987,6 +1091,7 @@ export function ProjectSection() {
                       className={`
                         relative
                         z-10
+
                         ${
                           active
                             ? "text-cyan-700 dark:text-cyan-300"
@@ -1003,7 +1108,7 @@ export function ProjectSection() {
           </div>
 
           {/* ===================================================
-              PROJECT GRID
+              EDITORIAL PROJECT GRID
           ==================================================== */}
 
           <div
@@ -1011,23 +1116,75 @@ export function ProjectSection() {
             className="
               mt-12
               grid
+              grid-cols-1
               gap-5
-              lg:grid-cols-2
+
+              sm:gap-6
+
+              lg:grid-cols-12
             "
           >
-            {filteredProjects.map((project, index) => (
-              <div
-                key={project.id}
-                data-projects-card
-                className="will-change-transform"
-              >
-                <ProjectCard
-                  project={project}
-                  index={index}
-                  onOpen={setSelectedProject}
-                />
-              </div>
-            ))}
+            {filteredProjects.map(
+              (project, index) => {
+                /*
+                 * Editorial layout:
+                 *
+                 * 01 → 8 columns
+                 * 02 → 4 columns
+                 * 03 → 4 columns
+                 * 04 → 4 columns
+                 * 05 → 4 columns
+                 * 06 → 8 columns
+                 *
+                 * Then repeats.
+                 */
+
+                const isFeatured =
+                  index === 0;
+
+                const isWide =
+                  index === 0 ||
+                  index % 5 === 0;
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * Do NOT use:
+                 *
+                 * lg:col-span-${...}
+                 *
+                 * Tailwind cannot reliably detect
+                 * dynamically generated class names.
+                 *
+                 * Use complete static class names.
+                 */
+
+                const gridClass = isWide
+                  ? "col-span-1 lg:col-span-8"
+                  : "col-span-1 lg:col-span-4";
+
+                return (
+                  <div
+                    key={project.id}
+                    data-projects-card
+                    className={`
+                      min-w-0
+                      will-change-transform
+                      ${gridClass}
+                    `}
+                  >
+                    <ProjectCard
+                      project={project}
+                      index={index}
+                      featured={isFeatured}
+                      onOpen={
+                        setSelectedProject
+                      }
+                    />
+                  </div>
+                );
+              },
+            )}
           </div>
 
           {/* ===================================================
@@ -1059,7 +1216,12 @@ export function ProjectSection() {
                 }
                 transition={{
                   duration: 0.4,
-                  ease: [0.22, 1, 0.36, 1],
+                  ease: [
+                    0.22,
+                    1,
+                    0.36,
+                    1,
+                  ],
                 }}
                 className="
                   mt-10
@@ -1070,6 +1232,7 @@ export function ProjectSection() {
                   bg-white/40
                   py-20
                   text-center
+
                   dark:border-white/[0.1]
                   dark:bg-white/[0.01]
                 "
@@ -1078,17 +1241,17 @@ export function ProjectSection() {
                   className="
                     text-sm
                     text-slate-500
-                    dark:text-slate-500
                   "
                 >
-                  No projects in this category yet.
+                  No projects in this
+                  category yet.
                 </p>
               </motion.div>
             )}
           </AnimatePresence>
 
           {/* ===================================================
-              BOTTOM TECHNICAL MARKER
+              BOTTOM MARKER
           ==================================================== */}
 
           <div
@@ -1101,17 +1264,28 @@ export function ProjectSection() {
               border-t
               border-slate-900/[0.08]
               pt-5
+
               dark:border-white/[0.06]
             "
           >
-            <div className="flex items-center gap-3">
+            <div
+              className="
+                flex
+                items-center
+                gap-3
+              "
+            >
               <motion.span
                 aria-hidden="true"
                 animate={
                   shouldReduceMotion
                     ? undefined
                     : {
-                        opacity: [0.45, 1, 0.45],
+                        opacity: [
+                          0.45,
+                          1,
+                          0.45,
+                        ],
                       }
                 }
                 transition={
@@ -1128,6 +1302,7 @@ export function ProjectSection() {
                   w-1.5
                   rounded-full
                   bg-cyan-500
+
                   dark:bg-cyan-400
                 "
               />
@@ -1139,6 +1314,7 @@ export function ProjectSection() {
                   uppercase
                   tracking-[0.2em]
                   text-slate-500
+
                   dark:text-slate-600
                 "
               >
@@ -1153,6 +1329,7 @@ export function ProjectSection() {
                 uppercase
                 tracking-[0.2em]
                 text-slate-400
+
                 dark:text-slate-700
               "
             >
@@ -1171,7 +1348,9 @@ export function ProjectSection() {
 
       <ProjectDialog
         project={selectedProject}
-        onClose={() => setSelectedProject(null)}
+        onClose={() =>
+          setSelectedProject(null)
+        }
       />
     </>
   );

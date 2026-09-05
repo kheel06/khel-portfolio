@@ -1,6 +1,13 @@
 "use client";
 
 import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+
+import {
   ArrowUpRight,
   CheckCircle2,
   ExternalLink,
@@ -14,6 +21,12 @@ import {
 
 import type { Project } from "@/data/projects";
 
+import {
+  CaseStudyImage,
+  ImageLightbox,
+  ProjectImageGallery,
+} from "./project-image-gallery";
+
 interface ProjectDialogProps {
   project: Project | null;
   onClose: () => void;
@@ -21,1004 +34,471 @@ interface ProjectDialogProps {
 
 const easing = [0.22, 1, 0.36, 1] as const;
 
-const staggerContainer = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.055,
-      delayChildren: 0.08,
-    },
-  },
-};
-
-const fadeUp = {
-  hidden: {
-    opacity: 0,
-    y: 18,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.48,
-      ease: easing,
-    },
-  },
-};
-
 export function ProjectDialog({
   project,
   onClose,
 }: ProjectDialogProps) {
   const shouldReduceMotion = useReducedMotion();
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const [lightbox, setLightbox] = useState<{
+    projectId: string;
+    index: number;
+  } | null>(null);
 
-  const instant = shouldReduceMotion;
+  const visualImages = project
+    ? project.caseStudyImages?.length
+      ? project.caseStudyImages
+      : project.image
+        ? [project.image]
+        : []
+    : [];
+
+  const heroImage = visualImages[0];
+  const openingImageCount = Math.min(
+    3,
+    Math.max(0, visualImages.length - 2),
+  );
+  const openingImages = visualImages.slice(
+    1,
+    1 + openingImageCount,
+  );
+  const narrativeStartIndex = 1 + openingImages.length;
+  const narrativeImages = visualImages.slice(
+    narrativeStartIndex,
+    Math.max(narrativeStartIndex, visualImages.length - 1),
+  );
+  const finalImage =
+    visualImages.length > 1
+      ? visualImages[visualImages.length - 1]
+      : undefined;
+
+  const lightboxIndex =
+    lightbox && lightbox.projectId === project?.id
+      ? lightbox.index
+      : null;
+
+  useEffect(() => {
+    if (!project) {
+      return;
+    }
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousDocumentOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+
+    requestAnimationFrame(() => {
+      closeButtonRef.current?.focus();
+    });
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousDocumentOverflow;
+    };
+  }, [project]);
+
+  useEffect(() => {
+    if (!project) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        if (lightboxIndex !== null) {
+          event.preventDefault();
+          setLightbox(null);
+          return;
+        }
+
+        onClose();
+        return;
+      }
+
+      if (lightboxIndex === null || visualImages.length < 2) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setLightbox((current) => {
+          if (!current || current.projectId !== project.id) {
+            return current;
+          }
+
+          return {
+            ...current,
+            index:
+              (current.index - 1 + visualImages.length) %
+              visualImages.length,
+          };
+        });
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setLightbox((current) => {
+          if (!current || current.projectId !== project.id) {
+            return current;
+          }
+
+          return {
+            ...current,
+            index: (current.index + 1) % visualImages.length,
+          };
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [lightboxIndex, onClose, project, visualImages.length]);
+
+  const showPreviousImage = () => {
+    setLightbox((current) => {
+      if (!current || current.projectId !== project?.id) {
+        return current;
+      }
+
+      return {
+        ...current,
+        index:
+          (current.index - 1 + visualImages.length) %
+          visualImages.length,
+      };
+    });
+  };
+
+  const showNextImage = () => {
+    setLightbox((current) => {
+      if (!current || current.projectId !== project?.id) {
+        return current;
+      }
+
+      return {
+        ...current,
+        index: (current.index + 1) % visualImages.length,
+      };
+    });
+  };
+
+  const selectImage = (index: number) => {
+    if (!project) {
+      return;
+    }
+
+    setLightbox({ projectId: project.id, index });
+  };
 
   return (
     <AnimatePresence mode="wait">
       {project && (
         <motion.div
-          key={project.title}
+          key={project.id}
           className="fixed inset-0 z-[100]"
-          initial="hidden"
-          animate="visible"
-          exit="exit"
+          initial={shouldReduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={shouldReduceMotion ? undefined : { opacity: 0 }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.22,
+            ease: easing,
+          }}
         >
-          {/* =====================================================
-              BACKDROP
-          ====================================================== */}
-
-          <motion.button
+          <button
             type="button"
             aria-label="Close project case study"
-            className="
-              absolute
-              inset-0
-              h-full
-              w-full
-              cursor-default
-              bg-slate-950/55
-              backdrop-blur-sm
-              dark:bg-black/75
-            "
-            variants={{
-              hidden: {
-                opacity: 0,
-              },
-              visible: {
-                opacity: 1,
-                transition: {
-                  duration: instant ? 0 : 0.3,
-                  ease: easing,
-                },
-              },
-              exit: {
-                opacity: 0,
-                transition: {
-                  duration: instant ? 0 : 0.2,
-                  ease: easing,
-                },
-              },
-            }}
+            className="absolute inset-0 h-full w-full cursor-default bg-slate-950/55 backdrop-blur-sm dark:bg-black/75"
             onClick={onClose}
           />
 
-          {/* =====================================================
-              MODAL FRAME
-          ====================================================== */}
-
-          <div
-            className="
-              relative
-              flex
-              h-full
-              items-center
-              justify-center
-              p-3
-              sm:p-6
-            "
-          >
+          <div className="relative flex h-full items-center justify-center p-3 sm:p-6">
             <motion.div
               role="dialog"
               aria-modal="true"
               aria-labelledby="project-dialog-title"
-              className="
-                relative
-                flex
-                max-h-[94vh]
-                w-full
-                max-w-5xl
-                flex-col
-                overflow-hidden
-                rounded-3xl
-                border
-                border-slate-900/[0.10]
-                bg-white
-                text-slate-950
-                shadow-2xl
-                dark:border-white/[0.1]
-                dark:bg-[#080d17]
-                dark:text-white
-              "
-              variants={{
-                hidden: instant
-                  ? {}
-                  : {
-                      opacity: 0,
-                      y: 24,
-                      scale: 0.965,
-                    },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  scale: 1,
-                  transition: {
-                    duration: instant ? 0 : 0.42,
-                    ease: easing,
-                  },
-                },
-                exit: instant
-                  ? {}
-                  : {
-                      opacity: 0,
-                      y: 14,
-                      scale: 0.975,
-                      transition: {
-                        duration: 0.25,
-                        ease: easing,
-                      },
-                    },
+              className="relative flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-3xl border border-slate-900/[0.10] bg-white text-slate-950 shadow-2xl dark:border-white/[0.1] dark:bg-[#080d17] dark:text-white"
+              initial={
+                shouldReduceMotion
+                  ? false
+                  : { opacity: 0, y: 24, scale: 0.975 }
+              }
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={
+                shouldReduceMotion
+                  ? undefined
+                  : { opacity: 0, y: 14, scale: 0.98 }
+              }
+              transition={{
+                duration: shouldReduceMotion ? 0 : 0.38,
+                ease: easing,
               }}
             >
-              {/* =================================================
-                  HEADER
-              ================================================= */}
-
-              <motion.div
-                initial={instant ? false : { opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: instant ? 0 : 0.35,
-                  delay: instant ? 0 : 0.12,
-                  ease: easing,
-                }}
-                className="
-                  relative
-                  z-30
-                  flex
-                  shrink-0
-                  items-center
-                  justify-between
-                  border-b
-                  border-slate-900/[0.08]
-                  px-5
-                  py-4
-                  dark:border-white/[0.07]
-                  sm:px-7
-                "
-              >
-                <div>
-                  <p
-                    className="
-                      font-mono
-                      text-[9px]
-                      uppercase
-                      tracking-[0.2em]
-                      text-cyan-600
-                      dark:text-cyan-400
-                    "
-                  >
-                    Project Case Study
-                  </p>
-
-                  <p
-                    className="
-                      mt-1
-                      text-xs
-                      text-slate-500
-                      dark:text-slate-600
-                    "
-                  >
-                    {project.category}
-                  </p>
-                </div>
+              <header className="relative z-20 flex shrink-0 items-center justify-between border-b border-slate-900/[0.08] px-5 py-4 dark:border-white/[0.07] sm:px-7">
+                <p className="font-mono text-[9px] font-medium uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-400">
+                  01 / Case Study
+                </p>
 
                 <motion.button
+                  ref={closeButtonRef}
                   type="button"
                   onClick={onClose}
                   aria-label="Close case study"
                   whileHover={
-                    instant
+                    shouldReduceMotion
                       ? undefined
-                      : {
-                          scale: 1.06,
-                          rotate: 4,
-                        }
+                      : { scale: 1.06, rotate: 4 }
                   }
                   whileTap={
-                    instant
-                      ? undefined
-                      : {
-                          scale: 0.94,
-                        }
+                    shouldReduceMotion ? undefined : { scale: 0.94 }
                   }
-                  className="
-                    flex
-                    h-9
-                    w-9
-                    items-center
-                    justify-center
-                    rounded-full
-                    border
-                    border-slate-900/[0.08]
-                    bg-slate-900/[0.025]
-                    text-slate-500
-                    transition-all
-                    duration-300
-                    hover:border-slate-900/[0.15]
-                    hover:bg-slate-900/[0.05]
-                    hover:text-slate-950
-                    dark:border-white/[0.08]
-                    dark:bg-white/[0.03]
-                    dark:text-slate-400
-                    dark:hover:border-white/[0.15]
-                    dark:hover:bg-white/[0.05]
-                    dark:hover:text-white
-                  "
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-900/[0.08] bg-slate-900/[0.025] text-slate-500 transition-colors duration-300 hover:border-slate-900/[0.15] hover:bg-slate-900/[0.05] hover:text-slate-950 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-slate-400 dark:hover:border-white/[0.15] dark:hover:bg-white/[0.05] dark:hover:text-white"
                 >
                   <X size={17} />
                 </motion.button>
-              </motion.div>
+              </header>
 
-              {/* =================================================
-                  SCROLL AREA
-              ================================================= */}
+              <main className="min-h-0 overflow-y-auto overscroll-contain scroll-smooth">
+                <section className="border-b border-slate-900/[0.08] px-6 pb-6 pt-7 dark:border-white/[0.07] sm:px-8 sm:pb-8 sm:pt-10 lg:px-10">
+                  <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-cyan-600 dark:text-cyan-400">
+                    {project.category}
+                  </p>
 
-              <div
-                className="
-                  overflow-y-auto
-                  overscroll-contain
-                  scroll-smooth
-                "
-              >
-                {/* =================================================
-                    HERO
-                ================================================= */}
+                  <h2
+                    id="project-dialog-title"
+                    className="mt-3 max-w-4xl text-3xl font-bold leading-[0.98] tracking-[-0.05em] text-slate-950 dark:text-white sm:text-5xl"
+                  >
+                    {project.title}
+                  </h2>
 
-                <div
-                  className="
-                    relative
-                    aspect-[16/7]
-                    min-h-[250px]
-                    overflow-hidden
-                    bg-slate-100
-                    dark:bg-[#0b1220]
-                  "
-                >
-                  {project.image ? (
-                    <motion.img
-                      src={project.image}
-                      alt={`${project.title} preview`}
-                      initial={
-                        instant
-                          ? false
-                          : {
-                              scale: 1.08,
-                            }
-                      }
-                      animate={{
-                        scale: 1,
-                      }}
-                      transition={{
-                        duration: instant ? 0 : 0.95,
-                        delay: instant ? 0 : 0.05,
-                        ease: easing,
-                      }}
-                      className="
-                        h-full
-                        w-full
-                        object-cover
-                      "
+                  <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400 sm:text-base">
+                    {project.shortDescription}
+                  </p>
+
+                  {project.technologies.length > 0 && (
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {project.technologies.map((technology) => (
+                        <span
+                          key={technology}
+                          className="rounded-md border border-slate-900/[0.10] bg-slate-900/[0.025] px-2.5 py-1.5 font-mono text-[9px] text-slate-600 dark:border-white/[0.1] dark:bg-white/[0.03] dark:text-slate-300"
+                        >
+                          {technology}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </section>
+
+                <section className="border-b border-slate-900/[0.08] p-3 dark:border-white/[0.07] sm:p-5 lg:p-6">
+                  {heroImage ? (
+                    <CaseStudyImage
+                      src={heroImage}
+                      index={0}
+                      totalImages={visualImages.length}
+                      onSelect={() => selectImage(0)}
+                      priority
+                      sizes="(max-width: 640px) 100vw, (max-width: 1200px) 88vw, 1100px"
+                      className="rounded-2xl"
                     />
                   ) : (
-                    <div
-                      className="
-                        technical-grid
-                        flex
-                        h-full
-                        items-center
-                        justify-center
-                        bg-slate-100
-                        dark:bg-[#0b1220]
-                      "
-                    >
-                      <span
-                        className="
-                          font-mono
-                          text-xs
-                          uppercase
-                          tracking-[0.2em]
-                          text-slate-500
-                          dark:text-slate-600
-                        "
-                      >
-                        Project Preview
+                    <div className="technical-grid flex min-h-56 items-center justify-center rounded-2xl border border-dashed border-slate-900/[0.12] bg-slate-100 p-6 text-center dark:border-white/[0.1] dark:bg-white/[0.025]">
+                      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500 dark:text-slate-500">
+                        Visual unavailable
                       </span>
                     </div>
                   )}
+                </section>
 
-                  {/* IMAGE DEPTH */}
+                <div className="p-6 sm:p-8 lg:p-10">
+                  <CaseStudyBlock title="Overview">
+                    <p className="max-w-3xl text-sm leading-7 text-slate-600 dark:text-slate-400 sm:text-base">
+                      {project.description}
+                    </p>
 
-                  <motion.div
-                    initial={instant ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{
-                      duration: instant ? 0 : 0.7,
-                      delay: instant ? 0 : 0.2,
-                    }}
-                    className="
-                      pointer-events-none
-                      absolute
-                      inset-0
-                      bg-gradient-to-t
-                      from-white
-                      via-white/5
-                      to-transparent
-                      dark:from-[#080d17]
-                      dark:via-[#080d17]/10
-                    "
-                  />
+                    <dl className="mt-7 grid gap-4 border-t border-slate-900/[0.08] pt-5 sm:grid-cols-3 dark:border-white/[0.07]">
+                      <CaseStudyDetail label="Project type">
+                        {project.category}
+                      </CaseStudyDetail>
 
-                  <div
-                    className="
-                      pointer-events-none
-                      absolute
-                      inset-x-0
-                      bottom-0
-                      h-32
-                      bg-gradient-to-t
-                      from-black/10
-                      to-transparent
-                      dark:from-black/20
-                    "
-                  />
+                      <CaseStudyDetail label="Case study images">
+                        {String(visualImages.length).padStart(2, "0")}
+                      </CaseStudyDetail>
 
-                  {/* =================================================
-                      HERO CONTENT
-                  ================================================= */}
-
-                  <motion.div
-                    variants={
-                      shouldReduceMotion
-                        ? undefined
-                        : staggerContainer
-                    }
-                    initial="hidden"
-                    animate="visible"
-                    className="
-                      absolute
-                      bottom-6
-                      left-6
-                      right-6
-                      sm:bottom-8
-                      sm:left-8
-                    "
-                  >
-                    <motion.div
-                      variants={
-                        shouldReduceMotion ? undefined : fadeUp
-                      }
-                    >
-                      <h2
-                        id="project-dialog-title"
-                        className="
-                          text-3xl
-                          font-bold
-                          tracking-[-0.04em]
-                          text-slate-950
-                          dark:text-white
-                          sm:text-5xl
-                        "
-                      >
-                        {project.title}
-                      </h2>
-                    </motion.div>
-
-                    <motion.div
-                      variants={
-                        shouldReduceMotion ? undefined : fadeUp
-                      }
-                      className="
-                        mt-4
-                        flex
-                        flex-wrap
-                        gap-2
-                      "
-                    >
-                      {project.technologies.map(
-                        (technology) => (
-                          <motion.span
-                            key={technology}
-                            whileHover={
-                              instant
-                                ? undefined
-                                : {
-                                    y: -2,
-                                  }
-                            }
-                            className="
-                              rounded-md
-                              border
-                              border-slate-900/[0.10]
-                              bg-white/75
-                              px-2.5
-                              py-1.5
-                              font-mono
-                              text-[9px]
-                              text-slate-600
-                              backdrop-blur-md
-                              dark:border-white/[0.1]
-                              dark:bg-[#070b14]/70
-                              dark:text-slate-300
-                            "
-                          >
-                            {technology}
-                          </motion.span>
-                        ),
+                      {project.technologies.length > 0 && (
+                        <CaseStudyDetail label="Stack">
+                          {project.technologies.join(" · ")}
+                        </CaseStudyDetail>
                       )}
-                    </motion.div>
-                  </motion.div>
-                </div>
+                    </dl>
+                  </CaseStudyBlock>
 
-                {/* =================================================
-                    MAIN CONTENT
-                ================================================= */}
-
-                <motion.div
-                  variants={
-                    shouldReduceMotion
-                      ? undefined
-                      : staggerContainer
-                  }
-                  initial="hidden"
-                  animate="visible"
-                  className="
-                    p-6
-                    sm:p-8
-                    lg:p-10
-                  "
-                >
-                  {/* =================================================
-                      OVERVIEW
-                  ================================================= */}
-
-                  <AnimatedBlock reduceMotion={!!instant}>
-                    <CaseStudyBlock title="Overview">
-                      <p
-                        className="
-                          text-sm
-                          leading-7
-                          text-slate-600
-                          sm:text-base
-                          dark:text-slate-400
-                        "
-                      >
-                        {project.description}
+                  {openingImages.length > 0 && (
+                    <CaseStudyBlock
+                      title="Selected views"
+                      className="mt-12"
+                    >
+                      <p className="mb-6 max-w-2xl text-sm leading-7 text-slate-500 dark:text-slate-500">
+                        A small opening sequence from the captured product experience.
                       </p>
+
+                      <ProjectImageGallery
+                        images={openingImages}
+                        imageOffset={1}
+                        totalImages={visualImages.length}
+                        onImageSelect={selectImage}
+                      />
                     </CaseStudyBlock>
-                  </AnimatedBlock>
+                  )}
 
-                  {/* =================================================
-                      PROBLEM / SOLUTION
-                  ================================================= */}
-
-                  <AnimatedBlock
-                    reduceMotion={!!instant}
-                    className="
-                      mt-12
-                      grid
-                      gap-10
-                      md:grid-cols-2
-                    "
-                  >
-                    <CaseStudyBlock title="The Problem">
-                      <p
-                        className="
-                          text-sm
-                          leading-7
-                          text-slate-600
-                          dark:text-slate-500
-                        "
-                      >
+                  <div className="mt-12 grid gap-10 md:grid-cols-2">
+                    <CaseStudyBlock title="The Challenge">
+                      <p className="text-sm leading-7 text-slate-600 dark:text-slate-400">
                         {project.problem}
                       </p>
                     </CaseStudyBlock>
 
-                    <CaseStudyBlock title="The Solution">
-                      <p
-                        className="
-                          text-sm
-                          leading-7
-                          text-slate-600
-                          dark:text-slate-500
-                        "
-                      >
+                    <CaseStudyBlock title="The Approach">
+                      <p className="text-sm leading-7 text-slate-600 dark:text-slate-400">
                         {project.solution}
                       </p>
                     </CaseStudyBlock>
-                  </AnimatedBlock>
+                  </div>
 
-                  {/* =================================================
-                      ARCHITECTURE
-                  ================================================= */}
+                  {narrativeImages.length > 0 && (
+                    <CaseStudyBlock
+                      title="Interface sequence"
+                      className="mt-12"
+                    >
+                      <p className="mb-6 max-w-2xl text-sm leading-7 text-slate-500 dark:text-slate-500">
+                        The remaining captures retain their original order and are arranged as an editorial visual sequence.
+                      </p>
 
-                  <AnimatedBlock
-                    reduceMotion={!!instant}
-                    className="mt-12"
-                  >
-                    <CaseStudyBlock title="Architecture">
-                      <div
-                        className="
-                          grid
-                          gap-2
-                          sm:grid-cols-2
-                        "
-                      >
-                        {project.architecture.map(
-                          (item, index) => (
-                            <motion.div
-                              key={item}
-                              initial={
-                                instant
-                                  ? false
-                                  : {
-                                      opacity: 0,
-                                      y: 12,
-                                    }
-                              }
-                              animate={{
-                                opacity: 1,
-                                y: 0,
-                              }}
-                              transition={{
-                                duration: instant
-                                  ? 0
-                                  : 0.4,
-                                delay: instant
-                                  ? 0
-                                  : 0.04 * index,
-                                ease: easing,
-                              }}
-                              whileHover={
-                                instant
-                                  ? undefined
-                                  : {
-                                      y: -3,
-                                    }
-                              }
-                              className="
-                                group
-                                flex
-                                items-center
-                                gap-3
-                                rounded-xl
-                                border
-                                border-slate-900/[0.07]
-                                bg-slate-900/[0.02]
-                                p-4
-                                transition-all
-                                duration-300
-                                hover:border-cyan-500/20
-                                hover:bg-cyan-500/[0.025]
-                                dark:border-white/[0.06]
-                                dark:bg-white/[0.02]
-                                dark:hover:border-cyan-400/20
-                                dark:hover:bg-cyan-400/[0.025]
-                              "
-                            >
-                              <span
-                                className="
-                                  font-mono
-                                  text-[9px]
-                                  text-cyan-600
-                                  transition-transform
-                                  duration-300
-                                  group-hover:translate-x-0.5
-                                  dark:text-cyan-400
-                                "
-                              >
-                                {String(index + 1).padStart(
-                                  2,
-                                  "0",
-                                )}
-                              </span>
+                      <ProjectImageGallery
+                        images={narrativeImages}
+                        imageOffset={narrativeStartIndex}
+                        totalImages={visualImages.length}
+                        onImageSelect={selectImage}
+                      />
+                    </CaseStudyBlock>
+                  )}
 
-                              <span
-                                className="
-                                  text-xs
-                                  text-slate-600
-                                  dark:text-slate-400
-                                "
-                              >
-                                {item}
-                              </span>
-                            </motion.div>
-                          ),
-                        )}
+                  {project.architecture.length > 0 && (
+                    <CaseStudyBlock
+                      title="System / Architecture"
+                      className="mt-12"
+                    >
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {project.architecture.map((item, index) => (
+                          <NumberedItem
+                            key={item}
+                            index={index}
+                            text={item}
+                          />
+                        ))}
                       </div>
                     </CaseStudyBlock>
-                  </AnimatedBlock>
+                  )}
 
-                  {/* =================================================
-                      KEY FEATURES
-                  ================================================= */}
-
-                  <AnimatedBlock
-                    reduceMotion={!!instant}
-                    className="mt-12"
-                  >
-                    <CaseStudyBlock title="Key Features">
-                      <div
-                        className="
-                          grid
-                          gap-3
-                          sm:grid-cols-2
-                        "
-                      >
-                        {project.features.map(
-                          (feature, index) => (
-                            <motion.div
-                              key={feature}
-                              initial={
-                                instant
-                                  ? false
-                                  : {
-                                      opacity: 0,
-                                      x: -10,
-                                    }
-                              }
-                              animate={{
-                                opacity: 1,
-                                x: 0,
-                              }}
-                              transition={{
-                                duration: instant
-                                  ? 0
-                                  : 0.4,
-                                delay: instant
-                                  ? 0
-                                  : 0.035 * index,
-                                ease: easing,
-                              }}
-                              className="
-                                group
-                                flex
-                                items-center
-                                gap-3
-                                text-sm
-                                text-slate-600
-                                dark:text-slate-400
-                              "
-                            >
-                              <span
-                                className="
-                                  flex
-                                  h-7
-                                  w-7
-                                  shrink-0
-                                  items-center
-                                  justify-center
-                                  rounded-full
-                                  bg-cyan-500/[0.06]
-                                  transition-transform
-                                  duration-300
-                                  group-hover:scale-105
-                                  dark:bg-cyan-400/[0.06]
-                                "
-                              >
-                                <CheckCircle2
-                                  size={15}
-                                  className="
-                                    text-cyan-600
-                                    dark:text-cyan-400
-                                  "
-                                />
-                              </span>
-
-                              <span>{feature}</span>
-                            </motion.div>
-                          ),
-                        )}
+                  {project.features.length > 0 && (
+                    <CaseStudyBlock
+                      title="Key Features"
+                      className="mt-12"
+                    >
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {project.features.map((feature, index) => (
+                          <div
+                            key={feature}
+                            className="flex items-center gap-3 rounded-xl border border-cyan-500/10 bg-cyan-500/[0.025] p-4 text-sm text-slate-600 dark:border-cyan-400/10 dark:bg-cyan-400/[0.025] dark:text-slate-400"
+                          >
+                            <span className="font-mono text-[9px] text-cyan-600 dark:text-cyan-400">
+                              {String(index + 1).padStart(2, "0")}
+                            </span>
+                            <span>{feature}</span>
+                          </div>
+                        ))}
                       </div>
                     </CaseStudyBlock>
-                  </AnimatedBlock>
+                  )}
 
-                  {/* =================================================
-                      CHALLENGES
-                  ================================================= */}
-
-                  <AnimatedBlock
-                    reduceMotion={!!instant}
-                    className="mt-12"
-                  >
-                    <CaseStudyBlock title="Challenges">
-                      <div className="space-y-3">
-                        {project.challenges.map(
-                          (challenge, index) => (
-                            <motion.div
-                              key={challenge}
-                              initial={
-                                instant
-                                  ? false
-                                  : {
-                                      opacity: 0,
-                                      x: -12,
-                                    }
-                              }
-                              animate={{
-                                opacity: 1,
-                                x: 0,
-                              }}
-                              transition={{
-                                duration: instant
-                                  ? 0
-                                  : 0.4,
-                                delay: instant
-                                  ? 0
-                                  : 0.045 * index,
-                                ease: easing,
-                              }}
-                              className="
-                                group
-                                flex
-                                gap-3
-                                text-sm
-                                leading-6
-                                text-slate-600
-                                dark:text-slate-500
-                              "
-                            >
-                              <span
-                                className="
-                                  mt-[10px]
-                                  h-1
-                                  w-1
-                                  shrink-0
-                                  rounded-full
-                                  bg-cyan-600
-                                  transition-transform
-                                  duration-300
-                                  group-hover:scale-150
-                                  dark:bg-cyan-400
-                                "
-                              />
-
-                              <span>{challenge}</span>
-                            </motion.div>
-                          ),
-                        )}
-                      </div>
+                  {project.challenges.length > 0 && (
+                    <CaseStudyBlock
+                      title="Challenges"
+                      className="mt-12"
+                    >
+                      <ul className="grid gap-3 sm:grid-cols-2">
+                        {project.challenges.map((challenge) => (
+                          <li
+                            key={challenge}
+                            className="flex gap-3 text-sm leading-6 text-slate-600 dark:text-slate-400"
+                          >
+                            <CheckCircle2
+                              size={16}
+                              className="mt-1 shrink-0 text-cyan-600 dark:text-cyan-400"
+                              aria-hidden="true"
+                            />
+                            {challenge}
+                          </li>
+                        ))}
+                      </ul>
                     </CaseStudyBlock>
-                  </AnimatedBlock>
+                  )}
 
-                  {/* =================================================
-                      RESULTS
-                  ================================================= */}
-
-                  <AnimatedBlock
-                    reduceMotion={!!instant}
-                    className="mt-12"
-                  >
-                    <CaseStudyBlock title="Results">
-                      <div
-                        className="
-                          grid
-                          gap-3
-                          sm:grid-cols-2
-                        "
-                      >
-                        {project.results.map(
-                          (result, index) => (
-                            <motion.div
-                              key={result}
-                              initial={
-                                instant
-                                  ? false
-                                  : {
-                                      opacity: 0,
-                                      y: 12,
-                                    }
-                              }
-                              animate={{
-                                opacity: 1,
-                                y: 0,
-                              }}
-                              transition={{
-                                duration: instant
-                                  ? 0
-                                  : 0.42,
-                                delay: instant
-                                  ? 0
-                                  : 0.05 * index,
-                                ease: easing,
-                              }}
-                              whileHover={
-                                instant
-                                  ? undefined
-                                  : {
-                                      y: -3,
-                                    }
-                              }
-                              className="
-                                rounded-xl
-                                border
-                                border-cyan-500/10
-                                bg-cyan-500/[0.025]
-                                p-4
-                                text-sm
-                                leading-6
-                                text-slate-600
-                                transition-all
-                                duration-300
-                                hover:border-cyan-500/20
-                                hover:bg-cyan-500/[0.04]
-                                dark:border-cyan-400/10
-                                dark:bg-cyan-400/[0.025]
-                                dark:text-slate-400
-                                dark:hover:border-cyan-400/20
-                                dark:hover:bg-cyan-400/[0.04]
-                              "
-                            >
-                              {result}
-                            </motion.div>
-                          ),
-                        )}
+                  <CaseStudyBlock title="Outcome" className="mt-12">
+                    {project.results.length > 0 && (
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {project.results.map((result) => (
+                          <p
+                            key={result}
+                            className="rounded-xl border border-slate-900/[0.07] bg-slate-900/[0.02] p-4 text-sm leading-6 text-slate-600 dark:border-white/[0.06] dark:bg-white/[0.02] dark:text-slate-400"
+                          >
+                            {result}
+                          </p>
+                        ))}
                       </div>
-                    </CaseStudyBlock>
-                  </AnimatedBlock>
+                    )}
 
-                  {/* =================================================
-                      LINKS
-                  ================================================= */}
+                    {finalImage && (
+                      <div className="mt-7">
+                        <CaseStudyImage
+                          src={finalImage}
+                          index={visualImages.length - 1}
+                          totalImages={visualImages.length}
+                          onSelect={() =>
+                            selectImage(visualImages.length - 1)
+                          }
+                          sizes="(max-width: 640px) 100vw, (max-width: 1200px) 88vw, 980px"
+                        />
+                      </div>
+                    )}
+                  </CaseStudyBlock>
 
                   {(project.github || project.live) && (
-                    <AnimatedBlock
-                      reduceMotion={!!instant}
-                      className="
-                        mt-12
-                        border-t
-                        border-slate-900/[0.08]
-                        pt-8
-                        dark:border-white/[0.07]
-                      "
-                    >
-                      <div
-                        className="
-                          flex
-                          flex-col
-                          gap-3
-                          sm:flex-row
-                        "
-                      >
-                        {project.github && (
-                          <motion.a
-                            href={project.github}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            whileHover={
-                              instant
-                                ? undefined
-                                : {
-                                    y: -3,
-                                  }
-                            }
-                            whileTap={
-                              instant
-                                ? undefined
-                                : {
-                                    scale: 0.98,
-                                  }
-                            }
-                            className="
-                              group
-                              inline-flex
-                              items-center
-                              justify-center
-                              gap-2
-                              rounded-xl
-                              border
-                              border-slate-900/[0.1]
-                              bg-slate-900/[0.025]
-                              px-5
-                              py-3
-                              text-sm
-                              font-semibold
-                              text-slate-900
-                              transition-all
-                              duration-300
-                              hover:border-slate-900/[0.2]
-                              hover:bg-slate-900/[0.05]
-                              dark:border-white/[0.1]
-                              dark:bg-white/[0.03]
-                              dark:text-white
-                              dark:hover:border-white/[0.2]
-                              dark:hover:bg-white/[0.05]
-                            "
-                          >
-                            <GitHubIcon size={16} />
+                    <div className="mt-12 flex flex-col gap-3 border-t border-slate-900/[0.08] pt-8 sm:flex-row dark:border-white/[0.07]">
+                      {project.live && (
+                        <CaseStudyLink href={project.live} emphasized>
+                          Live Project
+                        </CaseStudyLink>
+                      )}
 
-                            <span>GitHub</span>
-
-                            <ExternalLink
-                              size={13}
-                              className="
-                                transition-transform
-                                duration-300
-                                group-hover:translate-x-0.5
-                                group-hover:-translate-y-0.5
-                              "
-                            />
-                          </motion.a>
-                        )}
-
-                        {project.live && (
-                          <motion.a
-                            href={project.live}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            whileHover={
-                              instant
-                                ? undefined
-                                : {
-                                    y: -3,
-                                  }
-                            }
-                            whileTap={
-                              instant
-                                ? undefined
-                                : {
-                                    scale: 0.98,
-                                  }
-                            }
-                            className="
-                              group
-                              inline-flex
-                              items-center
-                              justify-center
-                              gap-2
-                              rounded-xl
-                              bg-slate-950
-                              px-5
-                              py-3
-                              text-sm
-                              font-semibold
-                              text-white
-                              transition-all
-                              duration-300
-                              hover:bg-slate-800
-                              dark:bg-white
-                              dark:text-slate-950
-                              dark:hover:bg-slate-100
-                            "
-                          >
-                            <span>Live Project</span>
-
-                            <ArrowUpRight
-                              size={16}
-                              className="
-                                transition-transform
-                                duration-300
-                                group-hover:translate-x-0.5
-                                group-hover:-translate-y-0.5
-                              "
-                            />
-                          </motion.a>
-                        )}
-                      </div>
-                    </AnimatedBlock>
+                      {project.github && (
+                        <CaseStudyLink href={project.github}>
+                          GitHub
+                        </CaseStudyLink>
+                      )}
+                    </div>
                   )}
-                </motion.div>
-              </div>
+                </div>
+              </main>
+
+              <ImageLightbox
+                images={visualImages}
+                activeIndex={lightboxIndex}
+                onClose={() => setLightbox(null)}
+                onPrevious={showPreviousImage}
+                onNext={showNextImage}
+              />
             </motion.div>
           </div>
         </motion.div>
@@ -1027,116 +507,98 @@ export function ProjectDialog({
   );
 }
 
-/* =========================================================
-   ANIMATED CONTENT BLOCK
-========================================================= */
-
-function AnimatedBlock({
-  children,
-  className = "",
-  reduceMotion,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  reduceMotion: boolean;
-}) {
-  return (
-    <motion.div
-      initial={
-        reduceMotion
-          ? false
-          : {
-              opacity: 0,
-              y: 20,
-            }
-      }
-      animate={{
-        opacity: 1,
-        y: 0,
-      }}
-      transition={{
-        duration: reduceMotion ? 0 : 0.5,
-        ease: easing,
-      }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-/* =========================================================
-   CASE STUDY BLOCK
-========================================================= */
-
 function CaseStudyBlock({
   title,
   children,
   className = "",
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
   return (
     <section className={className}>
       <div className="mb-5 flex items-center gap-3">
-        <motion.span
-          initial={{
-            width: 0,
-          }}
-          animate={{
-            width: 20,
-          }}
-          transition={{
-            duration: 0.45,
-            ease: easing,
-          }}
-          className="
-            h-px
-            bg-cyan-500/50
-            dark:bg-cyan-400/50
-          "
-        />
-
-        <h3
-          className="
-            text-[10px]
-            font-semibold
-            uppercase
-            tracking-[0.2em]
-            text-cyan-600
-            dark:text-cyan-400
-          "
-        >
+        <span className="h-px w-5 bg-cyan-500/50 dark:bg-cyan-400/50" />
+        <h3 className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-400">
           {title}
         </h3>
       </div>
-
       {children}
     </section>
   );
 }
 
-/* =========================================================
-   GITHUB BRAND ICON
-========================================================= */
-
-function GitHubIcon({
-  size = 16,
+function CaseStudyDetail({
+  label,
+  children,
 }: {
-  size?: number;
+  label: string;
+  children: ReactNode;
 }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
-      focusable="false"
+    <div>
+      <dt className="font-mono text-[9px] uppercase tracking-[0.16em] text-slate-500 dark:text-slate-500">
+        {label}
+      </dt>
+      <dd className="mt-2 text-xs leading-5 text-slate-700 dark:text-slate-300">
+        {children}
+      </dd>
+    </div>
+  );
+}
+
+function NumberedItem({
+  index,
+  text,
+}: {
+  index: number;
+  text: string;
+}) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border border-slate-900/[0.07] bg-slate-900/[0.02] p-4 dark:border-white/[0.06] dark:bg-white/[0.02]">
+      <span className="font-mono text-[9px] text-cyan-600 dark:text-cyan-400">
+        {String(index + 1).padStart(2, "0")}
+      </span>
+      <span className="text-xs text-slate-600 dark:text-slate-400">
+        {text}
+      </span>
+    </div>
+  );
+}
+
+function CaseStudyLink({
+  href,
+  children,
+  emphasized = false,
+}: {
+  href: string;
+  children: ReactNode;
+  emphasized?: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`group inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-colors ${
+        emphasized
+          ? "bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100"
+          : "border border-slate-900/[0.1] bg-slate-900/[0.025] text-slate-900 hover:border-slate-900/[0.2] hover:bg-slate-900/[0.05] dark:border-white/[0.1] dark:bg-white/[0.03] dark:text-white dark:hover:border-white/[0.2] dark:hover:bg-white/[0.05]"
+      }`}
     >
-      <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.165 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-1.02-.014-1.85-2.782.604-3.369-1.185-3.369-1.185-.455-1.157-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.004.071 1.532 1.031 1.532 1.031.892 1.529 2.341 1.087 2.91.832.091-.647.35-1.087.636-1.338-2.221-.253-4.555-1.111-4.555-4.943 0-1.091.39-1.984 1.029-2.682-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0 1 12 6.844a9.56 9.56 0 0 1 2.504.337c1.909-1.294 2.748-1.025 2.748-1.025.546 1.377.202 2.394.1 2.647.64.698 1.028 1.591 1.028 2.682 0 3.841-2.338 4.687-4.566 4.935.359.309.678.917.678 1.849 0 1.335-.012 2.411-.012 2.738 0 .268.18.58.688.481A10.002 10.002 0 0 0 22 12C22 6.477 17.523 2 12 2Z" />
-    </svg>
+      <span>{children}</span>
+      {emphasized ? (
+        <ArrowUpRight
+          size={16}
+          className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+        />
+      ) : (
+        <ExternalLink
+          size={14}
+          className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+        />
+      )}
+    </a>
   );
 }
