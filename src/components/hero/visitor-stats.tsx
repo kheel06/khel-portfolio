@@ -15,6 +15,7 @@ import {
    ============================================================================ */
 
 type VisitorData = {
+  configured?: boolean;
   totalVisitors: number;
   liveViewers: number;
 };
@@ -26,16 +27,21 @@ type VisitorData = {
 function StatusDot() {
   return (
     <span
-      className="relative inline-flex h-2 w-2 shrink-0"
+      className="
+        relative
+        inline-flex
+        h-2
+        w-2
+        shrink-0
+      "
       aria-hidden="true"
     >
       <span
         className="
           absolute
           inset-0
-          animate-ping
           rounded-full
-          bg-emerald-400/40
+          bg-emerald-400/30
         "
       />
 
@@ -48,7 +54,7 @@ function StatusDot() {
           rounded-full
           bg-emerald-400
 
-          shadow-[0_0_12px_rgba(52,211,153,0.9)]
+          shadow-[0_0_10px_rgba(52,211,153,0.75)]
         "
       />
     </span>
@@ -59,9 +65,10 @@ function StatusDot() {
    VISITOR STATS
    ============================================================================ */
 
-export function VisitorStats() {
+export default function VisitorStats() {
   const [data, setData] =
     useState<VisitorData>({
+      configured: false,
       totalVisitors: 0,
       liveViewers: 0,
     });
@@ -74,7 +81,7 @@ export function VisitorStats() {
 
     /* ========================================================================
        GET CURRENT COUNTS
-       ======================================================================== */
+    ======================================================================== */
 
     async function fetchStats() {
       try {
@@ -90,12 +97,12 @@ export function VisitorStats() {
                 "Cache-Control":
                   "no-cache",
               },
-            },
+            }
           );
 
         if (!response.ok) {
           throw new Error(
-            "Visitor stats unavailable",
+            "Unable to fetch visitor stats"
           );
         }
 
@@ -107,14 +114,19 @@ export function VisitorStats() {
         }
 
         setData({
+          configured:
+            Boolean(
+              result.configured
+            ),
+
           totalVisitors:
             Number(
-              result.totalVisitors,
+              result.totalVisitors
             ) || 0,
 
           liveViewers:
             Number(
-              result.liveViewers,
+              result.liveViewers
             ) || 0,
         });
 
@@ -128,13 +140,13 @@ export function VisitorStats() {
 
     /* ========================================================================
        SEND PRESENCE
-       ======================================================================== */
+    ======================================================================== */
 
     async function sendPresence(
       action:
         | "enter"
         | "heartbeat"
-        | "leave",
+        | "leave"
     ) {
       try {
         const response =
@@ -152,28 +164,28 @@ export function VisitorStats() {
                 action,
               }),
 
-              /*
-               * Helps the browser finish the request
-               * during page shutdown where supported.
-               */
-              keepalive:
-                action === "leave",
-
               cache: "no-store",
-            },
+
+              keepalive:
+                action ===
+                "leave",
+            }
           );
 
         if (!response.ok) {
           throw new Error(
-            "Presence request failed",
+            "Unable to update visitor presence"
           );
         }
 
         /*
-         * Leave requests don't need to update the
-         * visible UI because the page is disappearing.
+         * A leave request happens while
+         * the page is disappearing.
          */
-        if (action === "leave") {
+        if (
+          action ===
+          "leave"
+        ) {
           return;
         }
 
@@ -185,14 +197,19 @@ export function VisitorStats() {
         }
 
         setData({
+          configured:
+            Boolean(
+              result.configured
+            ),
+
           totalVisitors:
             Number(
-              result.totalVisitors,
+              result.totalVisitors
             ) || 0,
 
           liveViewers:
             Number(
-              result.liveViewers,
+              result.liveViewers
             ) || 0,
         });
 
@@ -205,50 +222,48 @@ export function VisitorStats() {
     }
 
     /* ========================================================================
-       ENTER
-       ======================================================================== */
+       REGISTER CURRENT VISITOR
+    ======================================================================== */
 
     void sendPresence("enter");
 
     /* ========================================================================
-       INITIAL FETCH
-       ======================================================================== */
+       INITIAL DATA
+    ======================================================================== */
 
     void fetchStats();
 
     /* ========================================================================
        HEARTBEAT
-       ======================================================================== */
+       
+       Every 20 seconds we tell Redis:
+       
+       "This browser is still active."
+    ======================================================================== */
 
     const heartbeatInterval =
       window.setInterval(
         () => {
-          /*
-           * Do not keep hidden tabs in the live
-           * viewer count forever.
-           */
           if (
             document.visibilityState ===
             "visible"
           ) {
             void sendPresence(
-              "heartbeat",
+              "heartbeat"
             );
           }
         },
-        20_000,
+        20_000
       );
 
     /* ========================================================================
-       LIVE COUNT REFRESH
-       ======================================================================== */
+       LIVE COUNT POLLING
 
-    /*
-     * This is what makes the number feel realtime.
-     *
-     * Heartbeat = keep OUR visitor alive.
-     * Polling = see OTHER visitors arrive/leave.
-     */
+       Every 4 seconds we ask:
+       
+       "How many visitors are active right now?"
+    ======================================================================== */
+
     const pollingInterval =
       window.setInterval(
         () => {
@@ -259,12 +274,12 @@ export function VisitorStats() {
             void fetchStats();
           }
         },
-        4_000,
+        4_000
       );
 
     /* ========================================================================
-       TAB VISIBILITY
-       ======================================================================== */
+       VISIBILITY
+    ======================================================================== */
 
     const handleVisibilityChange =
       () => {
@@ -273,7 +288,7 @@ export function VisitorStats() {
           "visible"
         ) {
           void sendPresence(
-            "heartbeat",
+            "heartbeat"
           );
 
           void fetchStats();
@@ -282,52 +297,48 @@ export function VisitorStats() {
 
     document.addEventListener(
       "visibilitychange",
-      handleVisibilityChange,
+      handleVisibilityChange
     );
 
     /* ========================================================================
        PAGE LEAVE
-       ======================================================================== */
+    ======================================================================== */
 
     const handlePageHide =
       () => {
-        /*
-         * Do not rely on this as the only way
-         * to remove the visitor.
-         *
-         * Redis expiration is the fallback.
-         */
-        void sendPresence("leave");
+        void sendPresence(
+          "leave"
+        );
       };
 
     window.addEventListener(
       "pagehide",
-      handlePageHide,
+      handlePageHide
     );
 
     /* ========================================================================
        CLEANUP
-       ======================================================================== */
+    ======================================================================== */
 
     return () => {
       cancelled = true;
 
       window.clearInterval(
-        heartbeatInterval,
+        heartbeatInterval
       );
 
       window.clearInterval(
-        pollingInterval,
+        pollingInterval
       );
 
       document.removeEventListener(
         "visibilitychange",
-        handleVisibilityChange,
+        handleVisibilityChange
       );
 
       window.removeEventListener(
         "pagehide",
-        handlePageHide,
+        handlePageHide
       );
     };
   }, []);
@@ -338,8 +349,11 @@ export function VisitorStats() {
       aria-label="Portfolio visitor statistics"
       className="
         relative
+
         w-full
+
         overflow-hidden
+
         rounded-[1.2rem]
 
         border
@@ -350,34 +364,51 @@ export function VisitorStats() {
         px-4
         py-4
 
-        shadow-[0_18px_55px_rgba(15,23,42,0.08)]
+        shadow-[0_18px_55px_rgba(15,23,42,0.07)]
 
         backdrop-blur-xl
 
         dark:border-cyan-400/20
-        dark:bg-[#07111e]/92
-        dark:shadow-[0_18px_55px_rgba(0,0,0,0.30)]
+        dark:bg-[#07111e]/94
+        dark:shadow-[0_18px_55px_rgba(0,0,0,0.28)]
       "
     >
-      {/* TOP STATUS */}
+      {/* ======================================================================
+          STATUS HEADER
+      ====================================================================== */}
 
       <div
         className="
           mb-3
+
           flex
           items-center
           justify-between
+
+          gap-3
         "
       >
-        <div className="flex items-center gap-2">
+        <div
+          className="
+            flex
+            min-w-0
+            items-center
+            gap-2
+          "
+        >
           <StatusDot />
 
           <span
             className="
+              truncate
+
               text-[8px]
+
               font-semibold
+
               uppercase
-              tracking-[0.16em]
+
+              tracking-[0.15em]
 
               text-slate-400
 
@@ -390,9 +421,14 @@ export function VisitorStats() {
 
         <span
           className="
+            shrink-0
+
             text-[7px]
+
             font-semibold
+
             uppercase
+
             tracking-[0.12em]
 
             text-slate-300
@@ -406,7 +442,9 @@ export function VisitorStats() {
         </span>
       </div>
 
-      {/* STATS */}
+      {/* ======================================================================
+          STATS
+      ====================================================================== */}
 
       <div
         className="
@@ -422,14 +460,23 @@ export function VisitorStats() {
         {/* VIEWING NOW */}
 
         <div className="pr-4">
-          <div className="flex items-center gap-2">
+          <div
+            className="
+              flex
+              items-center
+              gap-2
+            "
+          >
             <StatusDot />
 
             <span
               className="
                 text-[8px]
+
                 font-semibold
+
                 uppercase
+
                 tracking-[0.14em]
 
                 text-slate-400
@@ -444,6 +491,7 @@ export function VisitorStats() {
           <div
             className="
               mt-2
+
               flex
               items-end
               gap-2
@@ -454,7 +502,9 @@ export function VisitorStats() {
                 tabular-nums
 
                 text-2xl
+
                 font-semibold
+
                 tracking-tight
 
                 text-slate-950
@@ -468,6 +518,7 @@ export function VisitorStats() {
             <Eye
               className="
                 mb-1
+
                 h-3.5
                 w-3.5
 
@@ -496,7 +547,13 @@ export function VisitorStats() {
         {/* TOTAL VISITORS */}
 
         <div className="pl-4">
-          <div className="flex items-center gap-2">
+          <div
+            className="
+              flex
+              items-center
+              gap-2
+            "
+          >
             <Users
               className="
                 h-3
@@ -511,8 +568,11 @@ export function VisitorStats() {
             <span
               className="
                 text-[8px]
+
                 font-semibold
+
                 uppercase
+
                 tracking-[0.14em]
 
                 text-slate-400
@@ -531,7 +591,9 @@ export function VisitorStats() {
               tabular-nums
 
               text-2xl
+
               font-semibold
+
               tracking-tight
 
               text-slate-950
@@ -560,5 +622,3 @@ export function VisitorStats() {
     </article>
   );
 }
-
-export default VisitorStats;

@@ -22,15 +22,45 @@ import VisitorStats from "@/components/hero/visitor-stats";
    STATUS DOT
    ============================================================================ */
 
-function StatusDot() {
+function StatusDot({
+  pulse = false,
+}: {
+  pulse?: boolean;
+}) {
   return (
     <span
-      className="relative inline-flex h-2 w-2 shrink-0"
+      className="
+        relative
+        inline-flex
+        h-2
+        w-2
+        shrink-0
+      "
       aria-hidden="true"
     >
-      <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400/40" />
+      {pulse && (
+        <span
+          className="
+            absolute
+            inset-0
+            rounded-full
+            bg-emerald-400/30
+            animate-ping
+          "
+        />
+      )}
 
-      <span className="relative block h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
+      <span
+        className="
+          relative
+          block
+          h-2
+          w-2
+          rounded-full
+          bg-emerald-400
+          shadow-[0_0_10px_rgba(52,211,153,0.75)]
+        "
+      />
     </span>
   );
 }
@@ -95,7 +125,7 @@ function FacebookIcon({
 }
 
 /* ============================================================================
-   MOUSE SCROLL ICON
+   MOUSE ICON
    ============================================================================ */
 
 function MouseScrollIcon({
@@ -161,40 +191,41 @@ function SocialButton({
         group
 
         flex
-        h-11
-        w-11
+        h-10
+        w-10
+        shrink-0
+
         items-center
         justify-center
 
         rounded-xl
 
         border
-        border-slate-200/90
+        border-slate-200/80
 
-        bg-white/75
+        bg-white/70
 
         text-slate-500
 
-        shadow-[0_8px_22px_rgba(15,23,42,0.05)]
+        shadow-[0_8px_20px_rgba(15,23,42,0.04)]
 
         backdrop-blur-xl
 
         transition-all
-        duration-300
+        duration-200
 
-        hover:-translate-y-1
-        hover:border-cyan-400/60
+        hover:-translate-y-0.5
+        hover:border-cyan-400/50
         hover:bg-cyan-50
         hover:text-cyan-700
-        hover:shadow-[0_0_24px_rgba(34,211,238,0.14)]
 
-        dark:border-white/[0.10]
-        dark:bg-[#06101d]/80
+        dark:border-white/[0.09]
+        dark:bg-[#07111e]/80
         dark:text-white/50
-        dark:shadow-[0_8px_25px_rgba(0,0,0,0.25)]
+        dark:shadow-[0_8px_24px_rgba(0,0,0,0.22)]
 
-        dark:hover:border-cyan-300/60
-        dark:hover:bg-cyan-400/[0.08]
+        dark:hover:border-cyan-300/50
+        dark:hover:bg-cyan-400/[0.06]
         dark:hover:text-cyan-100
       "
     >
@@ -204,7 +235,7 @@ function SocialButton({
 }
 
 /* ============================================================================
-   SOCIAL RAIL
+   DESKTOP SOCIAL RAIL
    ============================================================================ */
 
 function SocialRail() {
@@ -230,8 +261,6 @@ function SocialRail() {
         lg:items-center
       "
     >
-      {/* TOP LINE */}
-
       <span
         aria-hidden="true"
         className="
@@ -241,12 +270,10 @@ function SocialRail() {
 
           bg-gradient-to-b
           from-transparent
-          via-cyan-400/55
-          to-cyan-400/10
+          via-cyan-400/45
+          to-transparent
         "
       />
-
-      {/* SOCIAL */}
 
       <div
         data-hero-social-list
@@ -261,14 +288,14 @@ function SocialRail() {
           href="https://github.com/kheel06"
           label="GitHub"
         >
-          <GithubIcon className="h-[17px] w-[17px] transition-transform duration-300 group-hover:scale-110" />
+          <GithubIcon className="h-[17px] w-[17px]" />
         </SocialButton>
 
         <SocialButton
           href="https://www.linkedin.com/"
           label="LinkedIn"
         >
-          <LinkedinIcon className="h-[17px] w-[17px] transition-transform duration-300 group-hover:scale-110" />
+          <LinkedinIcon className="h-[17px] w-[17px]" />
         </SocialButton>
 
         <SocialButton
@@ -276,18 +303,16 @@ function SocialRail() {
           label="Email"
           external={false}
         >
-          <Mail className="h-[17px] w-[17px] transition-transform duration-300 group-hover:scale-110" />
+          <Mail className="h-[17px] w-[17px]" />
         </SocialButton>
 
         <SocialButton
           href="https://www.facebook.com/"
           label="Facebook"
         >
-          <FacebookIcon className="h-[17px] w-[17px] transition-transform duration-300 group-hover:scale-110" />
+          <FacebookIcon className="h-[17px] w-[17px]" />
         </SocialButton>
       </div>
-
-      {/* LABEL */}
 
       <div className="mt-7 text-center">
         <p
@@ -297,9 +322,9 @@ function SocialRail() {
             uppercase
             tracking-[0.18em]
 
-            text-cyan-700/60
+            text-cyan-700/55
 
-            dark:text-cyan-100/45
+            dark:text-cyan-100/40
           "
         >
           Follow
@@ -314,16 +339,14 @@ function SocialRail() {
             uppercase
             tracking-[0.18em]
 
-            text-cyan-700/60
+            text-cyan-700/55
 
-            dark:text-cyan-100/45
+            dark:text-cyan-100/40
           "
         >
           &amp; Connect
         </p>
       </div>
-
-      {/* BOTTOM LINE */}
 
       <span
         aria-hidden="true"
@@ -333,13 +356,11 @@ function SocialRail() {
           w-px
 
           bg-gradient-to-b
-          from-cyan-400/40
-          via-cyan-400/35
+          from-cyan-400/35
+          via-cyan-400/25
           to-transparent
         "
       />
-
-      {/* DOT */}
 
       <span
         aria-hidden="true"
@@ -354,10 +375,64 @@ function SocialRail() {
           border
           border-cyan-500
 
-          shadow-[0_0_10px_rgba(34,211,238,0.55)]
+          shadow-[0_0_9px_rgba(34,211,238,0.45)]
         "
       />
     </aside>
+  );
+}
+
+/* ============================================================================
+   MOBILE SOCIAL LINKS
+   ============================================================================ */
+
+function MobileSocialLinks() {
+  return (
+    <div
+      data-hero-mobile-social
+      className="
+        mt-7
+
+        flex
+        w-full
+
+        items-center
+        justify-center
+
+        gap-2.5
+
+        lg:hidden
+      "
+    >
+      <SocialButton
+        href="https://github.com/kheel06"
+        label="GitHub"
+      >
+        <GithubIcon className="h-[16px] w-[16px]" />
+      </SocialButton>
+
+      <SocialButton
+        href="https://www.linkedin.com/"
+        label="LinkedIn"
+      >
+        <LinkedinIcon className="h-[16px] w-[16px]" />
+      </SocialButton>
+
+      <SocialButton
+        href="mailto:hello@khel.dev"
+        label="Email"
+        external={false}
+      >
+        <Mail className="h-[16px] w-[16px]" />
+      </SocialButton>
+
+      <SocialButton
+        href="https://www.facebook.com/"
+        label="Facebook"
+      >
+        <FacebookIcon className="h-[16px] w-[16px]" />
+      </SocialButton>
+    </div>
   );
 }
 
@@ -419,26 +494,28 @@ function SpotifyCard() {
       data-hero-spotify
       className="
         relative
+
         w-full
+
         overflow-hidden
 
-        rounded-[1.35rem]
+        rounded-[1.3rem]
 
         border
         border-cyan-500/20
 
         bg-white/90
 
-        shadow-[0_24px_70px_rgba(15,23,42,0.08)]
+        shadow-[0_24px_65px_rgba(15,23,42,0.075)]
 
         backdrop-blur-2xl
 
         dark:border-cyan-400/20
-        dark:bg-[#07111e]/92
-        dark:shadow-[0_24px_70px_rgba(0,0,0,0.38)]
+        dark:bg-[#07111e]/94
+        dark:shadow-[0_24px_65px_rgba(0,0,0,0.34)]
       "
     >
-      {/* GLOW */}
+      {/* STATIC GLOW */}
 
       <div
         aria-hidden="true"
@@ -454,11 +531,11 @@ function SpotifyCard() {
 
           rounded-full
 
-          bg-cyan-400/[0.08]
+          bg-cyan-400/[0.07]
 
           blur-[65px]
 
-          dark:bg-cyan-400/[0.10]
+          dark:bg-cyan-400/[0.09]
         "
       />
 
@@ -488,6 +565,7 @@ function SpotifyCard() {
               h-8
               w-8
               shrink-0
+
               items-center
               justify-center
 
@@ -538,10 +616,9 @@ function SpotifyCard() {
           </div>
         </div>
 
-        {/* EQUALIZER */}
+        {/* STATIC EQUALIZER */}
 
         <div
-          data-spotify-equalizer
           className="
             flex
             h-5
@@ -557,9 +634,7 @@ function SpotifyCard() {
         </div>
       </div>
 
-      {/* ======================================================================
-          SPOTIFY EMBED
-      ====================================================================== */}
+      {/* SPOTIFY EMBED */}
 
       <div className="relative p-3">
         <div
@@ -587,16 +662,30 @@ function SpotifyCard() {
             allowFullScreen
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
             loading="lazy"
-            className="block w-full"
+            className="
+              block
+              w-full
+            "
           />
         </div>
 
         {/* FOOTER */}
 
-        <div className="mt-3 flex items-center justify-between">
+        <div
+          className="
+            mt-3
+
+            flex
+            items-center
+            justify-between
+
+            gap-3
+          "
+        >
           <span
             className="
               flex
+              min-w-0
               items-center
               gap-2
 
@@ -612,7 +701,9 @@ function SpotifyCard() {
           >
             <StatusDot />
 
-            Live activity
+            <span>
+              Live activity
+            </span>
           </span>
 
           <a
@@ -621,6 +712,8 @@ function SpotifyCard() {
             rel="noopener noreferrer"
             className="
               flex
+              shrink-0
+
               items-center
               gap-1.5
 
@@ -632,13 +725,20 @@ function SpotifyCard() {
               text-slate-400
 
               transition-colors
+
               hover:text-emerald-500
 
               dark:text-white/45
               dark:hover:text-emerald-300
             "
           >
-            Open in Spotify
+            <span className="hidden sm:inline">
+              Open in Spotify
+            </span>
+
+            <span className="sm:hidden">
+              Spotify
+            </span>
 
             <ArrowUpRight className="h-3 w-3" />
           </a>
@@ -659,6 +759,7 @@ function ActivityRail() {
       aria-label="Portfolio activity"
       className="
         relative
+
         z-20
 
         mx-auto
@@ -671,8 +772,11 @@ function ActivityRail() {
         xl:absolute
         xl:right-8
         xl:top-1/2
+
         xl:mt-0
+
         xl:w-[315px]
+
         xl:-translate-y-1/2
       "
     >
@@ -689,13 +793,14 @@ function ActivityRail() {
           w-px
 
           bg-gradient-to-b
-          from-cyan-400/50
-          via-cyan-400/25
+
+          from-cyan-400/45
+          via-cyan-400/22
           to-transparent
         "
       />
 
-      {/* REALTIME VISITOR STATS */}
+      {/* REALTIME VISITORS */}
 
       <VisitorStats />
     </aside>
@@ -708,77 +813,103 @@ function ActivityRail() {
 
 function ScrollIndicator() {
   return (
-    <a
+    <div
       data-hero-scroll
-      href="#projects"
-      aria-label="Scroll to projects"
       className="
-        absolute
+        relative
 
-        bottom-5
-        left-1/2
-
-        z-30
+        mt-9
 
         flex
+        w-full
+        shrink-0
 
-        -translate-x-1/2
-
-        flex-col
         items-center
+        justify-center
 
-        gap-1.5
+        xl:absolute
+        xl:bottom-5
+        xl:left-1/2
 
-        whitespace-nowrap
+        xl:mt-0
+        xl:w-auto
+        xl:-translate-x-1/2
       "
     >
-      <span
+      <Link
+        href="#projects"
+        aria-label="Scroll to projects"
         className="
-          text-[8px]
-          font-semibold
-          uppercase
-          tracking-[0.22em]
+          group
 
-          text-slate-400
+          flex
 
-          transition-colors
+          flex-col
 
-          hover:text-cyan-500
+          items-center
 
-          dark:text-white/30
-          dark:hover:text-cyan-300
+          justify-center
+
+          gap-1.5
+
+          text-center
         "
       >
-        Scroll to explore
-      </span>
+        <span
+          className="
+            text-[8px]
 
-      <MouseScrollIcon
-        data-hero-mouse
-        className="
-          h-8
-          w-5
+            font-semibold
 
-          text-slate-400/65
+            uppercase
 
-          transition-all
-          duration-300
+            tracking-[0.22em]
 
-          dark:text-white/35
-        "
-      />
+            text-slate-400
 
-      <ArrowDown
-        data-hero-arrow
-        className="
-          h-3
-          w-3
+            transition-colors
+            duration-200
 
-          text-cyan-500/70
+            group-hover:text-cyan-500
 
-          dark:text-cyan-300/60
-        "
-      />
-    </a>
+            dark:text-white/30
+            dark:group-hover:text-cyan-300
+          "
+        >
+          Scroll to explore
+        </span>
+
+        <MouseScrollIcon
+          data-hero-mouse
+          className="
+            h-8
+            w-5
+
+            text-slate-400/65
+
+            transition-colors
+            duration-200
+
+            group-hover:text-cyan-500
+
+            dark:text-white/35
+            dark:group-hover:text-cyan-300
+          "
+        />
+
+        <ArrowDown
+          data-hero-arrow
+          className="
+            h-3
+            w-3
+
+            text-cyan-500/70
+
+            dark:text-cyan-300/60
+          "
+        />
+      </Link>
+    </div>
   );
 }
 
@@ -802,590 +933,467 @@ export function Hero() {
     }
 
     /*
-     * IMPORTANT:
-     * Do not reference `ctx` inside this callback.
-     * This prevents:
+     * GSAP IS ONLY USED FOR THE INITIAL
+     * ENTRANCE ANIMATION.
      *
-     * Cannot access 'ctx' before initialization
+     * There are intentionally NO infinite
+     * animations here.
      */
 
-    const ctx = gsap.context(
-      () => {
-        /* ==================================================================
-           ELEMENTS
-        ================================================================== */
+    const ctx =
+      gsap.context(
+        () => {
+          /* ================================================================
+             ELEMENTS
+          ================================================================ */
 
-        const social =
-          section.querySelector<HTMLElement>(
-            "[data-hero-social]"
-          );
+          const social =
+            section.querySelector<HTMLElement>(
+              "[data-hero-social]"
+            );
 
-        const socialItems =
-          section.querySelectorAll<HTMLElement>(
-            "[data-hero-social-list] a"
-          );
+          const socialItems =
+            section.querySelectorAll<HTMLElement>(
+              "[data-hero-social-list] a"
+            );
 
-        const eyebrow =
-          section.querySelector<HTMLElement>(
-            "[data-hero-eyebrow]"
-          );
+          const mobileSocial =
+            section.querySelector<HTMLElement>(
+              "[data-hero-mobile-social]"
+            );
 
-        const identity =
-          section.querySelector<HTMLElement>(
-            "[data-hero-identity]"
-          );
+          const eyebrow =
+            section.querySelector<HTMLElement>(
+              "[data-hero-eyebrow]"
+            );
 
-        const headline =
-          section.querySelector<HTMLElement>(
-            "[data-hero-headline]"
-          );
+          const identity =
+            section.querySelector<HTMLElement>(
+              "[data-hero-identity]"
+            );
 
-        const lineOne =
-          section.querySelector<HTMLElement>(
-            "[data-hero-line-one]"
-          );
+          const headline =
+            section.querySelector<HTMLElement>(
+              "[data-hero-headline]"
+            );
 
-        const gradientWord =
-          section.querySelector<HTMLElement>(
-            "[data-hero-gradient]"
-          );
+          const lineOne =
+            section.querySelector<HTMLElement>(
+              "[data-hero-line-one]"
+            );
 
-        const lineTwo =
-          section.querySelector<HTMLElement>(
-            "[data-hero-line-two]"
-          );
+          const gradientWord =
+            section.querySelector<HTMLElement>(
+              "[data-hero-gradient]"
+            );
 
-        const accent =
-          section.querySelector<HTMLElement>(
-            "[data-hero-accent]"
-          );
+          const lineTwo =
+            section.querySelector<HTMLElement>(
+              "[data-hero-line-two]"
+            );
 
-        const copy =
-          section.querySelector<HTMLElement>(
-            "[data-hero-copy]"
-          );
+          const accent =
+            section.querySelector<HTMLElement>(
+              "[data-hero-accent]"
+            );
 
-        const actions =
-          section.querySelector<HTMLElement>(
-            "[data-hero-actions]"
-          );
+          const copy =
+            section.querySelector<HTMLElement>(
+              "[data-hero-copy]"
+            );
 
-        const actionButtons =
-          section.querySelectorAll<HTMLElement>(
-            "[data-hero-action]"
-          );
+          const actions =
+            section.querySelector<HTMLElement>(
+              "[data-hero-actions]"
+            );
 
-        const spotify =
-          section.querySelector<HTMLElement>(
-            "[data-hero-spotify]"
-          );
+          const actionButtons =
+            section.querySelectorAll<HTMLElement>(
+              "[data-hero-action]"
+            );
 
-        const stats =
-          section.querySelector<HTMLElement>(
-            "[data-hero-stats]"
-          );
+          const spotify =
+            section.querySelector<HTMLElement>(
+              "[data-hero-spotify]"
+            );
 
-        const scroll =
-          section.querySelector<HTMLElement>(
-            "[data-hero-scroll]"
-          );
+          const stats =
+            section.querySelector<HTMLElement>(
+              "[data-hero-stats]"
+            );
 
-        const mouse =
-          section.querySelector<HTMLElement>(
-            "[data-hero-mouse]"
-          );
+          const scroll =
+            section.querySelector<HTMLElement>(
+              "[data-hero-scroll]"
+            );
 
-        const arrow =
-          section.querySelector<HTMLElement>(
-            "[data-hero-arrow]"
-          );
+          /* ================================================================
+             REDUCED MOTION
+          ================================================================ */
 
-        const grid =
-          section.querySelector<HTMLElement>(
-            "[data-hero-grid]"
-          );
+          if (
+            shouldReduceMotion
+          ) {
+            gsap.set(
+              [
+                social,
+                ...Array.from(
+                  socialItems
+                ),
+                mobileSocial,
+                eyebrow,
+                identity,
+                headline,
+                lineOne,
+                gradientWord,
+                lineTwo,
+                accent,
+                copy,
+                actions,
+                ...Array.from(
+                  actionButtons
+                ),
+                spotify,
+                stats,
+                scroll,
+              ].filter(Boolean),
+              {
+                clearProps:
+                  "all",
+              }
+            );
 
-        const glow =
-          section.querySelector<HTMLElement>(
-            "[data-hero-glow]"
-          );
+            return;
+          }
 
-        const equalizerBars =
-          section.querySelectorAll<HTMLElement>(
-            "[data-spotify-equalizer] span"
-          );
+          /* ================================================================
+             INITIAL STATES
+          ================================================================ */
 
-        /* ==================================================================
-           REDUCED MOTION
-        ================================================================== */
+          if (social) {
+            gsap.set(
+              social,
+              {
+                autoAlpha: 0,
+                x: -14,
+              }
+            );
+          }
 
-        if (shouldReduceMotion) {
+          if (
+            socialItems.length
+          ) {
+            gsap.set(
+              socialItems,
+              {
+                autoAlpha: 0,
+                y: 7,
+              }
+            );
+          }
+
           gsap.set(
             [
-              social,
-              ...Array.from(
-                socialItems
-              ),
+              mobileSocial,
               eyebrow,
               identity,
-              headline,
               lineOne,
-              gradientWord,
               lineTwo,
               accent,
               copy,
               actions,
-              ...Array.from(
-                actionButtons
-              ),
               spotify,
               stats,
               scroll,
-              mouse,
-              arrow,
             ].filter(Boolean),
             {
-              clearProps: "all",
+              autoAlpha: 0,
+              y: 16,
             }
           );
 
-          return;
-        }
-
-        /* ==================================================================
-           INITIAL STATES
-        ================================================================== */
-
-        gsap.set(
-          [
-            eyebrow,
-            identity,
-            lineOne,
-            lineTwo,
-            accent,
-            copy,
-            actions,
-            spotify,
-            stats,
-            scroll,
-          ].filter(Boolean),
-          {
-            opacity: 0,
-            y: 20,
+          if (
+            gradientWord
+          ) {
+            gsap.set(
+              gradientWord,
+              {
+                autoAlpha: 0,
+                scale: 0.96,
+                transformOrigin:
+                  "50% 50%",
+              }
+            );
           }
-        );
 
-        if (gradientWord) {
-          gsap.set(
-            gradientWord,
-            {
-              opacity: 0,
-              scale: 0.9,
-              transformOrigin:
-                "50% 50%",
-            }
-          );
-        }
+          /* ================================================================
+             ENTRANCE TIMELINE
+          ================================================================ */
 
-        if (social) {
-          gsap.set(social, {
-            opacity: 0,
-            x: -20,
-          });
-        }
-
-        if (socialItems.length) {
-          gsap.set(
-            socialItems,
-            {
-              opacity: 0,
-              y: 10,
-            }
-          );
-        }
-
-        if (mouse) {
-          gsap.set(mouse, {
-            opacity: 0,
-          });
-        }
-
-        if (arrow) {
-          gsap.set(arrow, {
-            opacity: 0,
-          });
-        }
-
-        /* ==================================================================
-           ENTRANCE TIMELINE
-        ================================================================== */
-
-        const timeline =
-          gsap.timeline({
-            defaults: {
-              ease: "power3.out",
-            },
-          });
-
-        /* SOCIAL */
-
-        if (social) {
-          timeline.to(
-            social,
-            {
-              opacity: 1,
-              x: 0,
-              duration: 0.5,
-            },
-            0.05
-          );
-        }
-
-        if (socialItems.length) {
-          timeline.to(
-            socialItems,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.35,
-              stagger: 0.06,
-            },
-            0.16
-          );
-        }
-
-        /* STATUS */
-
-        if (eyebrow) {
-          timeline.to(
-            eyebrow,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.4,
-            },
-            0.1
-          );
-        }
-
-        /* IDENTITY */
-
-        if (identity) {
-          timeline.to(
-            identity,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.4,
-            },
-            0.22
-          );
-        }
-
-        /* HEADLINE LINE ONE */
-
-        if (lineOne) {
-          timeline.to(
-            lineOne,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.6,
-            },
-            0.35
-          );
-        }
-
-        /* RELIABLE */
-
-        if (gradientWord) {
-          timeline.to(
-            gradientWord,
-            {
-              opacity: 1,
-              scale: 1,
-              duration: 0.58,
-              ease:
-                "back.out(1.2)",
-            },
-            0.45
-          );
-        }
-
-        /* HEADLINE LINE TWO */
-
-        if (lineTwo) {
-          timeline.to(
-            lineTwo,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.58,
-            },
-            0.52
-          );
-        }
-
-        /* ACCENT */
-
-        if (accent) {
-          timeline.to(
-            accent,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.35,
-            },
-            0.76
-          );
-        }
-
-        /* DESCRIPTION */
-
-        if (copy) {
-          timeline.to(
-            copy,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.45,
-            },
-            0.8
-          );
-        }
-
-        /* ACTION CONTAINER */
-
-        if (actions) {
-          timeline.to(
-            actions,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.4,
-            },
-            0.92
-          );
-        }
-
-        /* ACTION BUTTONS */
-
-        if (
-          actionButtons.length
-        ) {
-          timeline.fromTo(
-            actionButtons,
-            {
-              opacity: 0,
-              y: 8,
-            },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.3,
-              stagger: 0.06,
-            },
-            0.98
-          );
-        }
-
-        /* SPOTIFY */
-
-        if (spotify) {
-          timeline.to(
-            spotify,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.55,
-            },
-            0.65
-          );
-        }
-
-        /* VISITOR STATS */
-
-        if (stats) {
-          timeline.to(
-            stats,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.4,
-            },
-            0.82
-          );
-        }
-
-        /* SCROLL */
-
-        if (scroll) {
-          timeline.to(
-            scroll,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.4,
-            },
-            1.15
-          );
-        }
-
-        /* ==================================================================
-           GRID ANIMATION
-        ================================================================== */
-
-        if (grid) {
-          gsap.to(grid, {
-            backgroundPosition:
-              "48px 48px",
-            duration: 24,
-            repeat: -1,
-            ease: "none",
-          });
-        }
-
-        /* ==================================================================
-           GLOW ANIMATION
-        ================================================================== */
-
-        if (glow) {
-          gsap.to(glow, {
-            x: 35,
-            y: -15,
-            scale: 1.04,
-            duration: 8,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-          });
-        }
-
-        /* ==================================================================
-           SPOTIFY FLOAT
-        ================================================================== */
-
-        if (spotify) {
-          gsap.to(spotify, {
-            y: -4,
-            duration: 4.8,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            delay: 1,
-          });
-        }
-
-        /* ==================================================================
-           VISITOR CARD FLOAT
-        ================================================================== */
-
-        if (stats) {
-          gsap.to(stats, {
-            y: -2.5,
-            duration: 5.2,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            delay: 0.5,
-          });
-        }
-
-        /* ==================================================================
-           EQUALIZER
-        ================================================================== */
-
-        equalizerBars.forEach(
-          (
-            bar,
-            index
-          ) => {
-            gsap.to(bar, {
-              scaleY:
-                index % 2 === 0
-                  ? 0.65
-                  : 1,
-
-              transformOrigin:
-                "bottom",
-
-              duration:
-                0.45 +
-                index * 0.08,
-
-              repeat: -1,
-              yoyo: true,
-
-              ease:
-                "sine.inOut",
-
-              delay:
-                index * 0.08,
+          const timeline =
+            gsap.timeline({
+              defaults: {
+                ease:
+                  "power3.out",
+              },
             });
+
+          /* SOCIAL */
+
+          if (social) {
+            timeline.to(
+              social,
+              {
+                autoAlpha: 1,
+                x: 0,
+                duration:
+                  0.45,
+              },
+              0
+            );
           }
-        );
 
-        /* ==================================================================
-           MOUSE
-        ================================================================== */
+          if (
+            socialItems.length
+          ) {
+            timeline.to(
+              socialItems,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration:
+                  0.25,
+                stagger:
+                  0.045,
+              },
+              0.08
+            );
+          }
 
-        if (mouse) {
-          gsap.to(mouse, {
-            y: 4,
-            opacity: 0.72,
-            duration: 1.4,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            delay: 1.5,
-          });
-        }
+          /* STATUS */
 
-        /* ==================================================================
-           ARROW
-        ================================================================== */
+          if (eyebrow) {
+            timeline.to(
+              eyebrow,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration:
+                  0.38,
+              },
+              0.08
+            );
+          }
 
-        if (arrow) {
-          gsap.to(arrow, {
-            y: 4,
-            opacity: 0.5,
-            duration: 1.2,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            delay: 1.7,
-          });
-        }
+          /* IDENTITY */
 
-        /* ==================================================================
-           HEADLINE MICRO FLOAT
-        ================================================================== */
+          if (identity) {
+            timeline.to(
+              identity,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration:
+                  0.38,
+              },
+              0.18
+            );
+          }
 
-        if (headline) {
-          gsap.to(
-            headline,
-            {
-              y: -1.5,
-              duration: 5.5,
-              repeat: -1,
-              yoyo: true,
-              ease: "sine.inOut",
-              delay: 2,
-            }
-          );
-        }
-      },
-      section
-    );
+          /* HEADLINE */
+
+          if (lineOne) {
+            timeline.to(
+              lineOne,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration:
+                  0.5,
+              },
+              0.28
+            );
+          }
+
+          if (
+            gradientWord
+          ) {
+            timeline.to(
+              gradientWord,
+              {
+                autoAlpha: 1,
+                scale: 1,
+                duration:
+                  0.48,
+                ease:
+                  "back.out(1.08)",
+              },
+              0.36
+            );
+          }
+
+          if (lineTwo) {
+            timeline.to(
+              lineTwo,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration:
+                  0.48,
+              },
+              0.42
+            );
+          }
+
+          /* ACCENT */
+
+          if (accent) {
+            timeline.to(
+              accent,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration:
+                  0.28,
+              },
+              0.6
+            );
+          }
+
+          /* COPY */
+
+          if (copy) {
+            timeline.to(
+              copy,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration:
+                  0.4,
+              },
+              0.64
+            );
+          }
+
+          /* ACTIONS */
+
+          if (actions) {
+            timeline.to(
+              actions,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration:
+                  0.32,
+              },
+              0.74
+            );
+          }
+
+          if (
+            actionButtons.length
+          ) {
+            timeline.fromTo(
+              actionButtons,
+              {
+                autoAlpha: 0,
+                y: 7,
+              },
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration:
+                  0.24,
+                stagger:
+                  0.05,
+              },
+              0.78
+            );
+          }
+
+          /* MOBILE SOCIAL */
+
+          if (
+            mobileSocial
+          ) {
+            timeline.to(
+              mobileSocial,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration:
+                  0.3,
+              },
+              0.9
+            );
+          }
+
+          /* SPOTIFY */
+
+          if (spotify) {
+            timeline.fromTo(
+              spotify,
+              {
+                autoAlpha: 0,
+                y: 14,
+                scale: 0.985,
+              },
+              {
+                autoAlpha: 1,
+                y: 0,
+                scale: 1,
+                duration:
+                  0.45,
+              },
+              0.58
+            );
+          }
+
+          /* VISITOR */
+
+          if (stats) {
+            timeline.fromTo(
+              stats,
+              {
+                autoAlpha: 0,
+                y: 12,
+                scale: 0.985,
+              },
+              {
+                autoAlpha: 1,
+                y: 0,
+                scale: 1,
+                duration:
+                  0.38,
+              },
+              0.7
+            );
+          }
+
+          /* SCROLL */
+
+          if (scroll) {
+            timeline.to(
+              scroll,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration:
+                  0.32,
+              },
+              0.98
+            );
+          }
+        },
+        section
+      );
 
     return () => {
       ctx.revert();
     };
-  }, [shouldReduceMotion]);
-
-  /* ==========================================================================
-     RENDER
-  ========================================================================== */
+  }, [
+    shouldReduceMotion,
+  ]);
 
   return (
     <section
@@ -1409,24 +1417,26 @@ export function Hero() {
       aria-labelledby="hero-title"
     >
       {/* ======================================================================
-          BACKGROUND
+          STATIC BACKGROUND
       ====================================================================== */}
 
       <div
         aria-hidden="true"
         className="
           pointer-events-none
+
           absolute
           inset-0
+
           overflow-hidden
         "
       >
-        {/* CYAN GLOW */}
+        {/* CYAN ATMOSPHERE */}
 
         <div
-          data-hero-glow
           className="
             absolute
+
             -left-40
             top-[2%]
 
@@ -1435,22 +1445,23 @@ export function Hero() {
 
             rounded-full
 
-            bg-cyan-400/[0.045]
+            bg-cyan-400/[0.04]
 
             blur-[140px]
 
-            dark:bg-cyan-500/[0.08]
+            dark:bg-cyan-500/[0.075]
 
             sm:h-[38rem]
             sm:w-[38rem]
           "
         />
 
-        {/* VIOLET GLOW */}
+        {/* VIOLET ATMOSPHERE */}
 
         <div
           className="
             absolute
+
             -right-52
             top-[8%]
 
@@ -1459,25 +1470,24 @@ export function Hero() {
 
             rounded-full
 
-            bg-violet-400/[0.03]
+            bg-violet-400/[0.025]
 
             blur-[150px]
 
-            dark:bg-violet-500/[0.07]
+            dark:bg-violet-500/[0.065]
           "
         />
 
-        {/* GRID */}
+        {/* GRID - STATIC */}
 
         <div
-          data-hero-grid
           className="
             absolute
             inset-0
 
-            opacity-[0.13]
+            opacity-[0.115]
 
-            dark:opacity-[0.11]
+            dark:opacity-[0.095]
           "
           style={{
             backgroundImage:
@@ -1504,15 +1514,15 @@ export function Hero() {
 
             rounded-full
 
-            bg-cyan-400/[0.012]
+            bg-cyan-400/[0.01]
 
             blur-[120px]
 
-            dark:bg-blue-500/[0.02]
+            dark:bg-blue-500/[0.018]
           "
         />
 
-        {/* CYAN CURVE */}
+        {/* BOTTOM CYAN CURVE */}
 
         <div
           className="
@@ -1529,13 +1539,13 @@ export function Hero() {
             rounded-[50%]
 
             border-t
-            border-cyan-500/[0.08]
+            border-cyan-500/[0.07]
 
-            dark:border-cyan-400/[0.17]
+            dark:border-cyan-400/[0.15]
           "
         />
 
-        {/* VIOLET CURVE */}
+        {/* BOTTOM VIOLET CURVE */}
 
         <div
           className="
@@ -1552,9 +1562,9 @@ export function Hero() {
             rounded-[50%]
 
             border-t
-            border-violet-500/[0.08]
+            border-violet-500/[0.07]
 
-            dark:border-violet-500/[0.17]
+            dark:border-violet-500/[0.15]
           "
         />
 
@@ -1563,6 +1573,7 @@ export function Hero() {
         <div
           className="
             absolute
+
             inset-x-0
             top-0
 
@@ -1584,6 +1595,7 @@ export function Hero() {
         <div
           className="
             absolute
+
             inset-x-0
             bottom-0
 
@@ -1602,7 +1614,7 @@ export function Hero() {
       </div>
 
       {/* ======================================================================
-          SOCIAL RAIL
+          DESKTOP SOCIAL
       ====================================================================== */}
 
       <SocialRail />
@@ -1614,38 +1626,49 @@ export function Hero() {
       <div
         className="
           relative
+
           mx-auto
 
           flex
+
           min-h-[100svh]
 
           w-full
+
           max-w-[1500px]
 
           flex-col
 
-          justify-center
+          justify-start
 
           px-5
 
-          pb-24
-          pt-28
+          pb-10
+          pt-32
 
           sm:px-8
-          sm:pt-32
+          sm:pb-12
+          sm:pt-36
+
+          md:pt-36
 
           lg:px-12
 
+          xl:justify-center
+
           xl:px-16
+          xl:pb-24
+          xl:pt-28
         "
       >
         {/* ====================================================================
-            CENTER HERO
+            MAIN HERO CONTENT
         ==================================================================== */}
 
         <main
           className="
             relative
+
             z-10
 
             mx-auto
@@ -1653,11 +1676,13 @@ export function Hero() {
             flex
 
             w-full
+
             max-w-[820px]
 
             flex-col
 
             items-center
+
             justify-center
 
             text-center
@@ -1672,6 +1697,8 @@ export function Hero() {
             className="
               inline-flex
 
+              max-w-full
+
               items-center
               gap-2.5
 
@@ -1680,31 +1707,35 @@ export function Hero() {
               border
               border-cyan-400/20
 
-              bg-cyan-400/[0.04]
+              bg-cyan-400/[0.035]
 
               px-4
               py-2
 
-              text-[9px]
+              text-[8px]
 
               font-semibold
 
               uppercase
 
-              tracking-[0.20em]
+              tracking-[0.18em]
 
               text-cyan-700
 
               backdrop-blur-xl
 
+              sm:text-[9px]
+
               dark:border-cyan-300/20
-              dark:bg-cyan-400/[0.05]
+              dark:bg-cyan-400/[0.045]
               dark:text-cyan-100/80
             "
           >
             <StatusDot />
 
-            Available for select opportunities
+            <span className="truncate">
+              Available for select opportunities
+            </span>
           </div>
 
           {/* IDENTITY */}
@@ -1752,7 +1783,9 @@ export function Hero() {
             </p>
           </div>
 
-          {/* HEADLINE */}
+          {/* ==================================================================
+              HEADLINE
+          ================================================================== */}
 
           <h1
             id="hero-title"
@@ -1762,7 +1795,7 @@ export function Hero() {
 
               w-full
 
-              text-[clamp(2.3rem,5.05vw,5.35rem)]
+              text-[clamp(2.35rem,8vw,5.35rem)]
 
               font-semibold
 
@@ -1773,6 +1806,8 @@ export function Hero() {
               text-slate-950
 
               dark:text-white
+
+              sm:text-[clamp(2.8rem,6vw,5.35rem)]
             "
           >
             <span
@@ -1826,6 +1861,7 @@ export function Hero() {
               w-14
 
               bg-gradient-to-r
+
               from-transparent
               via-cyan-500
               to-transparent
@@ -1854,29 +1890,33 @@ export function Hero() {
             "
           >
             I design and develop modern web
-            applications focused on
-            performance, usability,
-            maintainability, and solving
+            applications focused on performance,
+            usability, maintainability, and solving
             real-world problems.
           </p>
 
-          {/* ACTIONS */}
+          {/* ==================================================================
+              ACTIONS
+          ================================================================== */}
 
           <div
             data-hero-actions
             className="
               mt-8
 
-              flex
+              grid
 
-              flex-col
+              w-full
 
-              items-center
-              justify-center
+              grid-cols-1
 
               gap-3
 
-              sm:flex-row
+              sm:flex
+              sm:w-auto
+              sm:flex-wrap
+              sm:items-center
+              sm:justify-center
             "
           >
             {/* VIEW MY WORK */}
@@ -1890,6 +1930,7 @@ export function Hero() {
                 inline-flex
 
                 min-h-12
+
                 min-w-[155px]
 
                 items-center
@@ -1899,6 +1940,7 @@ export function Hero() {
                 rounded-xl
 
                 !bg-slate-950
+
                 !text-white
 
                 px-5
@@ -1914,11 +1956,12 @@ export function Hero() {
                 shadow-[0_16px_40px_rgba(15,23,42,0.16)]
 
                 transition-all
-                duration-300
+                duration-200
 
-                hover:-translate-y-1
+                hover:-translate-y-0.5
                 hover:!bg-cyan-600
-                hover:shadow-[0_18px_45px_rgba(34,211,238,0.2)]
+
+                hover:shadow-[0_16px_40px_rgba(34,211,238,0.18)]
 
                 focus-visible:outline-none
                 focus-visible:ring-2
@@ -1940,7 +1983,7 @@ export function Hero() {
                   !text-inherit
 
                   transition-transform
-                  duration-300
+                  duration-200
 
                   group-hover:-translate-y-0.5
                   group-hover:translate-x-0.5
@@ -1960,6 +2003,7 @@ export function Hero() {
                 inline-flex
 
                 min-h-12
+
                 min-w-[155px]
 
                 items-center
@@ -1988,9 +2032,9 @@ export function Hero() {
                 backdrop-blur-xl
 
                 transition-all
-                duration-300
+                duration-200
 
-                hover:-translate-y-1
+                hover:-translate-y-0.5
                 hover:border-cyan-400/60
                 hover:bg-cyan-50
                 hover:!text-cyan-700
@@ -2013,7 +2057,7 @@ export function Hero() {
                   text-cyan-600
 
                   transition-transform
-                  duration-300
+                  duration-200
 
                   group-hover:translate-y-0.5
 
@@ -2033,6 +2077,7 @@ export function Hero() {
                 inline-flex
 
                 min-h-12
+
                 min-w-[145px]
 
                 items-center
@@ -2061,9 +2106,9 @@ export function Hero() {
                 backdrop-blur-xl
 
                 transition-all
-                duration-300
+                duration-200
 
-                hover:-translate-y-1
+                hover:-translate-y-0.5
                 hover:border-violet-400/40
                 hover:bg-violet-50
                 hover:!text-violet-700
@@ -2090,16 +2135,30 @@ export function Hero() {
               />
             </Link>
           </div>
+
+          {/* MOBILE SOCIAL LINKS */}
+
+          <MobileSocialLinks />
         </main>
 
         {/* ====================================================================
             ACTIVITY RAIL
+
+            MOBILE:
+            normal document flow
+
+            DESKTOP:
+            absolute right-side rail
         ==================================================================== */}
 
         <ActivityRail />
 
         {/* ====================================================================
             SCROLL INDICATOR
+
+            IMPORTANT FIX:
+            `w-full` ensures justify-center actually centers the
+            indicator on mobile.
         ==================================================================== */}
 
         <ScrollIndicator />
