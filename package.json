@@ -15,6 +15,7 @@
     "@teispace/next-themes": "^3.0.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.4",
+    "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.5",
     "firebase": "^12.18.0",

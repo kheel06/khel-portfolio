@@ -5,9 +5,7 @@ import {
   ArrowDown,
   ArrowUpRight,
   Download,
-  Eye,
   Mail,
-  Users,
 } from "lucide-react";
 import {
   useEffect,
@@ -18,15 +16,7 @@ import {
 } from "react";
 
 import { gsap } from "@/lib/gsap";
-
-/* ============================================================================
-   TYPES
-   ============================================================================ */
-
-type VisitorData = {
-  totalVisitors: number;
-  liveViewers: number;
-};
+import VisitorStats from "@/components/hero/visitor-stats";
 
 /* ============================================================================
    STATUS DOT
@@ -162,20 +152,35 @@ function SocialButton({
       href={href}
       aria-label={label}
       target={external ? "_blank" : undefined}
-      rel={external ? "noopener noreferrer" : undefined}
+      rel={
+        external
+          ? "noopener noreferrer"
+          : undefined
+      }
       className="
         group
-        flex h-11 w-11 items-center justify-center
+
+        flex
+        h-11
+        w-11
+        items-center
+        justify-center
+
         rounded-xl
 
-        border border-slate-200/90
+        border
+        border-slate-200/90
+
         bg-white/75
+
         text-slate-500
 
         shadow-[0_8px_22px_rgba(15,23,42,0.05)]
+
         backdrop-blur-xl
 
-        transition-all duration-300
+        transition-all
+        duration-300
 
         hover:-translate-y-1
         hover:border-cyan-400/60
@@ -209,11 +214,15 @@ function SocialRail() {
       aria-label="Social links"
       className="
         absolute
+
         left-[max(18px,calc((100vw-1280px)/2))]
+
         top-1/2
+
         z-30
 
         hidden
+
         -translate-y-1/2
 
         lg:flex
@@ -221,12 +230,15 @@ function SocialRail() {
         lg:items-center
       "
     >
+      {/* TOP LINE */}
+
       <span
         aria-hidden="true"
         className="
           mb-3
           h-9
           w-px
+
           bg-gradient-to-b
           from-transparent
           via-cyan-400/55
@@ -234,9 +246,16 @@ function SocialRail() {
         "
       />
 
+      {/* SOCIAL */}
+
       <div
         data-hero-social-list
-        className="flex flex-col items-center gap-3"
+        className="
+          flex
+          flex-col
+          items-center
+          gap-3
+        "
       >
         <SocialButton
           href="https://github.com/kheel06"
@@ -268,15 +287,43 @@ function SocialRail() {
         </SocialButton>
       </div>
 
+      {/* LABEL */}
+
       <div className="mt-7 text-center">
-        <p className="text-[8px] font-semibold uppercase tracking-[0.18em] text-cyan-700/60 dark:text-cyan-100/45">
+        <p
+          className="
+            text-[8px]
+            font-semibold
+            uppercase
+            tracking-[0.18em]
+
+            text-cyan-700/60
+
+            dark:text-cyan-100/45
+          "
+        >
           Follow
         </p>
 
-        <p className="mt-0.5 text-[8px] font-semibold uppercase tracking-[0.18em] text-cyan-700/60 dark:text-cyan-100/45">
+        <p
+          className="
+            mt-0.5
+
+            text-[8px]
+            font-semibold
+            uppercase
+            tracking-[0.18em]
+
+            text-cyan-700/60
+
+            dark:text-cyan-100/45
+          "
+        >
           &amp; Connect
         </p>
       </div>
+
+      {/* BOTTOM LINE */}
 
       <span
         aria-hidden="true"
@@ -284,6 +331,7 @@ function SocialRail() {
           mt-4
           h-9
           w-px
+
           bg-gradient-to-b
           from-cyan-400/40
           via-cyan-400/35
@@ -291,15 +339,21 @@ function SocialRail() {
         "
       />
 
+      {/* DOT */}
+
       <span
         aria-hidden="true"
         className="
           mt-2
+
           h-1.5
           w-1.5
+
           rounded-full
+
           border
           border-cyan-500
+
           shadow-[0_0_10px_rgba(34,211,238,0.55)]
         "
       />
@@ -367,6 +421,7 @@ function SpotifyCard() {
         relative
         w-full
         overflow-hidden
+
         rounded-[1.35rem]
 
         border
@@ -389,13 +444,18 @@ function SpotifyCard() {
         aria-hidden="true"
         className="
           pointer-events-none
+
           absolute
           -right-16
           -top-16
+
           h-36
           w-36
+
           rounded-full
+
           bg-cyan-400/[0.08]
+
           blur-[65px]
 
           dark:bg-cyan-400/[0.10]
@@ -407,6 +467,7 @@ function SpotifyCard() {
       <div
         className="
           relative
+
           flex
           items-center
           justify-between
@@ -446,19 +507,47 @@ function SpotifyCard() {
           </div>
 
           <div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-700 dark:text-white/65">
+            <p
+              className="
+                text-[9px]
+                font-bold
+                uppercase
+                tracking-[0.2em]
+
+                text-slate-700
+
+                dark:text-white/65
+              "
+            >
               Now Playing
             </p>
 
-            <p className="mt-0.5 text-[8px] text-slate-400 dark:text-white/30">
+            <p
+              className="
+                mt-0.5
+
+                text-[8px]
+
+                text-slate-400
+
+                dark:text-white/30
+              "
+            >
               Spotify
             </p>
           </div>
         </div>
 
+        {/* EQUALIZER */}
+
         <div
           data-spotify-equalizer
-          className="flex h-5 items-end gap-[3px]"
+          className="
+            flex
+            h-5
+            items-end
+            gap-[3px]
+          "
           aria-hidden="true"
         >
           <span className="h-2 w-[2px] rounded-full bg-emerald-400" />
@@ -468,12 +557,15 @@ function SpotifyCard() {
         </div>
       </div>
 
-      {/* SPOTIFY EMBED */}
+      {/* ======================================================================
+          SPOTIFY EMBED
+      ====================================================================== */}
 
       <div className="relative p-3">
         <div
           className="
             overflow-hidden
+
             rounded-xl
 
             border
@@ -519,6 +611,7 @@ function SpotifyCard() {
             "
           >
             <StatusDot />
+
             Live activity
           </span>
 
@@ -546,205 +639,9 @@ function SpotifyCard() {
             "
           >
             Open in Spotify
+
             <ArrowUpRight className="h-3 w-3" />
           </a>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-/* ============================================================================
-   VISITOR STATS
-   ============================================================================ */
-
-function VisitorStats() {
-  const [data, setData] = useState<VisitorData>({
-    totalVisitors: 0,
-    liveViewers: 0,
-  });
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function updatePresence(action: "enter" | "heartbeat") {
-      try {
-        const response = await fetch("/api/api/visitors", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            action,
-          }),
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          throw new Error("Visitor endpoint unavailable");
-        }
-
-        const result = (await response.json()) as VisitorData;
-
-        if (!cancelled) {
-          setData({
-            totalVisitors: Number(result.totalVisitors) || 0,
-            liveViewers: Number(result.liveViewers) || 0,
-          });
-        }
-      } catch {
-        // Keep UI stable if analytics is unavailable.
-      }
-    }
-
-    void updatePresence("enter");
-
-    const interval = window.setInterval(() => {
-      void updatePresence("heartbeat");
-    }, 30_000);
-
-    return () => {
-      cancelled = true;
-      window.clearInterval(interval);
-    };
-  }, []);
-
-  return (
-    <article
-      data-hero-stats
-      className="
-        relative
-        w-full
-        overflow-hidden
-        rounded-[1.2rem]
-
-        border
-        border-cyan-500/20
-
-        bg-white/90
-
-        px-4
-        py-4
-
-        shadow-[0_18px_55px_rgba(15,23,42,0.08)]
-
-        backdrop-blur-xl
-
-        dark:border-cyan-400/20
-        dark:bg-[#07111e]/92
-        dark:shadow-[0_18px_55px_rgba(0,0,0,0.30)]
-      "
-    >
-      <div
-        className="
-          grid
-          grid-cols-2
-
-          divide-x
-          divide-slate-200
-
-          dark:divide-white/[0.08]
-        "
-      >
-        {/* VIEWING NOW */}
-
-        <div className="pr-4">
-          <div className="flex items-center gap-2">
-            <StatusDot />
-
-            <span
-              className="
-                text-[8px]
-                font-semibold
-                uppercase
-                tracking-[0.14em]
-
-                text-slate-400
-
-                dark:text-white/35
-              "
-            >
-              Viewing now
-            </span>
-          </div>
-
-          <div className="mt-2 flex items-end gap-2">
-            <span
-              className="
-                text-2xl
-                font-semibold
-                tracking-tight
-
-                text-slate-950
-
-                dark:text-white
-              "
-            >
-              {data.liveViewers || "—"}
-            </span>
-
-            <Eye
-              className="
-                mb-1
-                h-3.5
-                w-3.5
-
-                text-cyan-500/70
-
-                dark:text-cyan-300/60
-              "
-            />
-          </div>
-        </div>
-
-        {/* TOTAL VISITORS */}
-
-        <div className="pl-4">
-          <div className="flex items-center gap-2">
-            <Users
-              className="
-                h-3
-                w-3
-
-                text-cyan-500/70
-
-                dark:text-cyan-300/60
-              "
-            />
-
-            <span
-              className="
-                text-[8px]
-                font-semibold
-                uppercase
-                tracking-[0.14em]
-
-                text-slate-400
-
-                dark:text-white/35
-              "
-            >
-              Total visitors
-            </span>
-          </div>
-
-          <div
-            className="
-              mt-2
-
-              text-2xl
-              font-semibold
-              tracking-tight
-
-              text-slate-950
-
-              dark:text-white
-            "
-          >
-            {data.totalVisitors
-              ? data.totalVisitors.toLocaleString()
-              : "—"}
-          </div>
         </div>
       </div>
     </article>
@@ -758,13 +655,16 @@ function VisitorStats() {
 function ActivityRail() {
   return (
     <aside
+      data-hero-activity
       aria-label="Portfolio activity"
       className="
         relative
         z-20
 
         mx-auto
-        mt-12
+
+        mt-10
+
         w-full
         max-w-[360px]
 
@@ -784,6 +684,7 @@ function ActivityRail() {
         aria-hidden="true"
         className="
           mx-auto
+
           h-4
           w-px
 
@@ -793,6 +694,8 @@ function ActivityRail() {
           to-transparent
         "
       />
+
+      {/* REALTIME VISITOR STATS */}
 
       <VisitorStats />
     </aside>
@@ -811,14 +714,19 @@ function ScrollIndicator() {
       aria-label="Scroll to projects"
       className="
         absolute
+
         bottom-5
         left-1/2
+
         z-30
 
         flex
+
         -translate-x-1/2
+
         flex-col
         items-center
+
         gap-1.5
 
         whitespace-nowrap
@@ -879,12 +787,15 @@ function ScrollIndicator() {
    ============================================================================ */
 
 export function Hero() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const sectionRef =
+    useRef<HTMLElement>(null);
 
-  const shouldReduceMotion = useReducedMotionPreference();
+  const shouldReduceMotion =
+    useReducedMotionPreference();
 
   useLayoutEffect(() => {
-    const section = sectionRef.current;
+    const section =
+      sectionRef.current;
 
     if (!section) {
       return;
@@ -892,499 +803,589 @@ export function Hero() {
 
     /*
      * IMPORTANT:
-     * Never reference the GSAP context variable from inside
-     * its own callback. This prevents:
+     * Do not reference `ctx` inside this callback.
+     * This prevents:
      *
      * Cannot access 'ctx' before initialization
      */
 
-    const ctx = gsap.context(() => {
-      /* ======================================================================
-         SELECTORS
-         ====================================================================== */
+    const ctx = gsap.context(
+      () => {
+        /* ==================================================================
+           ELEMENTS
+        ================================================================== */
 
-      const social = section.querySelector<HTMLElement>(
-        "[data-hero-social]"
-      );
+        const social =
+          section.querySelector<HTMLElement>(
+            "[data-hero-social]"
+          );
 
-      const socialItems = section.querySelectorAll<HTMLElement>(
-        "[data-hero-social-list] a"
-      );
+        const socialItems =
+          section.querySelectorAll<HTMLElement>(
+            "[data-hero-social-list] a"
+          );
 
-      const eyebrow = section.querySelector<HTMLElement>(
-        "[data-hero-eyebrow]"
-      );
+        const eyebrow =
+          section.querySelector<HTMLElement>(
+            "[data-hero-eyebrow]"
+          );
 
-      const identity = section.querySelector<HTMLElement>(
-        "[data-hero-identity]"
-      );
+        const identity =
+          section.querySelector<HTMLElement>(
+            "[data-hero-identity]"
+          );
 
-      const headline = section.querySelector<HTMLElement>(
-        "[data-hero-headline]"
-      );
+        const headline =
+          section.querySelector<HTMLElement>(
+            "[data-hero-headline]"
+          );
 
-      const lineOne = section.querySelector<HTMLElement>(
-        "[data-hero-line-one]"
-      );
+        const lineOne =
+          section.querySelector<HTMLElement>(
+            "[data-hero-line-one]"
+          );
 
-      const gradientWord = section.querySelector<HTMLElement>(
-        "[data-hero-gradient]"
-      );
+        const gradientWord =
+          section.querySelector<HTMLElement>(
+            "[data-hero-gradient]"
+          );
 
-      const lineTwo = section.querySelector<HTMLElement>(
-        "[data-hero-line-two]"
-      );
+        const lineTwo =
+          section.querySelector<HTMLElement>(
+            "[data-hero-line-two]"
+          );
 
-      const accent = section.querySelector<HTMLElement>(
-        "[data-hero-accent]"
-      );
+        const accent =
+          section.querySelector<HTMLElement>(
+            "[data-hero-accent]"
+          );
 
-      const copy = section.querySelector<HTMLElement>(
-        "[data-hero-copy]"
-      );
+        const copy =
+          section.querySelector<HTMLElement>(
+            "[data-hero-copy]"
+          );
 
-      const actions = section.querySelector<HTMLElement>(
-        "[data-hero-actions]"
-      );
+        const actions =
+          section.querySelector<HTMLElement>(
+            "[data-hero-actions]"
+          );
 
-      const actionButtons = section.querySelectorAll<HTMLElement>(
-        "[data-hero-action]"
-      );
+        const actionButtons =
+          section.querySelectorAll<HTMLElement>(
+            "[data-hero-action]"
+          );
 
-      const spotify = section.querySelector<HTMLElement>(
-        "[data-hero-spotify]"
-      );
+        const spotify =
+          section.querySelector<HTMLElement>(
+            "[data-hero-spotify]"
+          );
 
-      const stats = section.querySelector<HTMLElement>(
-        "[data-hero-stats]"
-      );
+        const stats =
+          section.querySelector<HTMLElement>(
+            "[data-hero-stats]"
+          );
 
-      const scroll = section.querySelector<HTMLElement>(
-        "[data-hero-scroll]"
-      );
+        const scroll =
+          section.querySelector<HTMLElement>(
+            "[data-hero-scroll]"
+          );
 
-      const mouse = section.querySelector<HTMLElement>(
-        "[data-hero-mouse]"
-      );
+        const mouse =
+          section.querySelector<HTMLElement>(
+            "[data-hero-mouse]"
+          );
 
-      const arrow = section.querySelector<HTMLElement>(
-        "[data-hero-arrow]"
-      );
+        const arrow =
+          section.querySelector<HTMLElement>(
+            "[data-hero-arrow]"
+          );
 
-      const grid = section.querySelector<HTMLElement>(
-        "[data-hero-grid]"
-      );
+        const grid =
+          section.querySelector<HTMLElement>(
+            "[data-hero-grid]"
+          );
 
-      const glow = section.querySelector<HTMLElement>(
-        "[data-hero-glow]"
-      );
+        const glow =
+          section.querySelector<HTMLElement>(
+            "[data-hero-glow]"
+          );
 
-      const equalizerBars = section.querySelectorAll<HTMLElement>(
-        "[data-spotify-equalizer] span"
-      );
+        const equalizerBars =
+          section.querySelectorAll<HTMLElement>(
+            "[data-spotify-equalizer] span"
+          );
 
-      /* ======================================================================
-         REDUCED MOTION
-         ====================================================================== */
+        /* ==================================================================
+           REDUCED MOTION
+        ================================================================== */
 
-      if (shouldReduceMotion) {
+        if (shouldReduceMotion) {
+          gsap.set(
+            [
+              social,
+              ...Array.from(
+                socialItems
+              ),
+              eyebrow,
+              identity,
+              headline,
+              lineOne,
+              gradientWord,
+              lineTwo,
+              accent,
+              copy,
+              actions,
+              ...Array.from(
+                actionButtons
+              ),
+              spotify,
+              stats,
+              scroll,
+              mouse,
+              arrow,
+            ].filter(Boolean),
+            {
+              clearProps: "all",
+            }
+          );
+
+          return;
+        }
+
+        /* ==================================================================
+           INITIAL STATES
+        ================================================================== */
+
         gsap.set(
           [
-            social,
-            ...Array.from(socialItems),
             eyebrow,
             identity,
-            headline,
             lineOne,
-            gradientWord,
             lineTwo,
             accent,
             copy,
             actions,
-            ...Array.from(actionButtons),
             spotify,
             stats,
             scroll,
-            mouse,
-            arrow,
           ].filter(Boolean),
           {
-            clearProps: "all",
+            opacity: 0,
+            y: 20,
           }
         );
 
-        return;
-      }
-
-      /* ======================================================================
-         INITIAL STATE
-         ====================================================================== */
-
-      gsap.set(
-        [
-          eyebrow,
-          identity,
-          lineOne,
-          lineTwo,
-          accent,
-          copy,
-          actions,
-          spotify,
-          stats,
-          scroll,
-        ].filter(Boolean),
-        {
-          opacity: 0,
-          y: 20,
+        if (gradientWord) {
+          gsap.set(
+            gradientWord,
+            {
+              opacity: 0,
+              scale: 0.9,
+              transformOrigin:
+                "50% 50%",
+            }
+          );
         }
-      );
 
-      if (gradientWord) {
-        gsap.set(gradientWord, {
-          opacity: 0,
-          scale: 0.9,
-          transformOrigin: "50% 50%",
-        });
-      }
-
-      if (social) {
-        gsap.set(social, {
-          opacity: 0,
-          x: -20,
-        });
-      }
-
-      if (socialItems.length) {
-        gsap.set(socialItems, {
-          opacity: 0,
-          y: 10,
-        });
-      }
-
-      if (mouse) {
-        gsap.set(mouse, {
-          opacity: 0,
-        });
-      }
-
-      if (arrow) {
-        gsap.set(arrow, {
-          opacity: 0,
-        });
-      }
-
-      /* ======================================================================
-         ENTRANCE
-         ====================================================================== */
-
-      const timeline = gsap.timeline({
-        defaults: {
-          ease: "power3.out",
-        },
-      });
-
-      if (social) {
-        timeline.to(
-          social,
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.5,
-          },
-          0.05
-        );
-      }
-
-      if (socialItems.length) {
-        timeline.to(
-          socialItems,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.35,
-            stagger: 0.06,
-          },
-          0.16
-        );
-      }
-
-      if (eyebrow) {
-        timeline.to(
-          eyebrow,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-          },
-          0.1
-        );
-      }
-
-      if (identity) {
-        timeline.to(
-          identity,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-          },
-          0.22
-        );
-      }
-
-      if (lineOne) {
-        timeline.to(
-          lineOne,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-          },
-          0.35
-        );
-      }
-
-      if (gradientWord) {
-        timeline.to(
-          gradientWord,
-          {
-            opacity: 1,
-            scale: 1,
-            duration: 0.58,
-            ease: "back.out(1.2)",
-          },
-          0.45
-        );
-      }
-
-      if (lineTwo) {
-        timeline.to(
-          lineTwo,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.58,
-          },
-          0.52
-        );
-      }
-
-      if (accent) {
-        timeline.to(
-          accent,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.35,
-          },
-          0.76
-        );
-      }
-
-      if (copy) {
-        timeline.to(
-          copy,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.45,
-          },
-          0.8
-        );
-      }
-
-      if (actions) {
-        timeline.to(
-          actions,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-          },
-          0.92
-        );
-      }
-
-      if (actionButtons.length) {
-        timeline.fromTo(
-          actionButtons,
-          {
+        if (social) {
+          gsap.set(social, {
             opacity: 0,
-            y: 8,
-          },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.3,
-            stagger: 0.06,
-          },
-          0.98
+            x: -20,
+          });
+        }
+
+        if (socialItems.length) {
+          gsap.set(
+            socialItems,
+            {
+              opacity: 0,
+              y: 10,
+            }
+          );
+        }
+
+        if (mouse) {
+          gsap.set(mouse, {
+            opacity: 0,
+          });
+        }
+
+        if (arrow) {
+          gsap.set(arrow, {
+            opacity: 0,
+          });
+        }
+
+        /* ==================================================================
+           ENTRANCE TIMELINE
+        ================================================================== */
+
+        const timeline =
+          gsap.timeline({
+            defaults: {
+              ease: "power3.out",
+            },
+          });
+
+        /* SOCIAL */
+
+        if (social) {
+          timeline.to(
+            social,
+            {
+              opacity: 1,
+              x: 0,
+              duration: 0.5,
+            },
+            0.05
+          );
+        }
+
+        if (socialItems.length) {
+          timeline.to(
+            socialItems,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.35,
+              stagger: 0.06,
+            },
+            0.16
+          );
+        }
+
+        /* STATUS */
+
+        if (eyebrow) {
+          timeline.to(
+            eyebrow,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.4,
+            },
+            0.1
+          );
+        }
+
+        /* IDENTITY */
+
+        if (identity) {
+          timeline.to(
+            identity,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.4,
+            },
+            0.22
+          );
+        }
+
+        /* HEADLINE LINE ONE */
+
+        if (lineOne) {
+          timeline.to(
+            lineOne,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+            },
+            0.35
+          );
+        }
+
+        /* RELIABLE */
+
+        if (gradientWord) {
+          timeline.to(
+            gradientWord,
+            {
+              opacity: 1,
+              scale: 1,
+              duration: 0.58,
+              ease:
+                "back.out(1.2)",
+            },
+            0.45
+          );
+        }
+
+        /* HEADLINE LINE TWO */
+
+        if (lineTwo) {
+          timeline.to(
+            lineTwo,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.58,
+            },
+            0.52
+          );
+        }
+
+        /* ACCENT */
+
+        if (accent) {
+          timeline.to(
+            accent,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.35,
+            },
+            0.76
+          );
+        }
+
+        /* DESCRIPTION */
+
+        if (copy) {
+          timeline.to(
+            copy,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.45,
+            },
+            0.8
+          );
+        }
+
+        /* ACTION CONTAINER */
+
+        if (actions) {
+          timeline.to(
+            actions,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.4,
+            },
+            0.92
+          );
+        }
+
+        /* ACTION BUTTONS */
+
+        if (
+          actionButtons.length
+        ) {
+          timeline.fromTo(
+            actionButtons,
+            {
+              opacity: 0,
+              y: 8,
+            },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.3,
+              stagger: 0.06,
+            },
+            0.98
+          );
+        }
+
+        /* SPOTIFY */
+
+        if (spotify) {
+          timeline.to(
+            spotify,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.55,
+            },
+            0.65
+          );
+        }
+
+        /* VISITOR STATS */
+
+        if (stats) {
+          timeline.to(
+            stats,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.4,
+            },
+            0.82
+          );
+        }
+
+        /* SCROLL */
+
+        if (scroll) {
+          timeline.to(
+            scroll,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.4,
+            },
+            1.15
+          );
+        }
+
+        /* ==================================================================
+           GRID ANIMATION
+        ================================================================== */
+
+        if (grid) {
+          gsap.to(grid, {
+            backgroundPosition:
+              "48px 48px",
+            duration: 24,
+            repeat: -1,
+            ease: "none",
+          });
+        }
+
+        /* ==================================================================
+           GLOW ANIMATION
+        ================================================================== */
+
+        if (glow) {
+          gsap.to(glow, {
+            x: 35,
+            y: -15,
+            scale: 1.04,
+            duration: 8,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
+        }
+
+        /* ==================================================================
+           SPOTIFY FLOAT
+        ================================================================== */
+
+        if (spotify) {
+          gsap.to(spotify, {
+            y: -4,
+            duration: 4.8,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            delay: 1,
+          });
+        }
+
+        /* ==================================================================
+           VISITOR CARD FLOAT
+        ================================================================== */
+
+        if (stats) {
+          gsap.to(stats, {
+            y: -2.5,
+            duration: 5.2,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            delay: 0.5,
+          });
+        }
+
+        /* ==================================================================
+           EQUALIZER
+        ================================================================== */
+
+        equalizerBars.forEach(
+          (
+            bar,
+            index
+          ) => {
+            gsap.to(bar, {
+              scaleY:
+                index % 2 === 0
+                  ? 0.65
+                  : 1,
+
+              transformOrigin:
+                "bottom",
+
+              duration:
+                0.45 +
+                index * 0.08,
+
+              repeat: -1,
+              yoyo: true,
+
+              ease:
+                "sine.inOut",
+
+              delay:
+                index * 0.08,
+            });
+          }
         );
-      }
 
-      if (spotify) {
-        timeline.to(
-          spotify,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.55,
-          },
-          0.65
-        );
-      }
+        /* ==================================================================
+           MOUSE
+        ================================================================== */
 
-      if (stats) {
-        timeline.to(
-          stats,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-          },
-          0.8
-        );
-      }
+        if (mouse) {
+          gsap.to(mouse, {
+            y: 4,
+            opacity: 0.72,
+            duration: 1.4,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            delay: 1.5,
+          });
+        }
 
-      if (scroll) {
-        timeline.to(
-          scroll,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-          },
-          1.15
-        );
-      }
+        /* ==================================================================
+           ARROW
+        ================================================================== */
 
-      /* ======================================================================
-         BACKGROUND GRID
-         ====================================================================== */
+        if (arrow) {
+          gsap.to(arrow, {
+            y: 4,
+            opacity: 0.5,
+            duration: 1.2,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            delay: 1.7,
+          });
+        }
 
-      if (grid) {
-        gsap.to(grid, {
-          backgroundPosition: "48px 48px",
-          duration: 24,
-          repeat: -1,
-          ease: "none",
-        });
-      }
+        /* ==================================================================
+           HEADLINE MICRO FLOAT
+        ================================================================== */
 
-      /* ======================================================================
-         BACKGROUND GLOW
-         ====================================================================== */
-
-      if (glow) {
-        gsap.to(glow, {
-          x: 35,
-          y: -15,
-          scale: 1.04,
-          duration: 8,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
-      }
-
-      /* ======================================================================
-         SPOTIFY FLOAT
-         ====================================================================== */
-
-      if (spotify) {
-        gsap.to(spotify, {
-          y: -4,
-          duration: 4.8,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: 1,
-        });
-      }
-
-      /* ======================================================================
-         STATS FLOAT
-         ====================================================================== */
-
-      if (stats) {
-        gsap.to(stats, {
-          y: -2.5,
-          duration: 5.2,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: 0.5,
-        });
-      }
-
-      /* ======================================================================
-         EQUALIZER
-         ====================================================================== */
-
-      equalizerBars.forEach((bar, index) => {
-        gsap.to(bar, {
-          scaleY: index % 2 === 0 ? 0.65 : 1,
-          transformOrigin: "bottom",
-          duration: 0.45 + index * 0.08,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: index * 0.08,
-        });
-      });
-
-      /* ======================================================================
-         MOUSE
-         ====================================================================== */
-
-      if (mouse) {
-        gsap.to(mouse, {
-          y: 4,
-          opacity: 0.72,
-          duration: 1.4,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: 1.5,
-        });
-      }
-
-      /* ======================================================================
-         ARROW
-         ====================================================================== */
-
-      if (arrow) {
-        gsap.to(arrow, {
-          y: 4,
-          opacity: 0.5,
-          duration: 1.2,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: 1.7,
-        });
-      }
-
-      /* ======================================================================
-         HEADLINE MICRO FLOAT
-         ====================================================================== */
-
-      if (headline) {
-        gsap.to(headline, {
-          y: -1.5,
-          duration: 5.5,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: 2,
-        });
-      }
-    }, section);
+        if (headline) {
+          gsap.to(
+            headline,
+            {
+              y: -1.5,
+              duration: 5.5,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+              delay: 2,
+            }
+          );
+        }
+      },
+      section
+    );
 
     return () => {
       ctx.revert();
     };
   }, [shouldReduceMotion]);
+
+  /* ==========================================================================
+     RENDER
+  ========================================================================== */
 
   return (
     <section
@@ -1399,6 +1400,7 @@ export function Hero() {
         overflow-hidden
 
         bg-[#f7f9fc]
+
         text-slate-950
 
         dark:bg-[#030712]
@@ -1408,7 +1410,7 @@ export function Hero() {
     >
       {/* ======================================================================
           BACKGROUND
-          ====================================================================== */}
+      ====================================================================== */}
 
       <div
         aria-hidden="true"
@@ -1480,7 +1482,9 @@ export function Hero() {
           style={{
             backgroundImage:
               "linear-gradient(rgba(100,116,139,0.065) 1px, transparent 1px), linear-gradient(90deg, rgba(100,116,139,0.065) 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
+
+            backgroundSize:
+              "48px 48px",
           }}
         />
 
@@ -1489,6 +1493,7 @@ export function Hero() {
         <div
           className="
             absolute
+
             left-1/2
             top-[44%]
 
@@ -1507,11 +1512,12 @@ export function Hero() {
           "
         />
 
-        {/* BOTTOM CYAN CURVE */}
+        {/* CYAN CURVE */}
 
         <div
           className="
             absolute
+
             -bottom-52
             -left-[15%]
 
@@ -1529,11 +1535,12 @@ export function Hero() {
           "
         />
 
-        {/* BOTTOM VIOLET CURVE */}
+        {/* VIOLET CURVE */}
 
         <div
           className="
             absolute
+
             -bottom-60
             -right-[15%]
 
@@ -1558,9 +1565,11 @@ export function Hero() {
             absolute
             inset-x-0
             top-0
+
             h-40
 
             bg-gradient-to-b
+
             from-[#f7f9fc]
             via-[#f7f9fc]/80
             to-transparent
@@ -1577,9 +1586,11 @@ export function Hero() {
             absolute
             inset-x-0
             bottom-0
+
             h-48
 
             bg-gradient-to-t
+
             from-[#f7f9fc]
             via-[#f7f9fc]/85
             to-transparent
@@ -1592,27 +1603,31 @@ export function Hero() {
 
       {/* ======================================================================
           SOCIAL RAIL
-          ====================================================================== */}
+      ====================================================================== */}
 
       <SocialRail />
 
       {/* ======================================================================
-          CONTENT WRAPPER
-          ====================================================================== */}
+          MAIN CONTENT
+      ====================================================================== */}
 
       <div
         className="
           relative
           mx-auto
+
           flex
           min-h-[100svh]
+
           w-full
           max-w-[1500px]
 
           flex-col
+
           justify-center
 
           px-5
+
           pb-24
           pt-28
 
@@ -1625,8 +1640,8 @@ export function Hero() {
         "
       >
         {/* ====================================================================
-            CENTER CONTENT
-            ==================================================================== */}
+            CENTER HERO
+        ==================================================================== */}
 
         <main
           className="
@@ -1636,11 +1651,15 @@ export function Hero() {
             mx-auto
 
             flex
+
             w-full
             max-w-[820px]
+
             flex-col
+
             items-center
             justify-center
+
             text-center
 
             xl:-translate-x-1
@@ -1652,6 +1671,7 @@ export function Hero() {
             data-hero-eyebrow
             className="
               inline-flex
+
               items-center
               gap-2.5
 
@@ -1666,8 +1686,11 @@ export function Hero() {
               py-2
 
               text-[9px]
+
               font-semibold
+
               uppercase
+
               tracking-[0.20em]
 
               text-cyan-700
@@ -1693,8 +1716,11 @@ export function Hero() {
             <p
               className="
                 text-[10px]
+
                 font-semibold
+
                 uppercase
+
                 tracking-[0.5em]
 
                 text-slate-500
@@ -1710,8 +1736,11 @@ export function Hero() {
                 mt-2
 
                 text-[9px]
+
                 font-medium
+
                 uppercase
+
                 tracking-[0.42em]
 
                 text-cyan-700/70
@@ -1730,6 +1759,7 @@ export function Hero() {
             data-hero-headline
             className="
               mt-7
+
               w-full
 
               text-[clamp(2.3rem,5.05vw,5.35rem)]
@@ -1756,6 +1786,7 @@ export function Hero() {
                   inline-block
 
                   bg-gradient-to-r
+
                   from-cyan-500
                   via-sky-500
                   to-violet-500
@@ -1811,6 +1842,7 @@ export function Hero() {
               max-w-[650px]
 
               text-sm
+
               leading-7
 
               text-slate-500
@@ -1821,10 +1853,11 @@ export function Hero() {
               sm:leading-8
             "
           >
-            I design and develop modern web applications
-            focused on performance, usability,
-            maintainability, and solving real-world
-            problems.
+            I design and develop modern web
+            applications focused on
+            performance, usability,
+            maintainability, and solving
+            real-world problems.
           </p>
 
           {/* ACTIONS */}
@@ -1835,7 +1868,9 @@ export function Hero() {
               mt-8
 
               flex
+
               flex-col
+
               items-center
               justify-center
 
@@ -1853,6 +1888,7 @@ export function Hero() {
                 group
 
                 inline-flex
+
                 min-h-12
                 min-w-[155px]
 
@@ -1868,8 +1904,11 @@ export function Hero() {
                 px-5
 
                 text-xs
+
                 font-bold
+
                 uppercase
+
                 tracking-[0.14em]
 
                 shadow-[0_16px_40px_rgba(15,23,42,0.16)]
@@ -1894,7 +1933,19 @@ export function Hero() {
                 View my work
               </span>
 
-              <ArrowUpRight className="h-4 w-4 !text-inherit transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              <ArrowUpRight
+                className="
+                  h-4
+                  w-4
+                  !text-inherit
+
+                  transition-transform
+                  duration-300
+
+                  group-hover:-translate-y-0.5
+                  group-hover:translate-x-0.5
+                "
+              />
             </Link>
 
             {/* DOWNLOAD CV */}
@@ -1907,6 +1958,7 @@ export function Hero() {
                 group
 
                 inline-flex
+
                 min-h-12
                 min-w-[155px]
 
@@ -1924,8 +1976,11 @@ export function Hero() {
                 px-5
 
                 text-xs
+
                 font-bold
+
                 uppercase
+
                 tracking-[0.14em]
 
                 !text-slate-800
@@ -1950,7 +2005,21 @@ export function Hero() {
             >
               Download CV
 
-              <Download className="h-4 w-4 text-cyan-600 transition-transform duration-300 group-hover:translate-y-0.5 dark:text-cyan-200/80" />
+              <Download
+                className="
+                  h-4
+                  w-4
+
+                  text-cyan-600
+
+                  transition-transform
+                  duration-300
+
+                  group-hover:translate-y-0.5
+
+                  dark:text-cyan-200/80
+                "
+              />
             </a>
 
             {/* LET'S TALK */}
@@ -1962,6 +2031,7 @@ export function Hero() {
                 group
 
                 inline-flex
+
                 min-h-12
                 min-w-[145px]
 
@@ -1979,8 +2049,11 @@ export function Hero() {
                 px-5
 
                 text-xs
+
                 font-bold
+
                 uppercase
+
                 tracking-[0.14em]
 
                 !text-slate-700
@@ -2005,26 +2078,29 @@ export function Hero() {
             >
               Let&apos;s talk
 
-              <Mail className="h-4 w-4 text-cyan-600/80 dark:text-cyan-200/70" />
+              <Mail
+                className="
+                  h-4
+                  w-4
+
+                  text-cyan-600/80
+
+                  dark:text-cyan-200/70
+                "
+              />
             </Link>
           </div>
         </main>
 
         {/* ====================================================================
             ACTIVITY RAIL
-
-            Desktop:
-              Positioned to the right and vertically centered.
-
-            Mobile / Tablet:
-              Falls naturally below the hero content.
         ==================================================================== */}
 
         <ActivityRail />
 
         {/* ====================================================================
             SCROLL INDICATOR
-            ==================================================================== */}
+        ==================================================================== */}
 
         <ScrollIndicator />
       </div>
@@ -2042,20 +2118,25 @@ function useReducedMotionPreference() {
     setPrefersReducedMotion,
   ] = useState(
     () =>
-      typeof window !== "undefined" &&
+      typeof window !==
+        "undefined" &&
       window.matchMedia(
         "(prefers-reduced-motion: reduce)"
       ).matches
   );
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    );
+    const mediaQuery =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      );
 
-    const updatePreference = () => {
-      setPrefersReducedMotion(mediaQuery.matches);
-    };
+    const updatePreference =
+      () => {
+        setPrefersReducedMotion(
+          mediaQuery.matches
+        );
+      };
 
     updatePreference();
 

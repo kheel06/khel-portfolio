@@ -1,116 +1,64 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+
 import { getRedis } from "@/lib/redis";
 
 export const dynamic = "force-dynamic";
 
-const TOTAL_VISITORS_KEY = "khel:portfolio:total-visitors";
-const LIVE_VIEWERS_KEY = "khel:portfolio:live-viewers";
+/* ============================================================================
+   REDIS KEYS
+   ============================================================================ */
 
-const VISITOR_COOKIE = "khel_visitor_id";
+const TOTAL_VISITORS_KEY =
+  "khel:portfolio:total-visitors";
 
-const PRESENCE_TTL_SECONDS = 45;
+const LIVE_VIEWERS_KEY =
+  "khel:portfolio:live-viewers";
 
-type VisitorAction = "enter" | "heartbeat" | "leave";
+/* ============================================================================
+   COOKIE
+   ============================================================================ */
+
+const VISITOR_COOKIE =
+  "khel_visitor_id";
+
+/*
+ * A browser is treated as the same visitor for one year.
+ *
+ * This is not a perfect human-identification system:
+ * clearing cookies, using another browser, private browsing,
+ * or another device can create another visitor ID.
+ */
+const VISITOR_COOKIE_MAX_AGE =
+  60 * 60 * 24 * 365;
+
+/* ============================================================================
+   LIVE PRESENCE
+   ============================================================================ */
+
+/*
+ * Visitor sends a heartbeat every 20 seconds.
+ *
+ * If no heartbeat arrives for 60 seconds,
+ * that visitor is considered inactive.
+ */
+const PRESENCE_TTL_SECONDS = 60;
+
+type VisitorAction =
+  | "enter"
+  | "heartbeat"
+  | "leave";
+
+/* ============================================================================
+   HELPERS
+   ============================================================================ */
 
 function createVisitorId() {
   return crypto.randomUUID();
 }
 
-async function cleanupPresence() {
-  const redis = getRedis();
-
-  if (!redis) {
-    return;
-  }
-
-  const cutoff =
-    Math.floor(Date.now() / 1000) -
-    PRESENCE_TTL_SECONDS;
-
-  await redis.zremrangebyscore(
-    LIVE_VIEWERS_KEY,
-    0,
-    cutoff,
-  );
-}
-
-async function getLiveViewerCount() {
-  const redis = getRedis();
-
-  if (!redis) {
-    return 0;
-  }
-
-  await cleanupPresence();
-
-  return await redis.zcard(
-    LIVE_VIEWERS_KEY,
-  );
-}
-
-export async function GET() {
-  const redis = getRedis();
-
-  if (!redis) {
-    return NextResponse.json(
-      {
-        configured: false,
-        totalVisitors: 0,
-        liveViewers: 0,
-      },
-      {
-        headers: {
-          "Cache-Control": "no-store",
-        },
-      },
-    );
-  }
-
-  await cleanupPresence();
-
-  const total =
-    (await redis.get<number>(
-      TOTAL_VISITORS_KEY,
-    )) ?? 0;
-
-  const liveViewers =
-    await redis.zcard(
-      LIVE_VIEWERS_KEY,
-    );
-
-  return NextResponse.json(
-    {
-      configured: true,
-      totalVisitors: total,
-      liveViewers,
-    },
-    {
-      headers: {
-        "Cache-Control": "no-store",
-      },
-    },
-  );
-}
-
-export async function POST(
-  request: Request,
-) {
-  const redis = getRedis();
+async function getOrCreateVisitorId() {
   const cookieStore = await cookies();
-
-  let body: {
-    action?: VisitorAction;
-  } = {};
-
-  try {
-    body = await request.json();
-  } catch {
-    body = {};
-  }
-
-  const action =
-    body.action ?? "heartbeat";
 
   let visitorId =
     cookieStore.get(
@@ -121,18 +69,317 @@ export async function POST(
     !visitorId;
 
   if (!visitorId) {
-    visitorId = createVisitorId();
+    visitorId =
+      createVisitorId();
   }
 
+  return {
+    visitorId,
+    isNewVisitor,
+  };
+}
+
+/* ============================================================================
+   CLEANUP OLD PRESENCE
+   ============================================================================ */
+
+async function cleanupPresence() {
+  const redis = getRedis();
+
   if (!redis) {
+    return;
+  }
+
+  const now =
+    Math.floor(
+      Date.now() / 1000,
+    );
+
+  const cutoff =
+    now -
+    PRESENCE_TTL_SECONDS;
+
+  await redis.zremrangebyscore(
+    LIVE_VIEWERS_KEY,
+    0,
+    cutoff,
+  );
+}
+
+/* ============================================================================
+   GET CURRENT COUNTS
+   ============================================================================ */
+
+async function getCurrentCounts() {
+  const redis = getRedis();
+
+  if (!redis) {
+    return {
+      configured: false,
+      totalVisitors: 0,
+      liveViewers: 0,
+    };
+  }
+
+  await cleanupPresence();
+
+  const [
+    totalVisitors,
+    liveViewers,
+  ] = await Promise.all([
+    redis.get<number>(
+      TOTAL_VISITORS_KEY,
+    ),
+
+    redis.zcard(
+      LIVE_VIEWERS_KEY,
+    ),
+  ]);
+
+  return {
+    configured: true,
+
+    totalVisitors:
+      Number(totalVisitors) || 0,
+
+    liveViewers:
+      Number(liveViewers) || 0,
+  };
+}
+
+/* ============================================================================
+   GET
+   ============================================================================ */
+
+export async function GET() {
+  try {
+    const counts =
+      await getCurrentCounts();
+
+    return NextResponse.json(
+      counts,
+      {
+        status: 200,
+
+        headers: {
+          "Cache-Control":
+            "no-store, no-cache, must-revalidate, proxy-revalidate",
+
+          Pragma: "no-cache",
+
+          Expires: "0",
+        },
+      },
+    );
+  } catch (error) {
+    console.error(
+      "Visitor GET error:",
+      error,
+    );
+
+    return NextResponse.json(
+      {
+        configured: false,
+        totalVisitors: 0,
+        liveViewers: 0,
+      },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control":
+            "no-store",
+        },
+      },
+    );
+  }
+}
+
+/* ============================================================================
+   POST
+   ============================================================================ */
+
+export async function POST(
+  request: Request,
+) {
+  try {
+    const redis = getRedis();
+
+    const {
+      visitorId,
+      isNewVisitor,
+    } =
+      await getOrCreateVisitorId();
+
+    let body: {
+      action?: VisitorAction;
+    } = {};
+
+    try {
+      body =
+        (await request.json()) as {
+          action?: VisitorAction;
+        };
+    } catch {
+      body = {};
+    }
+
+    const action =
+      body.action ??
+      "heartbeat";
+
+    /* ========================================================================
+       REDIS NOT CONFIGURED
+       ======================================================================== */
+
+    if (!redis) {
+      const response =
+        NextResponse.json(
+          {
+            configured: false,
+            totalVisitors: 0,
+            liveViewers: 0,
+          },
+          {
+            status: 200,
+
+            headers: {
+              "Cache-Control":
+                "no-store",
+            },
+          },
+        );
+
+      /*
+       * Still create the cookie locally so that
+       * development behaviour resembles production.
+       */
+      if (isNewVisitor) {
+        response.cookies.set(
+          VISITOR_COOKIE,
+          visitorId,
+          {
+            httpOnly: true,
+
+            sameSite: "lax",
+
+            secure:
+              process.env.NODE_ENV ===
+              "production",
+
+            maxAge:
+              VISITOR_COOKIE_MAX_AGE,
+
+            path: "/",
+          },
+        );
+      }
+
+      return response;
+    }
+
+    /* ========================================================================
+       CURRENT TIMESTAMP
+       ======================================================================== */
+
+    const now =
+      Math.floor(
+        Date.now() / 1000,
+      );
+
+    /* ========================================================================
+       ENTER
+       ======================================================================== */
+
+    if (action === "enter") {
+      /*
+       * Count a new browser visitor once.
+       */
+      if (isNewVisitor) {
+        await redis.incr(
+          TOTAL_VISITORS_KEY,
+        );
+      }
+
+      /*
+       * Mark visitor as currently active.
+       */
+      await redis.zadd(
+        LIVE_VIEWERS_KEY,
+        {
+          score: now,
+          member: visitorId,
+        },
+      );
+    }
+
+    /* ========================================================================
+       HEARTBEAT
+       ======================================================================== */
+
+    if (action === "heartbeat") {
+      /*
+       * Refresh current visitor's presence.
+       */
+      await redis.zadd(
+        LIVE_VIEWERS_KEY,
+        {
+          score: now,
+          member: visitorId,
+        },
+      );
+
+      /*
+       * This protects against a browser that somehow
+       * sends a heartbeat before its first "enter"
+       * request has completed.
+       */
+      if (isNewVisitor) {
+        await redis.incr(
+          TOTAL_VISITORS_KEY,
+        );
+      }
+    }
+
+    /* ========================================================================
+       LEAVE
+       ======================================================================== */
+
+    if (action === "leave") {
+      /*
+       * Remove immediately when possible.
+       *
+       * If the browser disappears without sending leave,
+       * cleanupPresence() will remove it after 60 seconds.
+       */
+      await redis.zrem(
+        LIVE_VIEWERS_KEY,
+        visitorId,
+      );
+    }
+
+    /* ========================================================================
+       CLEANUP
+       ======================================================================== */
+
+    await cleanupPresence();
+
+    /* ========================================================================
+       COUNTS
+       ======================================================================== */
+
+    const counts =
+      await getCurrentCounts();
+
+    /* ========================================================================
+       RESPONSE
+       ======================================================================== */
+
     const response =
       NextResponse.json(
+        counts,
         {
-          configured: false,
-          totalVisitors: 0,
-          liveViewers: 0,
-        },
-        {
+          status: 200,
+
           headers: {
             "Cache-Control":
               "no-store",
@@ -140,105 +387,55 @@ export async function POST(
         },
       );
 
-    if (isNewVisitor) {
+    /* ========================================================================
+       COOKIE
+       ======================================================================== */
+
+    if (
+      isNewVisitor &&
+      action !== "leave"
+    ) {
       response.cookies.set(
         VISITOR_COOKIE,
         visitorId,
         {
           httpOnly: true,
+
           sameSite: "lax",
+
           secure:
             process.env.NODE_ENV ===
             "production",
+
           maxAge:
-            60 * 60 * 24 * 30,
+            VISITOR_COOKIE_MAX_AGE,
+
           path: "/",
         },
       );
     }
 
     return response;
-  }
+  } catch (error) {
+    console.error(
+      "Visitor POST error:",
+      error,
+    );
 
-  const now =
-    Math.floor(Date.now() / 1000);
-
-  if (action === "enter") {
-    if (isNewVisitor) {
-      await redis.incr(
-        TOTAL_VISITORS_KEY,
-      );
-    }
-
-    await redis.zadd(
-      LIVE_VIEWERS_KEY,
+    return NextResponse.json(
       {
-        score: now,
-        member: visitorId,
-      },
-    );
-  }
-
-  if (action === "heartbeat") {
-    await redis.zadd(
-      LIVE_VIEWERS_KEY,
-      {
-        score: now,
-        member: visitorId,
-      },
-    );
-  }
-
-  if (action === "leave") {
-    await redis.zrem(
-      LIVE_VIEWERS_KEY,
-      visitorId,
-    );
-  }
-
-  await cleanupPresence();
-
-  const total =
-    (await redis.get<number>(
-      TOTAL_VISITORS_KEY,
-    )) ?? 0;
-
-  const liveViewers =
-    await redis.zcard(
-      LIVE_VIEWERS_KEY,
-    );
-
-  const response =
-    NextResponse.json(
-      {
-        configured: true,
-        totalVisitors: total,
-        liveViewers,
+        configured: false,
+        totalVisitors: 0,
+        liveViewers: 0,
       },
       {
+        status: 200,
+
         headers: {
           "Cache-Control":
             "no-store",
         },
       },
     );
-
-  if (isNewVisitor) {
-    response.cookies.set(
-      VISITOR_COOKIE,
-      visitorId,
-      {
-        httpOnly: true,
-        sameSite: "lax",
-        secure:
-          process.env.NODE_ENV ===
-          "production",
-        maxAge:
-          60 * 60 * 24 * 30,
-        path: "/",
-      },
-    );
   }
-
-  return response;
 }
