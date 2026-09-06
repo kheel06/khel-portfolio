@@ -5,10 +5,8 @@ import {
   ArrowDown,
   ArrowUpRight,
   Download,
-  ExternalLink,
   Eye,
   Mail,
-  Music2,
   Users,
 } from "lucide-react";
 import {
@@ -24,15 +22,6 @@ import { gsap } from "@/lib/gsap";
 /* ============================================================================
    TYPES
    ============================================================================ */
-
-type SpotifyTrack = {
-  title: string;
-  artist: string;
-  album: string;
-  image: string | null;
-  spotifyUrl: string;
-  playedAt: string;
-};
 
 type VisitorData = {
   totalVisitors: number;
@@ -219,36 +208,31 @@ function SocialRail() {
       data-hero-social
       aria-label="Social links"
       className="
-        pointer-events-auto
         absolute
+        left-[max(18px,calc((100vw-1280px)/2))]
         top-1/2
-        z-40
+        z-30
+
         hidden
         -translate-y-1/2
 
         lg:flex
         lg:flex-col
         lg:items-center
-
-        left-[max(24px,calc((100vw-1280px)/2))]
       "
     >
-      {/* TOP LINE */}
-
       <span
         aria-hidden="true"
         className="
           mb-3
-          h-10
+          h-9
           w-px
           bg-gradient-to-b
           from-transparent
           via-cyan-400/55
-          to-cyan-400/15
+          to-cyan-400/10
         "
       />
-
-      {/* SOCIAL ICONS */}
 
       <div
         data-hero-social-list
@@ -284,8 +268,6 @@ function SocialRail() {
         </SocialButton>
       </div>
 
-      {/* LABEL */}
-
       <div className="mt-7 text-center">
         <p className="text-[8px] font-semibold uppercase tracking-[0.18em] text-cyan-700/60 dark:text-cyan-100/45">
           Follow
@@ -296,22 +278,18 @@ function SocialRail() {
         </p>
       </div>
 
-      {/* BOTTOM LINE */}
-
       <span
         aria-hidden="true"
         className="
           mt-4
-          h-10
+          h-9
           w-px
           bg-gradient-to-b
           from-cyan-400/40
-          via-cyan-400/45
+          via-cyan-400/35
           to-transparent
         "
       />
-
-      {/* DOT */}
 
       <span
         aria-hidden="true"
@@ -330,60 +308,58 @@ function SocialRail() {
 }
 
 /* ============================================================================
+   SPOTIFY ICON
+   ============================================================================ */
+
+function SpotifyIcon({
+  className = "",
+}: {
+  className?: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="9.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+
+      <path
+        d="M7.8 10.2C10.7 9.5 14.2 9.8 16.7 11"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M8.2 13.1C10.6 12.5 13.4 12.8 15.5 13.8"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M8.8 15.8C10.8 15.4 12.8 15.7 14.4 16.4"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/* ============================================================================
    SPOTIFY CARD
    ============================================================================ */
 
 function SpotifyCard() {
-  const [track, setTrack] =
-    useState<SpotifyTrack | null>(null);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadSpotify() {
-      try {
-        const response = await fetch(
-          "/api/api/spotify/recently-played",
-          {
-            cache: "no-store",
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            "Spotify endpoint unavailable"
-          );
-        }
-
-        const result =
-          (await response.json()) as {
-            track?: SpotifyTrack | null;
-          };
-
-        if (!cancelled) {
-          setTrack(result.track ?? null);
-        }
-      } catch {
-        if (!cancelled) {
-          setTrack(null);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    void loadSpotify();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   return (
     <article
       data-hero-spotify
@@ -391,40 +367,42 @@ function SpotifyCard() {
         relative
         w-full
         overflow-hidden
-        rounded-[1.45rem]
+        rounded-[1.35rem]
 
         border
         border-cyan-500/20
 
         bg-white/90
 
-        shadow-[0_25px_70px_rgba(15,23,42,0.08)]
+        shadow-[0_24px_70px_rgba(15,23,42,0.08)]
 
         backdrop-blur-2xl
 
-        dark:border-cyan-400/25
-        dark:bg-[#07111e]/90
-        dark:shadow-[0_25px_70px_rgba(0,0,0,0.35)]
+        dark:border-cyan-400/20
+        dark:bg-[#07111e]/92
+        dark:shadow-[0_24px_70px_rgba(0,0,0,0.38)]
       "
     >
-      {/* glow */}
+      {/* GLOW */}
 
       <div
         aria-hidden="true"
         className="
           pointer-events-none
           absolute
-          -right-20
-          -top-20
-          h-44
-          w-44
+          -right-16
+          -top-16
+          h-36
+          w-36
           rounded-full
           bg-cyan-400/[0.08]
-          blur-[70px]
+          blur-[65px]
+
+          dark:bg-cyan-400/[0.10]
         "
       />
 
-      {/* header */}
+      {/* HEADER */}
 
       <div
         className="
@@ -436,22 +414,23 @@ function SpotifyCard() {
           border-b
           border-slate-200/80
 
-          px-5
-          py-4
+          px-4
+          py-3.5
 
-          dark:border-white/[0.08]
+          dark:border-white/[0.07]
         "
       >
         <div className="flex items-center gap-3">
           <div
             className="
               flex
-              h-9
-              w-9
+              h-8
+              w-8
+              shrink-0
               items-center
               justify-center
 
-              rounded-xl
+              rounded-lg
 
               border
               border-emerald-400/20
@@ -463,266 +442,113 @@ function SpotifyCard() {
               dark:text-emerald-400
             "
           >
-            <Music2 className="h-4 w-4" />
+            <SpotifyIcon className="h-4 w-4" />
           </div>
 
           <div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.20em] text-slate-700 dark:text-white/65">
+            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-700 dark:text-white/65">
               Now Playing
             </p>
 
-            <p className="mt-1 text-[8px] text-slate-400 dark:text-white/30">
-              Spotify activity
+            <p className="mt-0.5 text-[8px] text-slate-400 dark:text-white/30">
+              Spotify
             </p>
           </div>
         </div>
 
-        {/* EQUALIZER */}
-
         <div
           data-spotify-equalizer
-          className="flex items-end gap-[3px]"
+          className="flex h-5 items-end gap-[3px]"
           aria-hidden="true"
         >
-          <span className="h-2 w-[2px] rounded-full bg-cyan-400" />
+          <span className="h-2 w-[2px] rounded-full bg-emerald-400" />
           <span className="h-4 w-[2px] rounded-full bg-cyan-400" />
-          <span className="h-3 w-[2px] rounded-full bg-cyan-400" />
+          <span className="h-3 w-[2px] rounded-full bg-emerald-400" />
           <span className="h-5 w-[2px] rounded-full bg-cyan-400" />
         </div>
       </div>
 
-      {/* body */}
+      {/* SPOTIFY EMBED */}
 
-      <div className="relative p-5">
-        {/* loading */}
+      <div className="relative p-3">
+        <div
+          className="
+            overflow-hidden
+            rounded-xl
 
-        {loading && (
-          <div
-            className="flex items-center gap-4"
-            aria-label="Loading Spotify activity"
+            border
+            border-slate-200/70
+
+            bg-slate-50
+
+            dark:border-white/[0.06]
+            dark:bg-black/20
+          "
+        >
+          <iframe
+            data-testid="embed-iframe"
+            title="Spotify player"
+            src="https://open.spotify.com/embed/track/4iVj0UxqLlgrFWNdOnCwFS?utm_source=generator"
+            width="100%"
+            height="152"
+            frameBorder="0"
+            allowFullScreen
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+            className="block w-full"
+          />
+        </div>
+
+        {/* FOOTER */}
+
+        <div className="mt-3 flex items-center justify-between">
+          <span
+            className="
+              flex
+              items-center
+              gap-2
+
+              text-[8px]
+              font-semibold
+              uppercase
+              tracking-[0.13em]
+
+              text-slate-400
+
+              dark:text-white/35
+            "
           >
-            <div className="h-16 w-16 animate-pulse rounded-xl bg-slate-200 dark:bg-white/[0.06]" />
+            <StatusDot />
+            Live activity
+          </span>
 
-            <div className="flex-1 space-y-2">
-              <div className="h-4 w-3/4 animate-pulse rounded bg-slate-200 dark:bg-white/[0.07]" />
+          <a
+            href="https://open.spotify.com/track/4iVj0UxqLlgrFWNdOnCwFS"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              flex
+              items-center
+              gap-1.5
 
-              <div className="h-3 w-1/2 animate-pulse rounded bg-slate-100 dark:bg-white/[0.05]" />
-            </div>
-          </div>
-        )}
+              text-[8px]
+              font-semibold
+              uppercase
+              tracking-[0.12em]
 
-        {/* track */}
+              text-slate-400
 
-        {!loading && track && (
-          <>
-            <div className="flex items-center gap-4">
-              <div
-                className="
-                  h-16
-                  w-16
-                  shrink-0
-                  overflow-hidden
-                  rounded-xl
-                  border
-                  border-slate-200
-                  bg-slate-100
+              transition-colors
+              hover:text-emerald-500
 
-                  dark:border-white/[0.08]
-                  dark:bg-white/[0.04]
-                "
-              >
-                {track.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={track.image}
-                    alt={track.album}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <Music2 className="h-6 w-6 text-emerald-500/60 dark:text-emerald-400/60" />
-                  </div>
-                )}
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
-                  {track.title}
-                </p>
-
-                <p className="mt-1 truncate text-xs text-slate-500 dark:text-white/40">
-                  {track.artist}
-                </p>
-              </div>
-
-              <a
-                href={track.spotifyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Open track on Spotify"
-                className="
-                  flex
-                  h-8
-                  w-8
-                  shrink-0
-                  items-center
-                  justify-center
-
-                  rounded-lg
-                  border
-                  border-slate-200
-                  text-slate-400
-
-                  transition-all
-                  duration-300
-
-                  hover:border-emerald-400/30
-                  hover:bg-emerald-400/[0.08]
-                  hover:text-emerald-500
-
-                  dark:border-white/[0.08]
-                  dark:text-white/40
-                  dark:hover:text-emerald-300
-                "
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
-            </div>
-
-            {/* progress */}
-
-            <div className="mt-6">
-              <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-white/[0.07]">
-                <div
-                  className="
-                    h-full
-                    w-[68%]
-                    rounded-full
-                    bg-gradient-to-r
-                    from-cyan-400
-                    via-blue-500
-                    to-violet-500
-                    shadow-[0_0_16px_rgba(34,211,238,0.35)]
-                  "
-                />
-              </div>
-
-              <div className="mt-2 flex justify-between text-[8px] text-slate-400 dark:text-white/30">
-                <span>2:17</span>
-                <span>3:20</span>
-              </div>
-            </div>
-
-            {/* controls */}
-
-            <div className="mt-5 flex items-center justify-center gap-8">
-              <button
-                type="button"
-                aria-label="Previous track"
-                className="text-xl text-slate-400 transition hover:text-slate-900 dark:text-white/40 dark:hover:text-white"
-              >
-                ‹
-              </button>
-
-              <button
-                type="button"
-                aria-label="Pause"
-                className="
-                  flex
-                  h-11
-                  w-11
-                  items-center
-                  justify-center
-
-                  rounded-full
-
-                  border
-                  border-cyan-400/35
-
-                  bg-cyan-400/[0.05]
-
-                  text-sm
-                  font-bold
-
-                  text-slate-800
-
-                  dark:text-white
-                "
-              >
-                II
-              </button>
-
-              <button
-                type="button"
-                aria-label="Next track"
-                className="text-xl text-slate-400 transition hover:text-slate-900 dark:text-white/40 dark:hover:text-white"
-              >
-                ›
-              </button>
-            </div>
-
-            {/* footer */}
-
-            <div className="mt-6 flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[8px] font-semibold uppercase tracking-[0.13em] text-slate-400 dark:text-white/35">
-                <StatusDot />
-                Live activity
-              </span>
-
-              <a
-                href={track.spotifyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[8px] font-semibold uppercase tracking-[0.12em] text-slate-400 transition hover:text-emerald-500 dark:text-white/45 dark:hover:text-emerald-300"
-              >
-                Open in Spotify
-                <ArrowUpRight className="h-3 w-3" />
-              </a>
-            </div>
-          </>
-        )}
-
-        {/* empty */}
-
-        {!loading && !track && (
-          <div className="py-2">
-            <div className="flex items-center gap-4">
-              <div
-                className="
-                  flex
-                  h-16
-                  w-16
-                  shrink-0
-                  items-center
-                  justify-center
-
-                  rounded-xl
-
-                  border
-                  border-slate-200
-
-                  bg-slate-100
-
-                  dark:border-white/[0.08]
-                  dark:bg-white/[0.03]
-                "
-              >
-                <Music2 className="h-6 w-6 text-slate-400 dark:text-white/25" />
-              </div>
-
-              <div className="min-w-0">
-                <p className="text-base font-semibold text-slate-700 dark:text-white/75">
-                  Spotify is quiet
-                </p>
-
-                <p className="mt-1 text-xs leading-5 text-slate-400 dark:text-white/35">
-                  Recent listening activity appears here.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+              dark:text-white/45
+              dark:hover:text-emerald-300
+            "
+          >
+            Open in Spotify
+            <ArrowUpRight className="h-3 w-3" />
+          </a>
+        </div>
       </div>
     </article>
   );
@@ -733,52 +559,41 @@ function SpotifyCard() {
    ============================================================================ */
 
 function VisitorStats() {
-  const [data, setData] =
-    useState<VisitorData>({
-      totalVisitors: 0,
-      liveViewers: 0,
-    });
+  const [data, setData] = useState<VisitorData>({
+    totalVisitors: 0,
+    liveViewers: 0,
+  });
 
   useEffect(() => {
     let cancelled = false;
 
-    async function updatePresence(
-      action: "enter" | "heartbeat"
-    ) {
+    async function updatePresence(action: "enter" | "heartbeat") {
       try {
-        const response = await fetch(
-          "/api/api/visitors",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              action,
-            }),
-            cache: "no-store",
-          }
-        );
+        const response = await fetch("/api/api/visitors", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action,
+          }),
+          cache: "no-store",
+        });
 
         if (!response.ok) {
-          throw new Error(
-            "Visitor endpoint unavailable"
-          );
+          throw new Error("Visitor endpoint unavailable");
         }
 
-        const result =
-          (await response.json()) as VisitorData;
+        const result = (await response.json()) as VisitorData;
 
         if (!cancelled) {
           setData({
-            totalVisitors:
-              Number(result.totalVisitors) || 0,
-            liveViewers:
-              Number(result.liveViewers) || 0,
+            totalVisitors: Number(result.totalVisitors) || 0,
+            liveViewers: Number(result.liveViewers) || 0,
           });
         }
       } catch {
-        // Keep the hero working if analytics is unavailable.
+        // Keep UI stable if analytics is unavailable.
       }
     }
 
@@ -801,54 +616,131 @@ function VisitorStats() {
         relative
         w-full
         overflow-hidden
-        rounded-[1.25rem]
+        rounded-[1.2rem]
 
         border
         border-cyan-500/20
 
         bg-white/90
 
-        px-5
+        px-4
         py-4
 
         shadow-[0_18px_55px_rgba(15,23,42,0.08)]
 
         backdrop-blur-xl
 
-        dark:border-cyan-400/25
-        dark:bg-[#07111e]/90
+        dark:border-cyan-400/20
+        dark:bg-[#07111e]/92
         dark:shadow-[0_18px_55px_rgba(0,0,0,0.30)]
       "
     >
-      <div className="grid grid-cols-2 divide-x divide-slate-200 dark:divide-white/[0.08]">
-        <div className="pr-5">
+      <div
+        className="
+          grid
+          grid-cols-2
+
+          divide-x
+          divide-slate-200
+
+          dark:divide-white/[0.08]
+        "
+      >
+        {/* VIEWING NOW */}
+
+        <div className="pr-4">
           <div className="flex items-center gap-2">
             <StatusDot />
 
-            <span className="text-[8px] font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-white/35">
+            <span
+              className="
+                text-[8px]
+                font-semibold
+                uppercase
+                tracking-[0.14em]
+
+                text-slate-400
+
+                dark:text-white/35
+              "
+            >
               Viewing now
             </span>
           </div>
 
           <div className="mt-2 flex items-end gap-2">
-            <span className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+            <span
+              className="
+                text-2xl
+                font-semibold
+                tracking-tight
+
+                text-slate-950
+
+                dark:text-white
+              "
+            >
               {data.liveViewers || "—"}
             </span>
 
-            <Eye className="mb-1 h-3.5 w-3.5 text-cyan-500/70 dark:text-cyan-300/60" />
+            <Eye
+              className="
+                mb-1
+                h-3.5
+                w-3.5
+
+                text-cyan-500/70
+
+                dark:text-cyan-300/60
+              "
+            />
           </div>
         </div>
 
-        <div className="pl-5">
-          <div className="flex items-center gap-2">
-            <Users className="h-3 w-3 text-cyan-500/70 dark:text-cyan-300/60" />
+        {/* TOTAL VISITORS */}
 
-            <span className="text-[8px] font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-white/35">
+        <div className="pl-4">
+          <div className="flex items-center gap-2">
+            <Users
+              className="
+                h-3
+                w-3
+
+                text-cyan-500/70
+
+                dark:text-cyan-300/60
+              "
+            />
+
+            <span
+              className="
+                text-[8px]
+                font-semibold
+                uppercase
+                tracking-[0.14em]
+
+                text-slate-400
+
+                dark:text-white/35
+              "
+            >
               Total visitors
             </span>
           </div>
 
-          <div className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+          <div
+            className="
+              mt-2
+
+              text-2xl
+              font-semibold
+              tracking-tight
+
+              text-slate-950
+
+              dark:text-white
+            "
+          >
             {data.totalVisitors
               ? data.totalVisitors.toLocaleString()
               : "—"}
@@ -860,7 +752,7 @@ function VisitorStats() {
 }
 
 /* ============================================================================
-   RIGHT ACTIVITY RAIL
+   ACTIVITY RAIL
    ============================================================================ */
 
 function ActivityRail() {
@@ -868,29 +760,35 @@ function ActivityRail() {
     <aside
       aria-label="Portfolio activity"
       className="
-        hidden
+        relative
+        z-20
+
+        mx-auto
+        mt-12
+        w-full
+        max-w-[360px]
 
         xl:absolute
         xl:right-8
-        xl:top-[26%]
-        xl:z-30
-        xl:block
-
-        xl:w-[335px]
+        xl:top-1/2
+        xl:mt-0
+        xl:w-[315px]
+        xl:-translate-y-1/2
       "
     >
       <SpotifyCard />
 
-      {/* connector */}
+      {/* CONNECTOR */}
 
       <div
         aria-hidden="true"
         className="
           mx-auto
-          h-5
+          h-4
           w-px
+
           bg-gradient-to-b
-          from-cyan-400/45
+          from-cyan-400/50
           via-cyan-400/25
           to-transparent
         "
@@ -912,17 +810,18 @@ function ScrollIndicator() {
       href="#projects"
       aria-label="Scroll to projects"
       className="
-        group
         absolute
         bottom-5
         left-1/2
-        z-40
+        z-30
 
         flex
         -translate-x-1/2
         flex-col
         items-center
         gap-1.5
+
+        whitespace-nowrap
       "
     >
       <span
@@ -935,10 +834,11 @@ function ScrollIndicator() {
           text-slate-400
 
           transition-colors
-          group-hover:text-cyan-500
+
+          hover:text-cyan-500
 
           dark:text-white/30
-          dark:group-hover:text-cyan-300
+          dark:hover:text-cyan-300
         "
       >
         Scroll to explore
@@ -955,11 +855,7 @@ function ScrollIndicator() {
           transition-all
           duration-300
 
-          group-hover:-translate-y-0.5
-          group-hover:text-cyan-500
-
           dark:text-white/35
-          dark:group-hover:text-cyan-300
         "
       />
 
@@ -985,8 +881,7 @@ function ScrollIndicator() {
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
 
-  const shouldReduceMotion =
-    useReducedMotionPreference();
+  const shouldReduceMotion = useReducedMotionPreference();
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
@@ -997,121 +892,100 @@ export function Hero() {
 
     /*
      * IMPORTANT:
-     *
-     * We intentionally do NOT reference the gsap context variable from
-     * inside its own callback. That was the cause of:
+     * Never reference the GSAP context variable from inside
+     * its own callback. This prevents:
      *
      * Cannot access 'ctx' before initialization
      */
 
     const ctx = gsap.context(() => {
-      /* ================================================================
-         ELEMENTS
-         ================================================================ */
+      /* ======================================================================
+         SELECTORS
+         ====================================================================== */
 
-      const social =
-        section.querySelector<HTMLElement>(
-          "[data-hero-social]"
-        );
+      const social = section.querySelector<HTMLElement>(
+        "[data-hero-social]"
+      );
 
-      const socialItems =
-        section.querySelectorAll<HTMLElement>(
-          "[data-hero-social-list] a"
-        );
+      const socialItems = section.querySelectorAll<HTMLElement>(
+        "[data-hero-social-list] a"
+      );
 
-      const eyebrow =
-        section.querySelector<HTMLElement>(
-          "[data-hero-eyebrow]"
-        );
+      const eyebrow = section.querySelector<HTMLElement>(
+        "[data-hero-eyebrow]"
+      );
 
-      const identity =
-        section.querySelector<HTMLElement>(
-          "[data-hero-identity]"
-        );
+      const identity = section.querySelector<HTMLElement>(
+        "[data-hero-identity]"
+      );
 
-      const headline =
-        section.querySelector<HTMLElement>(
-          "[data-hero-headline]"
-        );
+      const headline = section.querySelector<HTMLElement>(
+        "[data-hero-headline]"
+      );
 
-      const lineOne =
-        section.querySelector<HTMLElement>(
-          "[data-hero-line-one]"
-        );
+      const lineOne = section.querySelector<HTMLElement>(
+        "[data-hero-line-one]"
+      );
 
-      const gradientWord =
-        section.querySelector<HTMLElement>(
-          "[data-hero-gradient]"
-        );
+      const gradientWord = section.querySelector<HTMLElement>(
+        "[data-hero-gradient]"
+      );
 
-      const lineTwo =
-        section.querySelector<HTMLElement>(
-          "[data-hero-line-two]"
-        );
+      const lineTwo = section.querySelector<HTMLElement>(
+        "[data-hero-line-two]"
+      );
 
-      const accent =
-        section.querySelector<HTMLElement>(
-          "[data-hero-accent]"
-        );
+      const accent = section.querySelector<HTMLElement>(
+        "[data-hero-accent]"
+      );
 
-      const copy =
-        section.querySelector<HTMLElement>(
-          "[data-hero-copy]"
-        );
+      const copy = section.querySelector<HTMLElement>(
+        "[data-hero-copy]"
+      );
 
-      const actions =
-        section.querySelector<HTMLElement>(
-          "[data-hero-actions]"
-        );
+      const actions = section.querySelector<HTMLElement>(
+        "[data-hero-actions]"
+      );
 
-      const actionButtons =
-        section.querySelectorAll<HTMLElement>(
-          "[data-hero-action]"
-        );
+      const actionButtons = section.querySelectorAll<HTMLElement>(
+        "[data-hero-action]"
+      );
 
-      const spotify =
-        section.querySelector<HTMLElement>(
-          "[data-hero-spotify]"
-        );
+      const spotify = section.querySelector<HTMLElement>(
+        "[data-hero-spotify]"
+      );
 
-      const stats =
-        section.querySelector<HTMLElement>(
-          "[data-hero-stats]"
-        );
+      const stats = section.querySelector<HTMLElement>(
+        "[data-hero-stats]"
+      );
 
-      const scroll =
-        section.querySelector<HTMLElement>(
-          "[data-hero-scroll]"
-        );
+      const scroll = section.querySelector<HTMLElement>(
+        "[data-hero-scroll]"
+      );
 
-      const mouse =
-        section.querySelector<HTMLElement>(
-          "[data-hero-mouse]"
-        );
+      const mouse = section.querySelector<HTMLElement>(
+        "[data-hero-mouse]"
+      );
 
-      const arrow =
-        section.querySelector<HTMLElement>(
-          "[data-hero-arrow]"
-        );
+      const arrow = section.querySelector<HTMLElement>(
+        "[data-hero-arrow]"
+      );
 
-      const grid =
-        section.querySelector<HTMLElement>(
-          "[data-hero-grid]"
-        );
+      const grid = section.querySelector<HTMLElement>(
+        "[data-hero-grid]"
+      );
 
-      const glow =
-        section.querySelector<HTMLElement>(
-          "[data-hero-glow]"
-        );
+      const glow = section.querySelector<HTMLElement>(
+        "[data-hero-glow]"
+      );
 
-      const equalizerBars =
-        section.querySelectorAll<HTMLElement>(
-          "[data-spotify-equalizer] span"
-        );
+      const equalizerBars = section.querySelectorAll<HTMLElement>(
+        "[data-spotify-equalizer] span"
+      );
 
-      /* ================================================================
+      /* ======================================================================
          REDUCED MOTION
-         ================================================================ */
+         ====================================================================== */
 
       if (shouldReduceMotion) {
         gsap.set(
@@ -1142,9 +1016,9 @@ export function Hero() {
         return;
       }
 
-      /* ================================================================
-         INITIAL STATES
-         ================================================================ */
+      /* ======================================================================
+         INITIAL STATE
+         ====================================================================== */
 
       gsap.set(
         [
@@ -1161,14 +1035,14 @@ export function Hero() {
         ].filter(Boolean),
         {
           opacity: 0,
-          y: 22,
+          y: 20,
         }
       );
 
       if (gradientWord) {
         gsap.set(gradientWord, {
           opacity: 0,
-          scale: 0.92,
+          scale: 0.9,
           transformOrigin: "50% 50%",
         });
       }
@@ -1176,14 +1050,14 @@ export function Hero() {
       if (social) {
         gsap.set(social, {
           opacity: 0,
-          x: -22,
+          x: -20,
         });
       }
 
       if (socialItems.length) {
         gsap.set(socialItems, {
           opacity: 0,
-          y: 12,
+          y: 10,
         });
       }
 
@@ -1199,17 +1073,15 @@ export function Hero() {
         });
       }
 
-      /* ================================================================
-         ENTRANCE TIMELINE
-         ================================================================ */
+      /* ======================================================================
+         ENTRANCE
+         ====================================================================== */
 
       const timeline = gsap.timeline({
         defaults: {
           ease: "power3.out",
         },
       });
-
-      /* SOCIAL */
 
       if (social) {
         timeline.to(
@@ -1229,14 +1101,12 @@ export function Hero() {
           {
             opacity: 1,
             y: 0,
-            duration: 0.38,
-            stagger: 0.07,
+            duration: 0.35,
+            stagger: 0.06,
           },
-          0.18
+          0.16
         );
       }
-
-      /* STATUS */
 
       if (eyebrow) {
         timeline.to(
@@ -1244,13 +1114,11 @@ export function Hero() {
           {
             opacity: 1,
             y: 0,
-            duration: 0.42,
+            duration: 0.4,
           },
-          0.12
+          0.1
         );
       }
-
-      /* NAME */
 
       if (identity) {
         timeline.to(
@@ -1258,13 +1126,11 @@ export function Hero() {
           {
             opacity: 1,
             y: 0,
-            duration: 0.45,
+            duration: 0.4,
           },
-          0.27
+          0.22
         );
       }
-
-      /* FIRST HEADLINE LINE */
 
       if (lineOne) {
         timeline.to(
@@ -1272,13 +1138,11 @@ export function Hero() {
           {
             opacity: 1,
             y: 0,
-            duration: 0.65,
+            duration: 0.6,
           },
-          0.4
+          0.35
         );
       }
-
-      /* RELIABLE */
 
       if (gradientWord) {
         timeline.to(
@@ -1286,14 +1150,12 @@ export function Hero() {
           {
             opacity: 1,
             scale: 1,
-            duration: 0.62,
-            ease: "back.out(1.25)",
+            duration: 0.58,
+            ease: "back.out(1.2)",
           },
-          0.52
+          0.45
         );
       }
-
-      /* SECOND HEADLINE LINE */
 
       if (lineTwo) {
         timeline.to(
@@ -1301,13 +1163,11 @@ export function Hero() {
           {
             opacity: 1,
             y: 0,
-            duration: 0.62,
+            duration: 0.58,
           },
-          0.58
+          0.52
         );
       }
-
-      /* ACCENT */
 
       if (accent) {
         timeline.to(
@@ -1315,13 +1175,11 @@ export function Hero() {
           {
             opacity: 1,
             y: 0,
-            duration: 0.4,
+            duration: 0.35,
           },
-          0.85
+          0.76
         );
       }
-
-      /* DESCRIPTION */
 
       if (copy) {
         timeline.to(
@@ -1329,13 +1187,11 @@ export function Hero() {
           {
             opacity: 1,
             y: 0,
-            duration: 0.5,
+            duration: 0.45,
           },
-          0.9
+          0.8
         );
       }
-
-      /* BUTTONS */
 
       if (actions) {
         timeline.to(
@@ -1343,9 +1199,9 @@ export function Hero() {
           {
             opacity: 1,
             y: 0,
-            duration: 0.45,
+            duration: 0.4,
           },
-          1.02
+          0.92
         );
       }
 
@@ -1354,19 +1210,17 @@ export function Hero() {
           actionButtons,
           {
             opacity: 0,
-            y: 9,
+            y: 8,
           },
           {
             opacity: 1,
             y: 0,
-            duration: 0.35,
-            stagger: 0.07,
+            duration: 0.3,
+            stagger: 0.06,
           },
-          1.08
+          0.98
         );
       }
-
-      /* RIGHT CARDS */
 
       if (spotify) {
         timeline.to(
@@ -1374,9 +1228,9 @@ export function Hero() {
           {
             opacity: 1,
             y: 0,
-            duration: 0.6,
+            duration: 0.55,
           },
-          0.7
+          0.65
         );
       }
 
@@ -1386,13 +1240,11 @@ export function Hero() {
           {
             opacity: 1,
             y: 0,
-            duration: 0.45,
+            duration: 0.4,
           },
-          0.92
+          0.8
         );
       }
-
-      /* SCROLL */
 
       if (scroll) {
         timeline.to(
@@ -1400,15 +1252,15 @@ export function Hero() {
           {
             opacity: 1,
             y: 0,
-            duration: 0.45,
+            duration: 0.4,
           },
-          1.25
+          1.15
         );
       }
 
-      /* ================================================================
+      /* ======================================================================
          BACKGROUND GRID
-         ================================================================ */
+         ====================================================================== */
 
       if (grid) {
         gsap.to(grid, {
@@ -1419,14 +1271,14 @@ export function Hero() {
         });
       }
 
-      /* ================================================================
+      /* ======================================================================
          BACKGROUND GLOW
-         ================================================================ */
+         ====================================================================== */
 
       if (glow) {
         gsap.to(glow, {
-          x: 38,
-          y: -16,
+          x: 35,
+          y: -15,
           scale: 1.04,
           duration: 8,
           repeat: -1,
@@ -1435,28 +1287,28 @@ export function Hero() {
         });
       }
 
-      /* ================================================================
+      /* ======================================================================
          SPOTIFY FLOAT
-         ================================================================ */
+         ====================================================================== */
 
       if (spotify) {
         gsap.to(spotify, {
-          y: -5,
+          y: -4,
           duration: 4.8,
           repeat: -1,
           yoyo: true,
           ease: "sine.inOut",
-          delay: 1.1,
+          delay: 1,
         });
       }
 
-      /* ================================================================
-         VISITOR CARD FLOAT
-         ================================================================ */
+      /* ======================================================================
+         STATS FLOAT
+         ====================================================================== */
 
       if (stats) {
         gsap.to(stats, {
-          y: -3,
+          y: -2.5,
           duration: 5.2,
           repeat: -1,
           yoyo: true,
@@ -1465,9 +1317,9 @@ export function Hero() {
         });
       }
 
-      /* ================================================================
-         SPOTIFY EQUALIZER
-         ================================================================ */
+      /* ======================================================================
+         EQUALIZER
+         ====================================================================== */
 
       equalizerBars.forEach((bar, index) => {
         gsap.to(bar, {
@@ -1481,9 +1333,9 @@ export function Hero() {
         });
       });
 
-      /* ================================================================
+      /* ======================================================================
          MOUSE
-         ================================================================ */
+         ====================================================================== */
 
       if (mouse) {
         gsap.to(mouse, {
@@ -1497,9 +1349,9 @@ export function Hero() {
         });
       }
 
-      /* ================================================================
+      /* ======================================================================
          ARROW
-         ================================================================ */
+         ====================================================================== */
 
       if (arrow) {
         gsap.to(arrow, {
@@ -1513,13 +1365,13 @@ export function Hero() {
         });
       }
 
-      /* ================================================================
+      /* ======================================================================
          HEADLINE MICRO FLOAT
-         ================================================================ */
+         ====================================================================== */
 
       if (headline) {
         gsap.to(headline, {
-          y: -2,
+          y: -1.5,
           duration: 5.5,
           repeat: -1,
           yoyo: true,
@@ -1528,10 +1380,6 @@ export function Hero() {
         });
       }
     }, section);
-
-    /* ================================================================
-       IMPORTANT CLEANUP
-       ================================================================ */
 
     return () => {
       ctx.revert();
@@ -1545,7 +1393,9 @@ export function Hero() {
       className="
         relative
         isolate
+
         min-h-[100svh]
+
         overflow-hidden
 
         bg-[#f7f9fc]
@@ -1569,62 +1419,63 @@ export function Hero() {
           overflow-hidden
         "
       >
-        {/* Cyan glow */}
+        {/* CYAN GLOW */}
 
         <div
           data-hero-glow
           className="
             absolute
             -left-40
-            top-[4%]
+            top-[2%]
 
             h-[30rem]
             w-[30rem]
 
             rounded-full
 
-            bg-cyan-400/[0.055]
+            bg-cyan-400/[0.045]
 
             blur-[140px]
 
-            dark:bg-cyan-500/[0.09]
+            dark:bg-cyan-500/[0.08]
 
             sm:h-[38rem]
             sm:w-[38rem]
           "
         />
 
-        {/* Violet glow */}
+        {/* VIOLET GLOW */}
 
         <div
           className="
             absolute
-            -right-48
-            top-[10%]
+            -right-52
+            top-[8%]
 
-            h-[32rem]
-            w-[32rem]
+            h-[30rem]
+            w-[30rem]
 
             rounded-full
 
-            bg-violet-400/[0.035]
+            bg-violet-400/[0.03]
 
             blur-[150px]
 
-            dark:bg-violet-500/[0.08]
+            dark:bg-violet-500/[0.07]
           "
         />
 
-        {/* Grid */}
+        {/* GRID */}
 
         <div
           data-hero-grid
           className="
             absolute
             inset-0
-            opacity-[0.16]
 
-            dark:opacity-[0.14]
+            opacity-[0.13]
+
+            dark:opacity-[0.11]
           "
           style={{
             backgroundImage:
@@ -1633,30 +1484,30 @@ export function Hero() {
           }}
         />
 
-        {/* Center atmosphere */}
+        {/* CENTER ATMOSPHERE */}
 
         <div
           className="
             absolute
             left-1/2
-            top-[43%]
+            top-[44%]
 
-            h-[28rem]
-            w-[50rem]
+            h-[26rem]
+            w-[48rem]
 
             -translate-x-1/2
 
             rounded-full
 
-            bg-cyan-400/[0.015]
+            bg-cyan-400/[0.012]
 
             blur-[120px]
 
-            dark:bg-blue-500/[0.025]
+            dark:bg-blue-500/[0.02]
           "
         />
 
-        {/* Bottom cyan curve */}
+        {/* BOTTOM CYAN CURVE */}
 
         <div
           className="
@@ -1672,13 +1523,13 @@ export function Hero() {
             rounded-[50%]
 
             border-t
-            border-cyan-500/10
+            border-cyan-500/[0.08]
 
-            dark:border-cyan-400/20
+            dark:border-cyan-400/[0.17]
           "
         />
 
-        {/* Bottom violet curve */}
+        {/* BOTTOM VIOLET CURVE */}
 
         <div
           className="
@@ -1694,47 +1545,47 @@ export function Hero() {
             rounded-[50%]
 
             border-t
-            border-violet-500/10
+            border-violet-500/[0.08]
 
-            dark:border-violet-500/20
+            dark:border-violet-500/[0.17]
           "
         />
 
-        {/* Top fade */}
+        {/* TOP FADE */}
 
         <div
           className="
             absolute
             inset-x-0
             top-0
-            h-48
+            h-40
 
             bg-gradient-to-b
             from-[#f7f9fc]
-            via-[#f7f9fc]/85
+            via-[#f7f9fc]/80
             to-transparent
 
             dark:from-[#030712]
-            dark:via-[#030712]/85
+            dark:via-[#030712]/80
           "
         />
 
-        {/* Bottom fade */}
+        {/* BOTTOM FADE */}
 
         <div
           className="
             absolute
             inset-x-0
             bottom-0
-            h-56
+            h-48
 
             bg-gradient-to-t
             from-[#f7f9fc]
-            via-[#f7f9fc]/90
+            via-[#f7f9fc]/85
             to-transparent
 
             dark:from-[#030712]
-            dark:via-[#030712]/90
+            dark:via-[#030712]/85
           "
         />
       </div>
@@ -1746,23 +1597,27 @@ export function Hero() {
       <SocialRail />
 
       {/* ======================================================================
-          MAIN CONTAINER
+          CONTENT WRAPPER
           ====================================================================== */}
 
       <div
         className="
           relative
           mx-auto
+          flex
           min-h-[100svh]
           w-full
           max-w-[1500px]
 
+          flex-col
+          justify-center
+
           px-5
-          pb-20
-          pt-24
+          pb-24
+          pt-28
 
           sm:px-8
-          sm:pt-28
+          sm:pt-32
 
           lg:px-12
 
@@ -1770,449 +1625,402 @@ export function Hero() {
         "
       >
         {/* ====================================================================
-            CENTER HERO
+            CENTER CONTENT
             ==================================================================== */}
 
-        <div
+        <main
           className="
-            absolute
-            inset-x-0
-            top-1/2
-
+            relative
             z-10
 
+            mx-auto
+
             flex
-            -translate-y-1/2
+            w-full
+            max-w-[820px]
+            flex-col
+            items-center
             justify-center
+            text-center
 
-            px-5
-
-            sm:px-8
-            lg:px-10
+            xl:-translate-x-1
           "
         >
+          {/* STATUS */}
+
           <div
+            data-hero-eyebrow
             className="
-              flex
-              w-full
-              max-w-[850px]
-              flex-col
+              inline-flex
               items-center
-              text-center
+              gap-2.5
+
+              rounded-full
+
+              border
+              border-cyan-400/20
+
+              bg-cyan-400/[0.04]
+
+              px-4
+              py-2
+
+              text-[9px]
+              font-semibold
+              uppercase
+              tracking-[0.20em]
+
+              text-cyan-700
+
+              backdrop-blur-xl
+
+              dark:border-cyan-300/20
+              dark:bg-cyan-400/[0.05]
+              dark:text-cyan-100/80
             "
           >
-            {/* STATUS */}
+            <StatusDot />
 
-            <div
-              data-hero-reveal
-              data-hero-eyebrow
+            Available for select opportunities
+          </div>
+
+          {/* IDENTITY */}
+
+          <div
+            data-hero-identity
+            className="mt-5"
+          >
+            <p
               className="
-                inline-flex
-                items-center
-                gap-2.5
-
-                rounded-full
-
-                border
-                border-cyan-400/20
-
-                bg-cyan-400/[0.04]
-
-                px-4
-                py-2
-
-                text-[9px]
+                text-[10px]
                 font-semibold
                 uppercase
-                tracking-[0.20em]
-
-                text-cyan-700
-
-                backdrop-blur-xl
-
-                dark:border-cyan-300/20
-                dark:bg-cyan-400/[0.05]
-                dark:text-cyan-100/80
-              "
-            >
-              <StatusDot />
-
-              Available for select opportunities
-            </div>
-
-            {/* IDENTITY */}
-
-            <div
-              data-hero-identity
-              className="mt-5"
-            >
-              <p
-                className="
-                  text-[10px]
-                  font-semibold
-                  uppercase
-                  tracking-[0.5em]
-
-                  text-slate-500
-
-                  dark:text-white/45
-                "
-              >
-                KHEL
-              </p>
-
-              <p
-                className="
-                  mt-2
-
-                  text-[9px]
-                  font-medium
-                  uppercase
-                  tracking-[0.42em]
-
-                  text-cyan-700/70
-
-                  dark:text-cyan-200/65
-                "
-              >
-                Software Engineer
-              </p>
-            </div>
-
-            {/* HEADLINE */}
-
-            <h1
-              id="hero-title"
-              data-hero-headline
-              className="
-                mt-7
-                w-full
-
-                text-[clamp(2.35rem,5.2vw,5.65rem)]
-
-                font-semibold
-
-                leading-[0.89]
-
-                tracking-[-0.075em]
-
-                text-slate-950
-
-                dark:text-white
-              "
-            >
-              <span
-                data-hero-line-one
-                className="inline-block"
-              >
-                I BUILD{" "}
-                <span
-                  data-hero-gradient
-                  className="
-                    inline-block
-
-                    bg-gradient-to-r
-                    from-cyan-500
-                    via-sky-500
-                    to-violet-500
-                    bg-clip-text
-                    text-transparent
-
-                    dark:from-cyan-200
-                    dark:via-sky-400
-                    dark:to-violet-400
-                  "
-                >
-                  RELIABLE
-                </span>
-              </span>
-
-              <br />
-
-              <span
-                data-hero-line-two
-                className="inline-block"
-              >
-                DIGITAL PRODUCTS.
-              </span>
-            </h1>
-
-            {/* ACCENT */}
-
-            <div
-              data-hero-accent
-              aria-hidden="true"
-              className="
-                mt-7
-
-                h-px
-                w-14
-
-                bg-gradient-to-r
-                from-transparent
-                via-cyan-500
-                to-transparent
-              "
-            />
-
-            {/* COPY */}
-
-            <p
-              data-hero-copy
-              className="
-                mt-6
-
-                max-w-xl
-
-                text-sm
-                leading-7
+                tracking-[0.5em]
 
                 text-slate-500
 
-                dark:text-slate-300/65
-
-                sm:text-base
-                sm:leading-8
+                dark:text-white/45
               "
             >
-              I design and develop modern web applications
-              focused on performance, usability,
-              maintainability, and solving real-world
-              problems.
+              KHEL
             </p>
 
-            {/* ACTIONS */}
-
-            <div
-              data-hero-actions
+            <p
               className="
-                mt-8
+                mt-2
 
-                flex
-                flex-col
-                items-center
-                justify-center
+                text-[9px]
+                font-medium
+                uppercase
+                tracking-[0.42em]
 
-                gap-3
+                text-cyan-700/70
 
-                sm:flex-row
+                dark:text-cyan-200/65
               "
             >
-              {/* VIEW MY WORK */}
-
-              <Link
-                data-hero-action
-                href="#projects"
-                className="
-                  group
-
-                  inline-flex
-                  min-h-12
-                  min-w-[155px]
-
-                  items-center
-                  justify-center
-                  gap-2
-
-                  rounded-xl
-
-                  !bg-slate-950
-                  !text-white
-
-                  px-5
-
-                  text-xs
-                  font-bold
-                  uppercase
-                  tracking-[0.14em]
-
-                  shadow-[0_16px_40px_rgba(15,23,42,0.16)]
-
-                  transition-all
-                  duration-300
-
-                  hover:-translate-y-1
-                  hover:!bg-cyan-600
-                  hover:shadow-[0_18px_45px_rgba(34,211,238,0.2)]
-
-                  focus-visible:outline-none
-                  focus-visible:ring-2
-                  focus-visible:ring-cyan-400
-
-                  dark:!bg-white
-                  dark:!text-slate-950
-                  dark:hover:!bg-cyan-200
-                "
-              >
-                <span className="!text-inherit">
-                  View my work
-                </span>
-
-                <ArrowUpRight className="h-4 w-4 !text-inherit transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-              </Link>
-
-              {/* DOWNLOAD CV */}
-
-              <a
-                data-hero-action
-                href="/cv.pdf"
-                download
-                className="
-                  group
-
-                  inline-flex
-                  min-h-12
-                  min-w-[155px]
-
-                  items-center
-                  justify-center
-                  gap-2
-
-                  rounded-xl
-
-                  border
-                  border-slate-300
-
-                  bg-white/70
-
-                  px-5
-
-                  text-xs
-                  font-bold
-                  uppercase
-                  tracking-[0.14em]
-
-                  !text-slate-800
-
-                  backdrop-blur-xl
-
-                  transition-all
-                  duration-300
-
-                  hover:-translate-y-1
-                  hover:border-cyan-400/60
-                  hover:bg-cyan-50
-                  hover:!text-cyan-700
-
-                  dark:border-cyan-300/30
-                  dark:bg-cyan-400/[0.03]
-                  dark:!text-white/80
-                  dark:hover:border-cyan-300/60
-                  dark:hover:bg-cyan-400/[0.07]
-                  dark:hover:!text-cyan-100
-                "
-              >
-                Download CV
-
-                <Download className="h-4 w-4 text-cyan-600 transition-transform duration-300 group-hover:translate-y-0.5 dark:text-cyan-200/80" />
-              </a>
-
-              {/* LET'S TALK */}
-
-              <Link
-                data-hero-action
-                href="#contact"
-                className="
-                  group
-
-                  inline-flex
-                  min-h-12
-                  min-w-[145px]
-
-                  items-center
-                  justify-center
-                  gap-2
-
-                  rounded-xl
-
-                  border
-                  border-slate-300
-
-                  bg-white/50
-
-                  px-5
-
-                  text-xs
-                  font-bold
-                  uppercase
-                  tracking-[0.14em]
-
-                  !text-slate-700
-
-                  backdrop-blur-xl
-
-                  transition-all
-                  duration-300
-
-                  hover:-translate-y-1
-                  hover:border-violet-400/40
-                  hover:bg-violet-50
-                  hover:!text-violet-700
-
-                  dark:border-white/[0.12]
-                  dark:bg-white/[0.025]
-                  dark:!text-white/80
-                  dark:hover:border-violet-300/35
-                  dark:hover:bg-violet-400/[0.06]
-                  dark:hover:!text-violet-100
-                "
-              >
-                Let&apos;s talk
-
-                <Mail className="h-4 w-4 text-cyan-600/80 dark:text-cyan-200/70" />
-              </Link>
-            </div>
+              Software Engineer
+            </p>
           </div>
-        </div>
 
-        {/* ====================================================================
-            DESKTOP ACTIVITY RAIL
-            ==================================================================== */}
+          {/* HEADLINE */}
 
-        <ActivityRail />
-
-        {/* ====================================================================
-            MOBILE / TABLET ACTIVITY
-            ==================================================================== */}
-
-        <div
-          className="
-            relative
-            z-20
-
-            mt-[105svh]
-
-            flex
-            justify-center
-
-            xl:hidden
-          "
-        >
-          <div
+          <h1
+            id="hero-title"
+            data-hero-headline
             className="
-              flex
+              mt-7
               w-full
-              max-w-[380px]
-              flex-col
+
+              text-[clamp(2.3rem,5.05vw,5.35rem)]
+
+              font-semibold
+
+              leading-[0.9]
+
+              tracking-[-0.075em]
+
+              text-slate-950
+
+              dark:text-white
             "
           >
-            <SpotifyCard />
+            <span
+              data-hero-line-one
+              className="inline-block"
+            >
+              I BUILD{" "}
+              <span
+                data-hero-gradient
+                className="
+                  inline-block
 
-            <div
-              aria-hidden="true"
+                  bg-gradient-to-r
+                  from-cyan-500
+                  via-sky-500
+                  to-violet-500
+
+                  bg-clip-text
+
+                  text-transparent
+
+                  dark:from-cyan-200
+                  dark:via-sky-400
+                  dark:to-violet-400
+                "
+              >
+                RELIABLE
+              </span>
+            </span>
+
+            <br />
+
+            <span
+              data-hero-line-two
+              className="inline-block"
+            >
+              DIGITAL PRODUCTS.
+            </span>
+          </h1>
+
+          {/* ACCENT */}
+
+          <div
+            data-hero-accent
+            aria-hidden="true"
+            className="
+              mt-7
+
+              h-px
+              w-14
+
+              bg-gradient-to-r
+              from-transparent
+              via-cyan-500
+              to-transparent
+            "
+          />
+
+          {/* DESCRIPTION */}
+
+          <p
+            data-hero-copy
+            className="
+              mt-6
+
+              max-w-[650px]
+
+              text-sm
+              leading-7
+
+              text-slate-500
+
+              dark:text-slate-300/65
+
+              sm:text-base
+              sm:leading-8
+            "
+          >
+            I design and develop modern web applications
+            focused on performance, usability,
+            maintainability, and solving real-world
+            problems.
+          </p>
+
+          {/* ACTIONS */}
+
+          <div
+            data-hero-actions
+            className="
+              mt-8
+
+              flex
+              flex-col
+              items-center
+              justify-center
+
+              gap-3
+
+              sm:flex-row
+            "
+          >
+            {/* VIEW MY WORK */}
+
+            <Link
+              data-hero-action
+              href="#projects"
               className="
-                mx-auto
-                h-5
-                w-px
-                bg-gradient-to-b
-                from-cyan-400/45
-                to-cyan-400/10
-              "
-            />
+                group
 
-            <VisitorStats />
+                inline-flex
+                min-h-12
+                min-w-[155px]
+
+                items-center
+                justify-center
+                gap-2
+
+                rounded-xl
+
+                !bg-slate-950
+                !text-white
+
+                px-5
+
+                text-xs
+                font-bold
+                uppercase
+                tracking-[0.14em]
+
+                shadow-[0_16px_40px_rgba(15,23,42,0.16)]
+
+                transition-all
+                duration-300
+
+                hover:-translate-y-1
+                hover:!bg-cyan-600
+                hover:shadow-[0_18px_45px_rgba(34,211,238,0.2)]
+
+                focus-visible:outline-none
+                focus-visible:ring-2
+                focus-visible:ring-cyan-400
+
+                dark:!bg-white
+                dark:!text-slate-950
+                dark:hover:!bg-cyan-200
+              "
+            >
+              <span className="!text-inherit">
+                View my work
+              </span>
+
+              <ArrowUpRight className="h-4 w-4 !text-inherit transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </Link>
+
+            {/* DOWNLOAD CV */}
+
+            <a
+              data-hero-action
+              href="/cv.pdf"
+              download
+              className="
+                group
+
+                inline-flex
+                min-h-12
+                min-w-[155px]
+
+                items-center
+                justify-center
+                gap-2
+
+                rounded-xl
+
+                border
+                border-slate-300
+
+                bg-white/70
+
+                px-5
+
+                text-xs
+                font-bold
+                uppercase
+                tracking-[0.14em]
+
+                !text-slate-800
+
+                backdrop-blur-xl
+
+                transition-all
+                duration-300
+
+                hover:-translate-y-1
+                hover:border-cyan-400/60
+                hover:bg-cyan-50
+                hover:!text-cyan-700
+
+                dark:border-cyan-300/30
+                dark:bg-cyan-400/[0.03]
+                dark:!text-white/80
+                dark:hover:border-cyan-300/60
+                dark:hover:bg-cyan-400/[0.07]
+                dark:hover:!text-cyan-100
+              "
+            >
+              Download CV
+
+              <Download className="h-4 w-4 text-cyan-600 transition-transform duration-300 group-hover:translate-y-0.5 dark:text-cyan-200/80" />
+            </a>
+
+            {/* LET'S TALK */}
+
+            <Link
+              data-hero-action
+              href="#contact"
+              className="
+                group
+
+                inline-flex
+                min-h-12
+                min-w-[145px]
+
+                items-center
+                justify-center
+                gap-2
+
+                rounded-xl
+
+                border
+                border-slate-300
+
+                bg-white/50
+
+                px-5
+
+                text-xs
+                font-bold
+                uppercase
+                tracking-[0.14em]
+
+                !text-slate-700
+
+                backdrop-blur-xl
+
+                transition-all
+                duration-300
+
+                hover:-translate-y-1
+                hover:border-violet-400/40
+                hover:bg-violet-50
+                hover:!text-violet-700
+
+                dark:border-white/[0.12]
+                dark:bg-white/[0.025]
+                dark:!text-white/80
+                dark:hover:border-violet-300/35
+                dark:hover:bg-violet-400/[0.06]
+                dark:hover:!text-violet-100
+              "
+            >
+              Let&apos;s talk
+
+              <Mail className="h-4 w-4 text-cyan-600/80 dark:text-cyan-200/70" />
+            </Link>
           </div>
-        </div>
+        </main>
+
+        {/* ====================================================================
+            ACTIVITY RAIL
+
+            Desktop:
+              Positioned to the right and vertically centered.
+
+            Mobile / Tablet:
+              Falls naturally below the hero content.
+        ==================================================================== */}
+
+        <ActivityRail />
 
         {/* ====================================================================
             SCROLL INDICATOR
@@ -2246,9 +2054,7 @@ function useReducedMotionPreference() {
     );
 
     const updatePreference = () => {
-      setPrefersReducedMotion(
-        mediaQuery.matches
-      );
+      setPrefersReducedMotion(mediaQuery.matches);
     };
 
     updatePreference();
