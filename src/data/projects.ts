@@ -24,12 +24,23 @@ export interface Project {
 }
 
 function createCaseStudyImages(
-  project: "core1" | "cybershield" | "soliera",
+  project: string,
   count: number,
 ) {
   return Array.from(
     { length: count },
     (_, index) => `/projects/${project}/${index + 1}.png`,
+  );
+}
+
+function createPaddedCaseStudyImages(
+  project: string,
+  count: number,
+) {
+  return Array.from(
+    { length: count },
+    (_, index) =>
+      `/projects/${project}/${String(index + 1).padStart(3, "0")}.png`,
   );
 }
 
@@ -44,7 +55,7 @@ export const projects: Project[] = [
       "An administrative management system with intelligent legal text analysis and document classification.",
     description:
       "A centralized administrative platform for hotel and restaurant operations, featuring Gemini AI-assisted legal text analysis and document classification.",
-    image: "/projects/soliera/1.png",
+    image: "/projects/soliera/soliera.png",
     caseStudyImages: createCaseStudyImages("soliera", 34),
     technologies: [
       "Laravel",
@@ -70,7 +81,7 @@ export const projects: Project[] = [
     architecture: ["Laravel application", "MySQL database", "Gemini AI integration"],
     challenges: ["Organizing administrative workflows", "Classifying legal documents"],
     results: ["Centralized operations", "AI-assisted document handling"],
-    github: "https://github.com/kheel06/soliera-administrative",
+    github: "https://github.com/kheel06/Soliera-Administrative-System",
   },
   {
     id: "alvion-core-transaction-1",
@@ -82,8 +93,8 @@ export const projects: Project[] = [
       "A digital patient-access and emergency management platform with AI-assisted triage and telehealth support.",
     description:
       "A hospital management platform for digital patient access, emergency workflows, AI-powered triage, and telehealth support.",
-    image: "/projects/core1/1.png",
-    caseStudyImages: createCaseStudyImages("core1", 39),
+    image: "/projects/alvion-core-transaction-1/1.png",
+    caseStudyImages: createCaseStudyImages("alvion-core-transaction-1", 39),
     technologies: [
       "PHP",
       "JavaScript ES6",
@@ -107,6 +118,36 @@ export const projects: Project[] = [
     architecture: ["PHP application", "MySQL database", "AI triage services"],
     challenges: ["Coordinating emergency workflows", "Supporting patient access"],
     results: ["Streamlined triage", "Connected patient services"],
+    github: "https://github.com/kheel06/Alvion-Core-Transaction-1",
+  },
+  {
+    id: "nexora",
+    title: "Nexora",
+    caseStudyTitle: "Nexora: Multi-Role E-Commerce Platform",
+    category: "Full Stack",
+    shortDescription:
+      "A multi-role e-commerce platform that combines a premium storefront with order, product, invoice, and customer management.",
+    description:
+      "A full-stack e-commerce platform for a modern Philippine shopping experience, with customer browsing and checkout alongside administrative controls for products, orders, invoices, users, and operational activity.",
+    image: "/projects/nexora/1.png",
+    caseStudyImages: createCaseStudyImages("nexora", 31),
+    technologies: ["PHP", "MySQL", "JavaScript ES6", "HTML", "CSS", "Bootstrap"],
+    features: [
+      "Customer storefront and product catalog",
+      "Shopping cart and checkout",
+      "Order tracking",
+      "Product and inventory administration",
+      "Invoice management",
+      "Role-based operations",
+    ],
+    problem:
+      "Online retail teams need a unified experience that makes shopping simple for customers while keeping products, orders, and fulfillment manageable internally.",
+    solution:
+      "Nexora pairs a polished storefront with role-based operational tools for managing products, customers, invoices, and orders across the commerce lifecycle.",
+    architecture: ["PHP web application", "MySQL database", "Customer and administrative portals"],
+    challenges: ["Balancing storefront polish with business operations", "Keeping orders and inventory visible"],
+    results: ["Streamlined online shopping flow", "Centralized commerce operations"],
+    github: "https://github.com/kheel06/Nexora",
   },
   {
     id: "cybershield",
@@ -132,6 +173,7 @@ export const projects: Project[] = [
     architecture: ["Web application", "REST API", "MySQL database"],
     challenges: ["Explaining security clearly", "Providing actionable assessment results"],
     results: ["Accessible cyber education", "Personalized risk guidance"],
+    github: "https://github.com/kheel06/Cybershield",
   },
   {
     id: "alvion-core-transaction-2",
@@ -143,7 +185,8 @@ export const projects: Project[] = [
       "A smart treatment system for coordinated surgery, laboratory, pharmacy, and patient-support workflows.",
     description:
       "A smart hospital treatment system with real-time surgery scheduling, laboratory coordination, pharmacy management, and Microsoft Azure Health Bot integration.",
-    image: "/projects/core-transaction-2/1.png",
+    image: "/projects/alvion-core-transaction-2/1.png",
+    caseStudyImages: createCaseStudyImages("alvion-core-transaction-2", 30),
     technologies: ["PHP", "MySQL", "JavaScript ES6", "Bootstrap", "Microsoft Azure Health Bot"],
     features: [
       "Laboratory Information System",
@@ -158,6 +201,7 @@ export const projects: Project[] = [
     architecture: ["PHP application", "MySQL database", "Azure Health Bot integration"],
     challenges: ["Coordinating clinical departments", "Scheduling operating rooms"],
     results: ["Connected treatment workflows", "Real-time schedule visibility"],
+    github: "https://github.com/kheel06/Alvion-Core-Transaction-2",
   },
   {
     id: "alvion-core-transaction-3",
@@ -169,7 +213,8 @@ export const projects: Project[] = [
       "A hospital operations platform focused on patient experience, virtual assistance, and AI automation.",
     description:
       "A hospital operations platform that improves patient experience through virtual assistants and Olive AI-powered process automation.",
-    image: "/projects/core-transaction-3/1.png",
+    image: "/projects/alvion-core-transaction-3/1.png",
+    caseStudyImages: createCaseStudyImages("alvion-core-transaction-3", 16),
     technologies: ["PHP", "MySQL", "JavaScript ES6", "Bootstrap", "Olive AI"],
     features: [
       "HMO and Insurance Claims System",
@@ -184,6 +229,7 @@ export const projects: Project[] = [
     architecture: ["PHP application", "MySQL database", "Olive AI integration"],
     challenges: ["Improving patient experience", "Automating operational processes"],
     results: ["AI-assisted service delivery", "Streamlined patient workflows"],
+    github: "https://github.com/kheel06/Alvion-Core-Transaction-3",
   },
   {
     id: "alvion-human-resource-3",
@@ -195,7 +241,8 @@ export const projects: Project[] = [
       "An HR platform that connects claims, reimbursement, attendance, schedules, and leave management.",
     description:
       "A hospital HR management platform that streamlines organizational processes with integrated claims, reimbursement, attendance, scheduling, leave management, and Azure AI.",
-    image: "/projects/human-resource-3/1.png",
+    image: "/projects/alvion-human-resource-3/1.png",
+    caseStudyImages: createCaseStudyImages("alvion-human-resource-3", 23),
     technologies: ["PHP", "MySQL", "JavaScript ES6", "Bootstrap", "Azure AI"],
     features: [
       "Time and Attendance System",
@@ -211,6 +258,7 @@ export const projects: Project[] = [
     architecture: ["PHP application", "MySQL database", "Azure AI integration"],
     challenges: ["Coordinating workforce information", "Managing staff schedules"],
     results: ["Integrated HR processes", "Improved organizational visibility"],
+    github: "https://github.com/kheel06/Alvion-Human-Resource-3",
   },
   {
     id: "alvion-financial-transaction",
@@ -222,7 +270,8 @@ export const projects: Project[] = [
       "A financial platform with automatic reporting, KPI dashboards, GPT-4, and PyTorch support.",
     description:
       "A hospital financial management platform for accounting workflows, automatic report generation, and KPI monitoring dashboards powered by GPT-4 and PyTorch.",
-    image: "/projects/financial-transaction/1.png",
+    image: "/projects/alvion-financial-transaction/1.png",
+    caseStudyImages: createPaddedCaseStudyImages("alvion-financial-transaction", 21),
     technologies: ["PHP", "MySQL", "JavaScript ES6", "Bootstrap", "GPT-4", "PyTorch"],
     features: ["Disbursement", "Budget Management", "Collection", "General Ledger"],
     problem:
@@ -232,6 +281,7 @@ export const projects: Project[] = [
     architecture: ["PHP application", "MySQL database", "GPT-4 and PyTorch services"],
     challenges: ["Automating financial reporting", "Monitoring performance indicators"],
     results: ["Faster report generation", "Centralized KPI monitoring"],
+    github: "https://github.com/kheel06/Alvion-Financial-Transactions",
   },
   {
     id: "alvion-logistics-1",
@@ -243,7 +293,8 @@ export const projects: Project[] = [
       "A hospital logistics platform for procurement, warehousing, assets, and continuous access to critical medical resources.",
     description:
       "A hospital logistics platform that applies AI-driven strategies to support continuous access to critical medical resources across hospital chains.",
-    image: "/projects/logistics-1/1.png",
+    image: "/projects/alvion-logistics-1/1.png",
+    caseStudyImages: createCaseStudyImages("alvion-logistics-1", 44),
     technologies: ["PHP", "MySQL", "JavaScript ES6", "Bootstrap"],
     features: [
       "Smart Warehousing System",
@@ -258,6 +309,7 @@ export const projects: Project[] = [
     architecture: ["PHP application", "MySQL database", "Operational dashboards"],
     challenges: ["Maintaining medical supply continuity", "Coordinating hospital-chain logistics"],
     results: ["Improved logistics visibility", "Structured medical-resource workflows"],
+    github: "https://github.com/kheel06/Alvion-Logistic-1",
   },
   {
     id: "alvion-logistics-2",
@@ -269,7 +321,8 @@ export const projects: Project[] = [
       "An executive information system for hospital transport, dispatch, vehicle availability, and stock monitoring.",
     description:
       "A web-based executive information system for hospital transport and dispatch with intelligent vehicle availability and stock-accuracy monitoring using ITMA and Scikit-Learn.",
-    image: "/projects/logistics-2/1.png",
+    image: "/projects/alvion-logistics-2/1.png",
+    caseStudyImages: createCaseStudyImages("alvion-logistics-2", 22),
     technologies: [
       "PHP",
       "MySQL",
@@ -291,6 +344,7 @@ export const projects: Project[] = [
     architecture: ["PHP application", "MySQL database", "ITMA and Scikit-Learn services"],
     challenges: ["Coordinating dispatch", "Monitoring vehicle availability"],
     results: ["Improved transport visibility", "More accurate stock monitoring"],
+    github: "https://github.com/kheel06/Alvion-Logistic-2",
   },
   {
     id: "prime-merch",
@@ -317,17 +371,20 @@ export const projects: Project[] = [
     architecture: ["Vanilla PHP application", "MySQL database", "REST API integration"],
     challenges: ["Coordinating supply-chain workflows", "Maintaining inventory visibility"],
     results: ["More structured merchandising operations", "Improved supply-chain oversight"],
+    caseStudyImages: createCaseStudyImages("prime-merch", 40),
+    github: "https://github.com/kheel06/PrimeMerch",
   },
   {
-    id: "hop-fabrications",
+    id: "hop-fabrications-inc",
     title: "HOP Fabrications Inc.",
     caseStudyTitle: "HOP Fabrications Inc.",
-    category: "Full Stack",
+    category: "Web",
     shortDescription:
       "A business website for a custom fabrication company serving food concepts, kiosks, carts, and growing businesses.",
     description:
       "A responsive business website showcasing custom fabrication services, collapsible carts, mall kiosks, company information, and customer inquiry touchpoints.",
-    image: "/projects/hop-fabrications/1.png",
+    image: "/projects/hop-fabrications-inc/1.png",
+    caseStudyImages: createCaseStudyImages("hop-fabrications-inc", 1),
     technologies: ["Next.js", "shadcn/ui", "Framer Motion", "Lucide Icons"],
     features: ["Project showcase", "Responsive business website", "AI project assistant", "Customer inquiries"],
     problem:
@@ -337,5 +394,6 @@ export const projects: Project[] = [
     architecture: ["Next.js App Router", "React components", "Tailwind CSS"],
     challenges: ["Presenting physical work digitally", "Creating a premium responsive experience"],
     results: ["Professional digital presence", "Improved project presentation"],
+    github: "https://github.com/kheel06/hop-fabrication-inc.",
   },
 ];

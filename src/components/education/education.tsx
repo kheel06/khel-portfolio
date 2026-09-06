@@ -101,34 +101,57 @@ export function Education() {
         const marker = item.querySelector<HTMLElement>(
           "[data-education-marker]",
         );
+
         const core = marker?.querySelector<HTMLElement>(
           "[data-marker-core]",
         );
+
         const glow = marker?.querySelector<HTMLElement>(
           "[data-marker-glow]",
         );
+
         const pulse = marker?.querySelector<HTMLElement>(
           "[data-current-pulse]",
         );
 
-        return { item, marker, core, glow, pulse };
+        return {
+          item,
+          marker,
+          core,
+          glow,
+          pulse,
+        };
       });
 
-      /* ------------------------------------------------------------
-       * ACCESSIBLE / REDUCED-MOTION STATE
-       * ------------------------------------------------------------ */
+      /* ============================================================
+         REDUCED MOTION
+      ============================================================ */
+
       if (prefersReducedMotion) {
-        if (header) gsap.set(header, { opacity: 1, y: 0, clearProps: "filter" });
+        if (header) {
+          gsap.set(header, {
+            opacity: 1,
+            y: 0,
+            clearProps: "filter",
+          });
+        }
 
         gsap.set(progressLine, {
           scaleY: 1,
           transformOrigin: "top center",
         });
 
-        if (progressTip) gsap.set(progressTip, { opacity: 0 });
+        if (progressTip) {
+          gsap.set(progressTip, {
+            opacity: 0,
+          });
+        }
 
         items.forEach((item) => {
-          const card = item.querySelector<HTMLElement>("[data-education-card]");
+          const card = item.querySelector<HTMLElement>(
+            "[data-education-card]",
+          );
+
           if (!card) return;
 
           gsap.set(card, {
@@ -140,26 +163,55 @@ export function Education() {
           });
 
           gsap.set(
-            item.querySelectorAll<HTMLElement>("[data-education-reveal]"),
-            { opacity: 1, y: 0, x: 0, clearProps: "transform,filter" },
+            item.querySelectorAll<HTMLElement>(
+              "[data-education-reveal]",
+            ),
+            {
+              opacity: 1,
+              y: 0,
+              x: 0,
+              clearProps: "transform,filter",
+            },
           );
         });
 
         markerData.forEach(({ marker, core, glow, pulse }) => {
           if (!marker) return;
+
           marker.dataset.reached = "true";
-          gsap.set(marker, { opacity: 1, scale: 1 });
-          if (core) gsap.set(core, { scale: 1 });
-          if (glow) gsap.set(glow, { opacity: 0.95, scale: 1 });
-          if (pulse) gsap.set(pulse, { opacity: 0 });
+
+          gsap.set(marker, {
+            opacity: 1,
+            scale: 1,
+          });
+
+          if (core) {
+            gsap.set(core, {
+              scale: 1,
+            });
+          }
+
+          if (glow) {
+            gsap.set(glow, {
+              opacity: 0.95,
+              scale: 1,
+            });
+          }
+
+          if (pulse) {
+            gsap.set(pulse, {
+              opacity: 0,
+            });
+          }
         });
 
         return;
       }
 
-      /* ------------------------------------------------------------
-       * INITIAL STATES
-       * ------------------------------------------------------------ */
+      /* ============================================================
+         INITIAL STATES
+      ============================================================ */
+
       if (header) {
         gsap.set(header, {
           opacity: 0,
@@ -185,6 +237,7 @@ export function Education() {
         if (!marker) return;
 
         marker.dataset.reached = "false";
+
         gsap.set(marker, {
           opacity: 1,
           scale: 0.96,
@@ -208,17 +261,26 @@ export function Education() {
       });
 
       items.forEach((item) => {
-        const card = item.querySelector<HTMLElement>("[data-education-card]");
-        const parts = item.querySelectorAll<HTMLElement>("[data-education-reveal]");
+        const card = item.querySelector<HTMLElement>(
+          "[data-education-card]",
+        );
+
+        const parts = item.querySelectorAll<HTMLElement>(
+          "[data-education-reveal]",
+        );
+
         const connector = item.querySelector<HTMLElement>(
           "[data-education-connector]",
         );
+
         const connectorLine = item.querySelector<HTMLElement>(
           "[data-connector-line]",
         );
+
         const connectorArrow = item.querySelector<HTMLElement>(
           "[data-connector-arrow]",
         );
+
         const isLeft = item.dataset.side === "left";
 
         if (!card) return;
@@ -258,9 +320,10 @@ export function Education() {
         }
       });
 
-      /* ------------------------------------------------------------
-       * HEADER REVEAL
-       * ------------------------------------------------------------ */
+      /* ============================================================
+         HEADER REVEAL
+      ============================================================ */
+
       if (header) {
         gsap.to(header, {
           opacity: 1,
@@ -276,10 +339,15 @@ export function Education() {
         });
       }
 
-      /* ------------------------------------------------------------
-       * PROGRESS LINE
-       * ------------------------------------------------------------ */
-      const setMarkerInactive = (marker: HTMLElement, core: HTMLElement | null, glow: HTMLElement | null) => {
+      /* ============================================================
+         MARKER STATES
+      ============================================================ */
+
+      const setMarkerInactive = (
+        marker: HTMLElement,
+        core: HTMLElement | null,
+        glow: HTMLElement | null,
+      ) => {
         marker.dataset.reached = "false";
 
         gsap.to(marker, {
@@ -318,15 +386,31 @@ export function Education() {
         marker.dataset.reached = "true";
 
         if (immediate) {
-          gsap.set(marker, { scale: 1.06 });
-          if (core) gsap.set(core, { scale: 1 });
-          if (glow) gsap.set(glow, { opacity: 1, scale: 1 });
+          gsap.set(marker, {
+            scale: 1.06,
+          });
+
+          if (core) {
+            gsap.set(core, {
+              scale: 1,
+            });
+          }
+
+          if (glow) {
+            gsap.set(glow, {
+              opacity: 1,
+              scale: 1,
+            });
+          }
+
           return;
         }
 
         gsap.fromTo(
           marker,
-          { scale: 0.92 },
+          {
+            scale: 0.92,
+          },
           {
             scale: 1.06,
             duration: 0.38,
@@ -338,7 +422,9 @@ export function Education() {
         if (core) {
           gsap.fromTo(
             core,
-            { scale: 0.72 },
+            {
+              scale: 0.72,
+            },
             {
               scale: 1,
               duration: 0.34,
@@ -351,7 +437,10 @@ export function Education() {
         if (glow) {
           gsap.fromTo(
             glow,
-            { opacity: 0, scale: 0.55 },
+            {
+              opacity: 0,
+              scale: 0.55,
+            },
             {
               opacity: 1,
               scale: 1,
@@ -363,26 +452,57 @@ export function Education() {
         }
       };
 
+      /* ============================================================
+         UPDATE MARKERS
+      ============================================================ */
+
       const updateTimelineMarkers = (progress: number) => {
         const timelineHeight = timeline.offsetHeight;
+
         if (!timelineHeight) return;
 
         const progressPosition = timelineHeight * progress;
 
-        markerData.forEach(({ item, marker, core, glow }) => {
-          if (!marker) return;
+        markerData.forEach(
+          ({ item, marker, core, glow }) => {
+            if (!marker) return;
 
-          const markerPosition = item.offsetTop + item.offsetHeight / 2;
-          const reached = progressPosition >= markerPosition - 10;
-          const isReached = marker.dataset.reached === "true";
+            /*
+             * IMPORTANT:
+             *
+             * The marker is vertically centered inside each article.
+             * Using the article's center keeps the calculation correct
+             * on both desktop and mobile.
+             */
+            const markerPosition =
+              item.offsetTop + item.offsetHeight / 2;
 
-          if (reached && !isReached) {
-            setMarkerActive(marker, core ?? null, glow ?? null);
-          } else if (!reached && isReached) {
-            setMarkerInactive(marker, core ?? null, glow ?? null);
-          }
-        });
+            const reached =
+              progressPosition >= markerPosition - 10;
+
+            const isReached =
+              marker.dataset.reached === "true";
+
+            if (reached && !isReached) {
+              setMarkerActive(
+                marker,
+                core ?? null,
+                glow ?? null,
+              );
+            } else if (!reached && isReached) {
+              setMarkerInactive(
+                marker,
+                core ?? null,
+                glow ?? null,
+              );
+            }
+          },
+        );
       };
+
+      /* ============================================================
+         PROGRESS LINE
+      ============================================================ */
 
       gsap.to(progressLine, {
         scaleY: 1,
@@ -393,8 +513,10 @@ export function Education() {
           end: "bottom 62%",
           scrub: 0.65,
           invalidateOnRefresh: true,
+
           onEnter: () => {
             if (!progressTip) return;
+
             gsap.to(progressTip, {
               opacity: 1,
               scale: 1,
@@ -403,41 +525,54 @@ export function Education() {
               overwrite: true,
             });
           },
+
           onUpdate: (self) => {
             updateTimelineMarkers(self.progress);
           },
+
           onRefresh: (self) => {
             updateTimelineMarkers(self.progress);
           },
         },
       });
 
-      /* ------------------------------------------------------------
-       * CARD / CONNECTOR REVEALS
-       * ------------------------------------------------------------ */
+      /* ============================================================
+         CARD / CONNECTOR REVEALS
+      ============================================================ */
+
       items.forEach((item, index) => {
-        const card = item.querySelector<HTMLElement>("[data-education-card]");
+        const card = item.querySelector<HTMLElement>(
+          "[data-education-card]",
+        );
+
         const parts = gsap.utils.toArray<HTMLElement>(
           "[data-education-reveal]",
           item,
         );
+
         const connector = item.querySelector<HTMLElement>(
           "[data-education-connector]",
         );
+
         const connectorLine = item.querySelector<HTMLElement>(
           "[data-connector-line]",
         );
+
         const connectorArrow = item.querySelector<HTMLElement>(
           "[data-connector-arrow]",
         );
 
         if (!card) return;
 
-        const isLeft = item.dataset.side === "left";
+        const isLeft =
+          item.dataset.side === "left";
 
         const tl = gsap.timeline({
           paused: true,
-          defaults: { overwrite: "auto" },
+          defaults: {
+            overwrite: "auto",
+          },
+
           scrollTrigger: {
             trigger: item,
             start: "top 82%",
@@ -454,19 +589,22 @@ export function Education() {
           scale: 1,
           duration: 0.72,
           ease: "power3.out",
-        })
-          .to(
-            parts,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.42,
-              stagger: 0.055,
-              ease: "power2.out",
-            },
-            "-=0.46",
-          );
+        }).to(
+          parts,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.42,
+            stagger: 0.055,
+            ease: "power2.out",
+          },
+          "-=0.46",
+        );
 
+        /*
+         * Connectors are desktop-only.
+         * Mobile uses one continuous vertical timeline.
+         */
         if (connector) {
           tl.to(
             connector,
@@ -498,7 +636,7 @@ export function Education() {
             {
               opacity: 0,
               scale: 0.55,
-              rotation: isLeft ? 45 : 45,
+              rotation: 45,
             },
             {
               opacity: 1,
@@ -512,7 +650,11 @@ export function Education() {
 
         tl.call(() => {
           const data = markerData[index];
-          if (data?.marker && data.marker.dataset.reached === "true") {
+
+          if (
+            data?.marker &&
+            data.marker.dataset.reached === "true"
+          ) {
             gsap.to(data.marker, {
               scale: 1.08,
               duration: 0.22,
@@ -524,11 +666,14 @@ export function Education() {
         });
       });
 
-      /* ------------------------------------------------------------
-       * CURRENT EDUCATION PULSE
-       * ------------------------------------------------------------ */
+      /* ============================================================
+         CURRENT EDUCATION PULSE
+      ============================================================ */
+
       markerData.forEach(({ item, pulse }) => {
-        if (!pulse || item.dataset.current !== "true") return;
+        if (!pulse || item.dataset.current !== "true") {
+          return;
+        }
 
         gsap.set(pulse, {
           scale: 0.8,
@@ -546,9 +691,10 @@ export function Education() {
         });
       });
 
-      /* ------------------------------------------------------------
-       * REFRESH AFTER LAYOUT / FONT MEASUREMENT
-       * ------------------------------------------------------------ */
+      /* ============================================================
+         REFRESH AFTER LAYOUT / FONT MEASUREMENT
+      ============================================================ */
+
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           ScrollTrigger.refresh();
@@ -556,7 +702,9 @@ export function Education() {
       });
     }, section);
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+    };
   }, []);
 
   return (
@@ -569,17 +717,25 @@ export function Education() {
         border-t
         border-slate-200/70
         bg-white
-        py-24
+        py-20
         dark:border-white/[0.06]
         dark:bg-[#070B14]
-        sm:py-28
+        sm:py-24
         lg:py-32
       "
     >
-      {/* BACKGROUND */}
+      {/* ==========================================================
+          BACKGROUND
+      ========================================================== */}
+
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 overflow-hidden"
+        className="
+          pointer-events-none
+          absolute
+          inset-0
+          overflow-hidden
+        "
       >
         <div
           className="
@@ -594,6 +750,7 @@ export function Education() {
             blur-[120px]
           "
         />
+
         <div
           className="
             absolute
@@ -606,6 +763,7 @@ export function Education() {
             blur-[120px]
           "
         />
+
         <div
           className="
             absolute
@@ -620,28 +778,82 @@ export function Education() {
         />
       </div>
 
-      {/* CONTENT */}
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-6 sm:px-8 lg:px-10">
-        {/* HEADER */}
+      {/* ==========================================================
+          CONTENT
+      ========================================================== */}
+
+      <div
+        className="
+          relative
+          z-10
+          mx-auto
+          w-full
+          max-w-6xl
+          px-4
+          sm:px-6
+          md:px-8
+          lg:px-10
+        "
+      >
+        {/* ========================================================
+            HEADER
+        ======================================================== */}
+
         <div
           data-education-header
-          className="mx-auto mb-20 max-w-3xl text-center lg:mb-24"
+          className="
+            mx-auto
+            mb-14
+            max-w-3xl
+            text-center
+            sm:mb-20
+            lg:mb-24
+          "
         >
-          <div className="mb-5 flex items-center justify-center gap-3">
-            <span className="h-px w-8 bg-cyan-500 dark:bg-cyan-400" />
+          <div
+            className="
+              mb-4
+              flex
+              items-center
+              justify-center
+              gap-3
+              sm:mb-5
+            "
+          >
             <span
               className="
-                text-[10px]
+                h-px
+                w-6
+                bg-cyan-500
+                dark:bg-cyan-400
+                sm:w-8
+              "
+            />
+
+            <span
+              className="
+                text-[9px]
                 font-semibold
                 uppercase
-                tracking-[0.28em]
+                tracking-[0.22em]
                 text-cyan-600
+                sm:text-[10px]
+                sm:tracking-[0.28em]
                 dark:text-cyan-400
               "
             >
               02 — EDUCATION
             </span>
-            <span className="h-px w-8 bg-cyan-500 dark:bg-cyan-400" />
+
+            <span
+              className="
+                h-px
+                w-6
+                bg-cyan-500
+                dark:bg-cyan-400
+                sm:w-8
+              "
+            />
           </div>
 
           <h2
@@ -661,30 +873,53 @@ export function Education() {
           <p
             className="
               mx-auto
-              mt-5
+              mt-4
               max-w-2xl
               text-sm
-              leading-7
+              leading-6
               text-slate-600
+              sm:mt-5
               sm:text-base
+              sm:leading-7
               dark:text-slate-400
             "
           >
-            A timeline of the academic experiences that built the foundation
-            for my work in software development and information technology.
+            A timeline of the academic experiences that built
+            the foundation for my work in software development
+            and information technology.
           </p>
         </div>
 
-        {/* TIMELINE */}
-        <div ref={timelineRef} className="relative mx-auto max-w-5xl">
-          {/* TIMELINE LINE */}
+        {/* ========================================================
+            TIMELINE
+        ======================================================== */}
+
+        <div
+          ref={timelineRef}
+          className="
+            relative
+            mx-auto
+            w-full
+            max-w-5xl
+          "
+        >
+          {/* ======================================================
+              TIMELINE LINE
+
+              MOBILE:
+              left-[14px]
+
+              DESKTOP:
+              centered at 50%
+          ====================================================== */}
+
           <div
             aria-hidden="true"
             className="
               pointer-events-none
               absolute
               bottom-0
-              left-[28px]
+              left-[14px]
               top-0
               z-0
               w-px
@@ -692,6 +927,8 @@ export function Education() {
               md:-translate-x-1/2
             "
           >
+            {/* Base line */}
+
             <div
               className="
                 absolute
@@ -700,6 +937,8 @@ export function Education() {
                 dark:bg-white/[0.08]
               "
             />
+
+            {/* Animated progress */}
 
             <div
               ref={progressLineRef}
@@ -716,6 +955,8 @@ export function Education() {
                 shadow-[0_0_12px_rgba(34,211,238,0.25)]
               "
             />
+
+            {/* Progress tip */}
 
             <div
               ref={progressTipRef}
@@ -736,8 +977,19 @@ export function Education() {
             />
           </div>
 
-          {/* ITEMS */}
-          <div className="relative z-10 space-y-14 md:space-y-20">
+          {/* ======================================================
+              ITEMS
+          ====================================================== */}
+
+          <div
+            className="
+              relative
+              z-10
+              space-y-12
+              sm:space-y-14
+              md:space-y-20
+            "
+          >
             {education.map((item, index) => {
               const isLeft = index % 2 === 0;
 
@@ -774,27 +1026,47 @@ function EducationItem({
       data-current={item.current}
       className="
         relative
-        min-h-[230px]
+        min-h-[220px]
+
+        /* DESKTOP */
         md:grid
+        md:min-h-[230px]
         md:grid-cols-[1fr_72px_1fr]
         md:items-center
       "
     >
-      {/* LEFT CARD */}
+      {/* ==========================================================
+          DESKTOP LEFT CARD
+      ========================================================== */}
+
       <div
         className={`
           hidden
           md:block
-          ${isLeft ? "md:col-start-1 md:pr-10 lg:pr-14" : "md:col-start-1"}
+          ${
+            isLeft
+              ? "md:col-start-1 md:pr-10 lg:pr-14"
+              : "md:col-start-1"
+          }
         `}
       >
-        {isLeft ? <EducationCard item={item} /> : <div aria-hidden="true" />}
+        {isLeft ? (
+          <EducationCard item={item} />
+        ) : (
+          <div aria-hidden="true" />
+        )}
       </div>
 
-      {/* CONNECTOR */}
+      {/* ==========================================================
+          DESKTOP CONNECTOR
+      ========================================================== */}
+
       <EducationConnector isLeft={isLeft} />
 
-      {/* CENTER MARKER */}
+      {/* ==========================================================
+          DESKTOP CENTER MARKER
+      ========================================================== */}
+
       <div
         className="
           relative
@@ -808,22 +1080,64 @@ function EducationItem({
         <EducationMarker item={item} />
       </div>
 
-      {/* RIGHT CARD */}
+      {/* ==========================================================
+          DESKTOP RIGHT CARD
+      ========================================================== */}
+
       <div
         className={`
           hidden
           md:block
-          ${!isLeft ? "md:col-start-3 md:pl-10 lg:pl-14" : "md:col-start-3"}
+          ${
+            !isLeft
+              ? "md:col-start-3 md:pl-10 lg:pl-14"
+              : "md:col-start-3"
+          }
         `}
       >
-        {!isLeft ? <EducationCard item={item} /> : <div aria-hidden="true" />}
+        {!isLeft ? (
+          <EducationCard item={item} />
+        ) : (
+          <div aria-hidden="true" />
+        )}
       </div>
 
-      {/* MOBILE */}
-      <div className="relative z-20 pl-[60px] md:hidden">
-        <EducationMarker item={item} />
+      {/* ==========================================================
+          MOBILE
+
+          IMPORTANT FIX:
+          The marker is now positioned relative to the ARTICLE,
+          not relative to the padded card container.
+
+          This guarantees that:
+
+              TIMELINE
+                  |
+                  ●
+                  |
+              CARD
+
+          stays perfectly aligned.
+      ========================================================== */}
+
+      <div
+        className="
+          relative
+          z-20
+          min-w-0
+          pl-[44px]
+          md:hidden
+        "
+      >
         <EducationCard item={item} />
       </div>
+
+      {/* Mobile marker */}
+
+      <EducationMarker
+        item={item}
+        mobile
+      />
     </article>
   );
 }
@@ -882,7 +1196,11 @@ function EducationConnector({
           border-cyan-400
           bg-white
           dark:bg-[#070B14]
-          ${isLeft ? "left-0 border-b border-l" : "right-0 border-r border-t"}
+          ${
+            isLeft
+              ? "left-0 border-b border-l"
+              : "right-0 border-r border-t"
+          }
         `}
       />
     </div>
@@ -895,23 +1213,21 @@ function EducationConnector({
 
 function EducationMarker({
   item,
+  mobile = false,
 }: {
   item: EducationItemData;
+  mobile?: boolean;
 }) {
   return (
     <div
       data-education-marker
       data-reached="false"
-      className="
+      className={`
         absolute
         z-50
-        left-1/2
-        top-1/2
         flex
         h-7
         w-7
-        -translate-x-1/2
-        -translate-y-1/2
         items-center
         justify-center
         rounded-full
@@ -921,18 +1237,41 @@ function EducationMarker({
         shadow-[0_0_0_5px_rgba(255,255,255,0.9)]
         transition-[border-color,background-color,box-shadow]
         duration-300
+
         data-[reached=true]:border-cyan-300
         data-[reached=true]:bg-white
         data-[reached=true]:shadow-[0_0_0_5px_rgba(255,255,255,0.96),0_0_24px_rgba(34,211,238,0.45)]
+
         dark:border-white/[0.16]
         dark:bg-[#0B1120]
         dark:shadow-[0_0_0_5px_rgba(7,11,20,0.95)]
+
         dark:data-[reached=true]:border-cyan-300
         dark:data-[reached=true]:bg-[#0B1120]
         dark:data-[reached=true]:shadow-[0_0_0_5px_rgba(7,11,20,0.96),0_0_24px_rgba(34,211,238,0.55)]
-      "
+
+        ${
+          mobile
+            ? `
+              left-[14px]
+              top-1/2
+              -translate-x-1/2
+              -translate-y-1/2
+              md:hidden
+            `
+            : `
+              left-1/2
+              top-1/2
+              -translate-x-1/2
+              -translate-y-1/2
+            `
+        }
+      `}
     >
-      {/* Active glow */}
+      {/* ==========================================================
+          ACTIVE GLOW
+      ========================================================== */}
+
       <span
         data-marker-glow
         aria-hidden="true"
@@ -948,7 +1287,10 @@ function EducationMarker({
         "
       />
 
-      {/* Current item pulse */}
+      {/* ==========================================================
+          CURRENT ITEM PULSE
+      ========================================================== */}
+
       {item.current && (
         <span
           data-current-pulse
@@ -964,7 +1306,10 @@ function EducationMarker({
         />
       )}
 
-      {/* Core */}
+      {/* ==========================================================
+          CORE
+      ========================================================== */}
+
       <span
         data-marker-core
         className="
@@ -976,8 +1321,10 @@ function EducationMarker({
           bg-slate-400
           transition-[background-color,box-shadow]
           duration-300
+
           data-[reached=true]:bg-cyan-400
           data-[reached=true]:shadow-[0_0_12px_rgba(34,211,238,1)]
+
           dark:bg-slate-500
           dark:data-[reached=true]:bg-cyan-300
           dark:data-[reached=true]:shadow-[0_0_14px_rgba(34,211,238,1)]
@@ -1006,23 +1353,28 @@ function EducationCard({
         group
         relative
         w-full
+        min-w-0
         overflow-hidden
         rounded-xl
         border
         border-slate-200
         bg-white/90
-        p-5
+        p-4
         shadow-sm
         outline-none
         transition-all
         duration-300
+
         hover:-translate-y-1
         hover:border-cyan-400/40
         hover:shadow-[0_18px_50px_rgba(15,23,42,0.08)]
+
         focus-visible:border-cyan-400/60
         focus-visible:ring-2
         focus-visible:ring-cyan-400/30
+
         sm:p-6
+
         dark:border-white/[0.08]
         dark:bg-[#0B1120]/80
         dark:hover:border-cyan-400/30
@@ -1030,7 +1382,10 @@ function EducationCard({
         dark:focus-visible:border-cyan-400/50
       "
     >
-      {/* TOP ACCENT */}
+      {/* ==========================================================
+          TOP ACCENT
+      ========================================================== */}
+
       <div
         aria-hidden="true"
         className="
@@ -1049,12 +1404,36 @@ function EducationCard({
         "
       />
 
-      {/* HEADER */}
-      <div className="flex items-start justify-between gap-4" data-education-reveal>
-        <div className="flex min-w-0 items-center gap-2">
+      {/* ==========================================================
+          CARD HEADER
+      ========================================================== */}
+
+      <div
+        className="
+          flex
+          min-w-0
+          items-start
+          justify-between
+          gap-3
+        "
+        data-education-reveal
+      >
+        <div
+          className="
+            flex
+            min-w-0
+            flex-1
+            flex-wrap
+            items-center
+            gap-2
+          "
+        >
+          {/* Type */}
+
           <span
             className="
               inline-flex
+              max-w-full
               items-center
               rounded-full
               border
@@ -1065,7 +1444,7 @@ function EducationCard({
               text-[8px]
               font-semibold
               uppercase
-              tracking-[0.18em]
+              tracking-[0.15em]
               text-cyan-600
               dark:border-cyan-400/20
               dark:bg-cyan-400/[0.06]
@@ -1075,20 +1454,25 @@ function EducationCard({
             {item.type}
           </span>
 
+          {/* Period */}
+
           <span
             data-education-period
             className="
               whitespace-nowrap
               text-[9px]
               font-medium
-              tracking-[0.12em]
+              tracking-[0.08em]
               text-slate-400
+              sm:tracking-[0.12em]
               dark:text-slate-500
             "
           >
             {item.period}
           </span>
         </div>
+
+        {/* Icon */}
 
         <div
           className="
@@ -1105,8 +1489,10 @@ function EducationCard({
             text-slate-400
             transition-colors
             duration-300
+
             group-hover:border-cyan-400/20
             group-hover:text-cyan-500
+
             dark:border-white/[0.06]
             dark:bg-white/[0.025]
             dark:text-slate-500
@@ -1118,20 +1504,28 @@ function EducationCard({
         </div>
       </div>
 
-      {/* TITLE */}
+      {/* ==========================================================
+          TITLE
+      ========================================================== */}
+
       <h3
         data-education-reveal
         className="
-          mt-5
-          text-lg
+          mt-4
+          break-words
+          text-base
           font-semibold
           leading-snug
           tracking-[-0.025em]
           text-slate-950
           transition-colors
           duration-300
+
           group-hover:text-cyan-600
+
+          sm:mt-5
           sm:text-xl
+
           dark:text-white
           dark:group-hover:text-cyan-300
         "
@@ -1139,13 +1533,18 @@ function EducationCard({
         {item.title}
       </h3>
 
-      {/* INSTITUTION */}
+      {/* ==========================================================
+          INSTITUTION
+      ========================================================== */}
+
       <p
         data-education-reveal
         className="
           mt-1.5
+          break-words
           text-xs
           font-medium
+          leading-5
           text-slate-600
           dark:text-slate-400
         "
@@ -1153,47 +1552,72 @@ function EducationCard({
         {item.institution}
       </p>
 
-      {/* DESCRIPTION */}
+      {/* ==========================================================
+          DESCRIPTION
+      ========================================================== */}
+
       <p
         data-education-reveal
         className="
-          mt-5
+          mt-4
+          break-words
           text-xs
-          leading-6
+          leading-5
           text-slate-500
+          sm:mt-5
           sm:text-[13px]
+          sm:leading-6
           dark:text-slate-400
         "
       >
         {item.description}
       </p>
 
-      {/* FOOTER */}
+      {/* ==========================================================
+          FOOTER
+      ========================================================== */}
+
       <div
         data-education-reveal
         className="
-          mt-5
+          mt-4
           flex
+          min-w-0
+          flex-wrap
           items-center
           justify-between
+          gap-3
           border-t
           border-slate-200
-          pt-4
+          pt-3
+
+          sm:mt-5
+          sm:pt-4
+
           dark:border-white/[0.06]
         "
       >
-        <div className="flex items-center gap-2">
+        {/* Status */}
+
+        <div className="flex min-w-0 items-center gap-2">
           {item.current ? (
             <>
               <CheckCircle2
-                className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400"
+                className="
+                  h-3.5
+                  w-3.5
+                  shrink-0
+                  text-emerald-500
+                  dark:text-emerald-400
+                "
               />
+
               <span
                 className="
                   text-[9px]
                   font-semibold
                   uppercase
-                  tracking-[0.14em]
+                  tracking-[0.12em]
                   text-emerald-600
                   dark:text-emerald-400
                 "
@@ -1203,9 +1627,24 @@ function EducationCard({
             </>
           ) : (
             <>
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-slate-600" />
               <span
-                className="text-[9px] font-medium text-slate-400 dark:text-slate-500"
+                className="
+                  h-1.5
+                  w-1.5
+                  shrink-0
+                  rounded-full
+                  bg-slate-400
+                  dark:bg-slate-600
+                "
+              />
+
+              <span
+                className="
+                  text-[9px]
+                  font-medium
+                  text-slate-400
+                  dark:text-slate-500
+                "
               >
                 {item.status}
               </span>
@@ -1213,15 +1652,22 @@ function EducationCard({
           )}
         </div>
 
+        {/* Period */}
+
         <span
           className="
+            shrink-0
             text-[9px]
             font-medium
-            tracking-[0.12em]
+            tracking-[0.08em]
             text-slate-400
             transition-colors
             duration-300
+
             group-hover:text-cyan-500
+
+            sm:tracking-[0.12em]
+
             dark:text-slate-600
             dark:group-hover:text-cyan-400
           "
