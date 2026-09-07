@@ -1721,80 +1721,58 @@ export function Hero() {
               />
             </Link>
 
-            {/* DOWNLOAD CV */}
+           {/* DOWNLOAD CV */}
+<a
+  data-hero-action
+href="/resume/resume.pdf"
+  download="Khel-Resume.pdf"
+  className="
+    group
+    inline-flex
+    min-h-12
+    min-w-[155px]
+    items-center
+    justify-center
+    gap-2
+    rounded-xl
+    border
+    border-slate-300
+    bg-white/70
+    px-5
+    text-xs
+    font-bold
+    uppercase
+    tracking-[0.14em]
+    !text-slate-800
+    backdrop-blur-xl
+    transition-all
+    duration-200
+    hover:-translate-y-0.5
+    hover:border-cyan-400/60
+    hover:bg-cyan-50
+    hover:!text-cyan-700
+    dark:border-cyan-300/30
+    dark:bg-cyan-400/[0.03]
+    dark:!text-white/80
+    dark:hover:border-cyan-300/60
+    dark:hover:bg-cyan-400/[0.07]
+    dark:hover:!text-cyan-100
+  "
+>
+  Download CV
 
-            <a
-              data-hero-action
-              href="/cv.pdf"
-              download
-              className="
-                group
-
-                inline-flex
-
-                min-h-12
-
-                min-w-[155px]
-
-                items-center
-                justify-center
-                gap-2
-
-                rounded-xl
-
-                border
-                border-slate-300
-
-                bg-white/70
-
-                px-5
-
-                text-xs
-
-                font-bold
-
-                uppercase
-
-                tracking-[0.14em]
-
-                !text-slate-800
-
-                backdrop-blur-xl
-
-                transition-all
-                duration-200
-
-                hover:-translate-y-0.5
-                hover:border-cyan-400/60
-                hover:bg-cyan-50
-                hover:!text-cyan-700
-
-                dark:border-cyan-300/30
-                dark:bg-cyan-400/[0.03]
-                dark:!text-white/80
-                dark:hover:border-cyan-300/60
-                dark:hover:bg-cyan-400/[0.07]
-                dark:hover:!text-cyan-100
-              "
-            >
-              Download CV
-
-              <Download
-                className="
-                  h-4
-                  w-4
-
-                  text-cyan-600
-
-                  transition-transform
-                  duration-200
-
-                  group-hover:translate-y-0.5
-
-                  dark:text-cyan-200/80
-                "
-              />
-            </a>
+  <Download
+    className="
+      h-4
+      w-4
+      text-cyan-600
+      transition-transform
+      duration-200
+      group-hover:translate-y-0.5
+      dark:text-cyan-200/80
+    "
+  />
+</a>
 
             {/* LET'S TALK */}
 
