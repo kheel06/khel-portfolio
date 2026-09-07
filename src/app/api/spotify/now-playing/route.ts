@@ -5,20 +5,21 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const track =
-      await getNowPlaying();
+    const track = await getNowPlaying();
 
     return NextResponse.json(
       {
         success: true,
-        isPlaying:
-          track?.isPlaying ?? false,
+        isPlaying: track?.isPlaying ?? false,
         track,
       },
       {
+        status: 200,
         headers: {
           "Cache-Control":
-            "no-store, no-cache, must-revalidate",
+            "no-store, no-cache, must-revalidate, proxy-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
         },
       },
     );
@@ -40,6 +41,12 @@ export async function GET() {
       },
       {
         status: 500,
+        headers: {
+          "Cache-Control":
+            "no-store, no-cache, must-revalidate, proxy-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
       },
     );
   }
