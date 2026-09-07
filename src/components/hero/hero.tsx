@@ -485,259 +485,6 @@ function SpotifyIcon({
   );
 }
 
-/* ============================================================================
-   SPOTIFY CARD
-   ============================================================================ */
-
-function SpotifyCard() {
-  return (
-    <article
-      data-hero-spotify
-      className="
-        relative
-
-        w-full
-
-        overflow-hidden
-
-        rounded-[1.3rem]
-
-        border
-        border-cyan-500/20
-
-        bg-white/90
-
-        shadow-[0_24px_65px_rgba(15,23,42,0.075)]
-
-        backdrop-blur-2xl
-
-        dark:border-cyan-400/20
-        dark:bg-[#07111e]/94
-        dark:shadow-[0_24px_65px_rgba(0,0,0,0.34)]
-      "
-    >
-      {/* STATIC GLOW */}
-
-      <div
-        aria-hidden="true"
-        className="
-          pointer-events-none
-
-          absolute
-          -right-16
-          -top-16
-
-          h-36
-          w-36
-
-          rounded-full
-
-          bg-cyan-400/[0.07]
-
-          blur-[65px]
-
-          dark:bg-cyan-400/[0.09]
-        "
-      />
-
-      {/* HEADER */}
-
-      <div
-        className="
-          relative
-
-          flex
-          items-center
-          justify-between
-
-          border-b
-          border-slate-200/80
-
-          px-4
-          py-3.5
-
-          dark:border-white/[0.07]
-        "
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="
-              flex
-              h-8
-              w-8
-              shrink-0
-
-              items-center
-              justify-center
-
-              rounded-lg
-
-              border
-              border-emerald-400/20
-
-              bg-emerald-400/[0.08]
-
-              text-emerald-500
-
-              dark:text-emerald-400
-            "
-          >
-            <SpotifyIcon className="h-4 w-4" />
-          </div>
-
-          <div>
-            <p
-              className="
-                text-[9px]
-                font-bold
-                uppercase
-                tracking-[0.2em]
-
-                text-slate-700
-
-                dark:text-white/65
-              "
-            >
-              Now Playing
-            </p>
-
-            <p
-              className="
-                mt-0.5
-
-                text-[8px]
-
-                text-slate-400
-
-                dark:text-white/30
-              "
-            >
-              Spotify
-            </p>
-          </div>
-        </div>
-
-        {/* STATIC EQUALIZER */}
-
-        <div
-          className="
-            flex
-            h-5
-            items-end
-            gap-[3px]
-          "
-          aria-hidden="true"
-        >
-          <span className="h-2 w-[2px] rounded-full bg-emerald-400" />
-          <span className="h-4 w-[2px] rounded-full bg-cyan-400" />
-          <span className="h-3 w-[2px] rounded-full bg-emerald-400" />
-          <span className="h-5 w-[2px] rounded-full bg-cyan-400" />
-        </div>
-      </div>
-
-      {/* SPOTIFY EMBED */}
-
-      <div className="relative p-3">
-        <div
-          className="
-            overflow-hidden
-
-            rounded-xl
-
-            border
-            border-slate-200/70
-
-            bg-slate-50
-
-            dark:border-white/[0.06]
-            dark:bg-black/20
-          "
-        >
-          <SpotifyNowPlaying />
-        </div>
-
-        {/* FOOTER */}
-
-        <div
-          className="
-            mt-3
-
-            flex
-            items-center
-            justify-between
-
-            gap-3
-          "
-        >
-          <span
-            className="
-              flex
-              min-w-0
-              items-center
-              gap-2
-
-              text-[8px]
-              font-semibold
-              uppercase
-              tracking-[0.13em]
-
-              text-slate-400
-
-              dark:text-white/35
-            "
-          >
-            <StatusDot />
-
-            <span>
-              Live activity
-            </span>
-          </span>
-
-          <a
-            href="https://open.spotify.com/track/4iVj0UxqLlgrFWNdOnCwFS"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="
-              flex
-              shrink-0
-
-              items-center
-              gap-1.5
-
-              text-[8px]
-              font-semibold
-              uppercase
-              tracking-[0.12em]
-
-              text-slate-400
-
-              transition-colors
-
-              hover:text-emerald-500
-
-              dark:text-white/45
-              dark:hover:text-emerald-300
-            "
-          >
-            <span className="hidden sm:inline">
-              Open in Spotify
-            </span>
-
-            <span className="sm:hidden">
-              Spotify
-            </span>
-
-            <ArrowUpRight className="h-3 w-3" />
-          </a>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-/* ============================================================================
-   ACTIVITY RAIL
-   ============================================================================ */
 
 function ActivityRail() {
   return (
@@ -746,49 +493,45 @@ function ActivityRail() {
       aria-label="Portfolio activity"
       className="
         relative
-
         z-20
-
         mx-auto
-
         mt-10
-
         w-full
         max-w-[360px]
 
         xl:absolute
         xl:right-8
         xl:top-1/2
-
         xl:mt-0
-
         xl:w-[315px]
-
         xl:-translate-y-1/2
       "
     >
-      <SpotifyCard />
+      {/* ================================================================
+          SPOTIFY
+          The Spotify component owns the complete card UI.
+      ================================================================= */}
+      <SpotifyNowPlaying />
 
-      {/* CONNECTOR */}
-
+      {/* ================================================================
+          CONNECTOR
+      ================================================================= */}
       <div
         aria-hidden="true"
         className="
           mx-auto
-
           h-4
           w-px
-
           bg-gradient-to-b
-
-          from-cyan-400/45
-          via-cyan-400/22
+          from-cyan-400/50
+          via-cyan-400/25
           to-transparent
         "
       />
 
-      {/* REALTIME VISITORS */}
-
+      {/* ================================================================
+          VISITOR STATISTICS
+      ================================================================= */}
       <VisitorStats />
     </aside>
   );

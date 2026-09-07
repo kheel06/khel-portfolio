@@ -1,6 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
 type SpotifyTrack = {
   isPlaying: boolean;
@@ -9,16 +13,16 @@ type SpotifyTrack = {
   title: string;
   artist: string;
   album: string;
-  image: string;
-  spotifyUrl?: string;
+  image: string | null;
+  spotifyUrl: string;
 };
 
 type RecentlyPlayedTrack = {
   title: string;
   artist: string;
   album: string;
-  image: string;
-  spotifyUrl?: string;
+  image: string | null;
+  spotifyUrl: string;
   playedAt?: string;
 };
 
@@ -26,6 +30,7 @@ type NowPlayingResponse = {
   success: boolean;
   isPlaying: boolean;
   track: SpotifyTrack | null;
+  error?: string;
 };
 
 type RecentlyPlayedResponse = {
@@ -33,17 +38,55 @@ type RecentlyPlayedResponse = {
   track: RecentlyPlayedTrack | null;
 };
 
-type ActivityMode = "now-playing" | "recently-played" | "empty";
+type ActivityMode =
+  | "loading"
+  | "now-playing"
+  | "recently-played"
+  | "empty";
 
-function SpotifyIcon() {
+/* ============================================================================
+   ICONS
+============================================================================ */
+
+function SpotifyIcon({
+  className = "",
+}: {
+  className?: string;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
-      fill="currentColor"
+      fill="none"
+      className={className}
       aria-hidden="true"
-      className="h-4 w-4"
     >
-      <path d="M12 1.8a10.2 10.2 0 1 0 0 20.4 10.2 10.2 0 0 0 0-20.4Zm4.68 14.7a.7.7 0 0 1-.96.23c-2.63-1.61-5.94-1.97-9.84-1.08a.7.7 0 1 1-.31-1.37c4.27-.98 7.93-.56 10.88 1.24.33.2.43.64.23.98Zm1.3-2.9a.87.87 0 0 1-1.2.29c-3-1.84-7.57-2.37-11.12-1.3a.87.87 0 1 1-.5-1.67c4.06-1.23 9.13-.64 12.53 1.45.41.25.54.79.29 1.23Zm.11-3.02c-3.6-2.14-9.55-2.34-13-.? 0 0-.01 0-.01-.01"
+      <circle
+        cx="12"
+        cy="12"
+        r="9.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+
+      <path
+        d="M7.8 10.2C10.7 9.5 14.2 9.8 16.7 11"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M8.2 13.1C10.6 12.5 13.4 12.8 15.5 13.8"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M8.8 15.8C10.8 15.4 12.8 15.7 14.4 16.4"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
       />
     </svg>
   );
@@ -58,70 +101,554 @@ function ExternalLinkIcon() {
       strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
+      className="h-3 w-3"
       aria-hidden="true"
-      className="h-3.5 w-3.5"
     >
       <path d="M14 5h5v5" />
-      <path d="M19 5 11 13" />
+      <path d="M19 5l-8 8" />
       <path d="M19 13v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" />
     </svg>
   );
 }
 
-function Equalizer() {
+/* ============================================================================
+   EQUALIZER
+============================================================================ */
+
+function Equalizer({
+  active = true,
+}: {
+  active?: boolean;
+}) {
   return (
     <div
-      className="flex h-6 items-end gap-[3px]"
+      className={`
+        flex
+        h-6
+        items-end
+        gap-[3px]
+        transition-opacity
+        duration-300
+        ${active ? "opacity-100" : "opacity-45"}
+      `}
       aria-hidden="true"
     >
-      <span className="h-2 w-[2px] rounded-full bg-[#1ed760] animate-[spotifyBar_0.9s_ease-in-out_infinite]" />
-      <span className="h-4 w-[2px] rounded-full bg-[#1ed760] animate-[spotifyBar_1.1s_ease-in-out_infinite_0.1s]" />
-      <span className="h-6 w-[2px] rounded-full bg-[#1ed760] animate-[spotifyBar_0.75s_ease-in-out_infinite_0.2s]" />
-      <span className="h-3 w-[2px] rounded-full bg-[#1ed760] animate-[spotifyBar_1s_ease-in-out_infinite_0.3s]" />
+      <span
+        className="
+          h-2
+          w-[2px]
+          rounded-full
+          bg-[#1ed760]
+        "
+      />
+
+      <span
+        className="
+          h-4
+          w-[2px]
+          rounded-full
+          bg-[#1ed760]
+        "
+      />
+
+      <span
+        className="
+          h-6
+          w-[2px]
+          rounded-full
+          bg-[#1ed760]
+        "
+      />
+
+      <span
+        className="
+          h-3
+          w-[2px]
+          rounded-full
+          bg-[#1ed760]
+        "
+      />
     </div>
   );
 }
 
-function SpotifyLogoCircle() {
-  return (
-    <div
-      className="
-        flex h-10 w-10 shrink-0 items-center justify-center
-        rounded-xl
-        border border-[#1ed760]/30
-        bg-[#1ed760]/10
-        text-[#1ed760]
-      "
-    >
-      <SpotifyIcon />
-    </div>
-  );
-}
+/* ============================================================================
+   HELPERS
+============================================================================ */
 
 function formatTime(ms: number) {
   const totalSeconds = Math.floor(ms / 1000);
 
-  const minutes = Math.floor(totalSeconds / 60);
+  const minutes = Math.floor(
+    totalSeconds / 60,
+  );
+
   const seconds = totalSeconds % 60;
 
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  return `${minutes}:${seconds
+    .toString()
+    .padStart(2, "0")}`;
 }
 
-function getProgressPercentage(
+function getProgress(
   progressMs: number,
   durationMs: number,
 ) {
-  if (!durationMs || durationMs <= 0) return 0;
+  if (
+    !durationMs ||
+    durationMs <= 0
+  ) {
+    return 0;
+  }
 
   return Math.min(
     100,
-    Math.max(0, (progressMs / durationMs) * 100),
+    Math.max(
+      0,
+      (progressMs / durationMs) * 100,
+    ),
   );
 }
 
+/* ============================================================================
+   ALBUM ART
+============================================================================ */
+
+function AlbumArtwork({
+  src,
+  title,
+}: {
+  src: string | null | undefined;
+  title: string;
+}) {
+  return (
+    <div
+      className="
+        relative
+        h-[72px]
+        w-[72px]
+        shrink-0
+        overflow-hidden
+        rounded-[11px]
+        bg-slate-200
+        ring-1
+        ring-black/[0.04]
+        dark:bg-white/[0.06]
+        dark:ring-white/[0.06]
+      "
+    >
+      {src ? (
+        <img
+          src={src}
+          alt={`${title} album artwork`}
+          className="
+            h-full
+            w-full
+            object-cover
+          "
+          loading="eager"
+        />
+      ) : (
+        <div
+          className="
+            flex
+            h-full
+            w-full
+            items-center
+            justify-center
+            text-[#1ed760]
+          "
+        >
+          <SpotifyIcon className="h-7 w-7" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================================
+   HEADER
+============================================================================ */
+
+function SpotifyHeader({
+  mode,
+  isPlaying,
+}: {
+  mode: "NOW PLAYING" | "RECENTLY PLAYED";
+  isPlaying: boolean;
+}) {
+  return (
+    <header
+      className="
+        flex
+        min-h-[66px]
+        items-center
+        justify-between
+        border-b
+        border-slate-200/80
+        px-4
+        dark:border-white/[0.07]
+      "
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className="
+            flex
+            h-9
+            w-9
+            shrink-0
+            items-center
+            justify-center
+            rounded-xl
+            border
+            border-emerald-400/25
+            bg-emerald-400/[0.08]
+            text-[#1db954]
+            dark:border-emerald-400/20
+            dark:bg-emerald-400/[0.07]
+            dark:text-[#1ed760]
+          "
+        >
+          <SpotifyIcon className="h-[17px] w-[17px]" />
+        </div>
+
+        <div className="min-w-0">
+          <p
+            className="
+              text-[9px]
+              font-bold
+              uppercase
+              tracking-[0.2em]
+              text-slate-800
+              dark:text-white/75
+            "
+          >
+            {mode}
+          </p>
+
+          <p
+            className="
+              mt-0.5
+              text-[8px]
+              font-medium
+              text-slate-400
+              dark:text-white/35
+            "
+          >
+            Spotify
+          </p>
+        </div>
+      </div>
+
+      <Equalizer active={isPlaying} />
+    </header>
+  );
+}
+
+/* ============================================================================
+   FOOTER
+============================================================================ */
+
+function SpotifyFooter({
+  spotifyUrl,
+  recentlyPlayed = false,
+}: {
+  spotifyUrl?: string;
+  recentlyPlayed?: boolean;
+}) {
+  return (
+    <footer
+      className="
+        flex
+        min-h-[48px]
+        items-center
+        justify-between
+        gap-3
+        border-t
+        border-slate-200/80
+        px-4
+        dark:border-white/[0.07]
+      "
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className="
+            h-2
+            w-2
+            shrink-0
+            rounded-full
+            bg-[#1ed760]
+            shadow-[0_0_10px_rgba(30,215,96,0.5)]
+          "
+        />
+
+        <span
+          className="
+            text-[8px]
+            font-bold
+            uppercase
+            tracking-[0.16em]
+            text-slate-400
+            dark:text-white/35
+          "
+        >
+          {recentlyPlayed
+            ? "Recent activity"
+            : "Live activity"}
+        </span>
+      </div>
+
+      {spotifyUrl && (
+        <a
+          href={spotifyUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="
+            group
+            flex
+            shrink-0
+            items-center
+            gap-1.5
+            text-[8px]
+            font-bold
+            uppercase
+            tracking-[0.12em]
+            text-slate-500
+            transition-colors
+            duration-200
+            hover:text-[#1db954]
+            dark:text-white/45
+            dark:hover:text-[#1ed760]
+          "
+        >
+          <span className="hidden sm:inline">
+            Open in Spotify
+          </span>
+
+          <span className="sm:hidden">
+            Spotify
+          </span>
+
+          <span
+            className="
+              transition-transform
+              duration-200
+              group-hover:translate-x-0.5
+            "
+          >
+            <ExternalLinkIcon />
+          </span>
+        </a>
+      )}
+    </footer>
+  );
+}
+
+/* ============================================================================
+   LOADING
+============================================================================ */
+
+function SpotifyLoading() {
+  return (
+    <article
+      data-hero-spotify
+      className="
+        relative
+        w-full
+        overflow-hidden
+        rounded-[1.35rem]
+        border
+        border-cyan-500/20
+        bg-white/95
+        shadow-[0_24px_70px_rgba(15,23,42,0.08)]
+        backdrop-blur-2xl
+        dark:border-cyan-400/20
+        dark:bg-[#07111e]/94
+        dark:shadow-[0_24px_70px_rgba(0,0,0,0.35)]
+      "
+    >
+      <SpotifyHeader
+        mode="NOW PLAYING"
+        isPlaying={false}
+      />
+
+      <div
+        className="
+          m-3
+          flex
+          min-h-[145px]
+          items-center
+          gap-4
+          rounded-xl
+          border
+          border-slate-200/80
+          bg-slate-50
+          p-4
+          dark:border-white/[0.06]
+          dark:bg-white/[0.025]
+        "
+      >
+        <div
+          className="
+            h-[72px]
+            w-[72px]
+            shrink-0
+            animate-pulse
+            rounded-[11px]
+            bg-slate-200
+            dark:bg-white/[0.08]
+          "
+        />
+
+        <div className="min-w-0 flex-1 space-y-3">
+          <div
+            className="
+              h-2.5
+              w-20
+              animate-pulse
+              rounded-full
+              bg-slate-200
+              dark:bg-white/[0.08]
+            "
+          />
+
+          <div
+            className="
+              h-4
+              w-36
+              animate-pulse
+              rounded-full
+              bg-slate-200
+              dark:bg-white/[0.08]
+            "
+          />
+
+          <div
+            className="
+              h-2.5
+              w-24
+              animate-pulse
+              rounded-full
+              bg-slate-200
+              dark:bg-white/[0.08]
+            "
+          />
+        </div>
+      </div>
+
+      <div
+        className="
+          h-[48px]
+          border-t
+          border-slate-200/80
+          dark:border-white/[0.07]
+        "
+      />
+    </article>
+  );
+}
+
+/* ============================================================================
+   EMPTY
+============================================================================ */
+
+function SpotifyEmpty() {
+  return (
+    <article
+      data-hero-spotify
+      className="
+        relative
+        w-full
+        overflow-hidden
+        rounded-[1.35rem]
+        border
+        border-cyan-500/20
+        bg-white/95
+        shadow-[0_24px_70px_rgba(15,23,42,0.08)]
+        backdrop-blur-2xl
+        dark:border-cyan-400/20
+        dark:bg-[#07111e]/94
+        dark:shadow-[0_24px_70px_rgba(0,0,0,0.35)]
+      "
+    >
+      <SpotifyHeader
+        mode="NOW PLAYING"
+        isPlaying={false}
+      />
+
+      <div
+        className="
+          m-3
+          flex
+          min-h-[145px]
+          items-center
+          justify-center
+          rounded-xl
+          border
+          border-slate-200/80
+          bg-slate-50
+          px-5
+          text-center
+          dark:border-white/[0.06]
+          dark:bg-white/[0.025]
+        "
+      >
+        <div>
+          <div
+            className="
+              mx-auto
+              flex
+              h-11
+              w-11
+              items-center
+              justify-center
+              rounded-xl
+              border
+              border-emerald-400/25
+              bg-emerald-400/[0.08]
+              text-[#1db954]
+            "
+          >
+            <SpotifyIcon className="h-5 w-5" />
+          </div>
+
+          <p
+            className="
+              mt-3
+              text-[12px]
+              font-semibold
+              text-slate-900
+              dark:text-white
+            "
+          >
+            Spotify
+          </p>
+
+          <p
+            className="
+              mt-1
+              text-[10px]
+              text-slate-500
+              dark:text-white/40
+            "
+          >
+            Nothing played recently
+          </p>
+        </div>
+      </div>
+
+      <SpotifyFooter />
+    </article>
+  );
+}
+
+/* ============================================================================
+   MAIN COMPONENT
+============================================================================ */
+
 export default function SpotifyNowPlaying() {
   const [mode, setMode] =
-    useState<ActivityMode>("empty");
+    useState<ActivityMode>("loading");
 
   const [nowPlaying, setNowPlaying] =
     useState<SpotifyTrack | null>(null);
@@ -129,13 +656,12 @@ export default function SpotifyNowPlaying() {
   const [recentlyPlayed, setRecentlyPlayed] =
     useState<RecentlyPlayedTrack | null>(null);
 
-  const [loading, setLoading] = useState(true);
-
-  const fetchSpotifyActivity = useCallback(
-    async () => {
+  const fetchSpotifyActivity =
+    useCallback(async () => {
       try {
         /*
-         * First check if Spotify is currently playing.
+         * STEP 1
+         * Check currently playing.
          */
         const nowResponse = await fetch(
           "/api/spotify/now-playing",
@@ -146,26 +672,23 @@ export default function SpotifyNowPlaying() {
         );
 
         if (nowResponse.ok) {
-          const nowData =
+          const data =
             (await nowResponse.json()) as NowPlayingResponse;
 
-          if (
-            nowData.success &&
-            nowData.track
-          ) {
-            setNowPlaying(nowData.track);
+          if (data.track) {
+            setNowPlaying(data.track);
             setRecentlyPlayed(null);
             setMode("now-playing");
-            setLoading(false);
 
             return;
           }
         }
 
         /*
-         * Nothing is currently playing.
+         * STEP 2
+         * Nothing playing.
          *
-         * Fall back to the latest Spotify track.
+         * Use recently played instead.
          */
         const recentResponse = await fetch(
           "/api/spotify/recently-played",
@@ -176,16 +699,13 @@ export default function SpotifyNowPlaying() {
         );
 
         if (recentResponse.ok) {
-          const recentData =
+          const data =
             (await recentResponse.json()) as RecentlyPlayedResponse;
 
-          if (recentData.track) {
-            setRecentlyPlayed(
-              recentData.track,
-            );
+          if (data.track) {
             setNowPlaying(null);
+            setRecentlyPlayed(data.track);
             setMode("recently-played");
-            setLoading(false);
 
             return;
           }
@@ -196,30 +716,26 @@ export default function SpotifyNowPlaying() {
         setMode("empty");
       } catch (error) {
         console.error(
-          "Failed to load Spotify activity:",
+          "Spotify activity error:",
           error,
         );
 
         setNowPlaying(null);
         setRecentlyPlayed(null);
         setMode("empty");
-      } finally {
-        setLoading(false);
       }
-    },
-    [],
-  );
+    }, []);
 
   useEffect(() => {
-    fetchSpotifyActivity();
+    void fetchSpotifyActivity();
 
-    /*
-     * Refresh every 10 seconds.
-     */
-    const interval = window.setInterval(
-      fetchSpotifyActivity,
-      10000,
-    );
+    const interval =
+      window.setInterval(
+        () => {
+          void fetchSpotifyActivity();
+        },
+        10000,
+      );
 
     return () => {
       window.clearInterval(interval);
@@ -227,160 +743,102 @@ export default function SpotifyNowPlaying() {
   }, [fetchSpotifyActivity]);
 
   /*
-   * Loading state
+   * LOADING
    */
-  if (loading) {
-    return (
-      <div
-        className="
-          w-full
-          overflow-hidden
-          rounded-[24px]
-          border
-          border-slate-200
-          bg-white
-          shadow-[0_20px_60px_rgba(15,23,42,0.08)]
-          dark:border-white/10
-          dark:bg-slate-950/70
-          dark:shadow-none
-        "
-      >
-        <SpotifyHeader
-          mode="NOW PLAYING"
-          isPlaying={false}
-        />
-
-        <div
-          className="
-            mx-3 mb-3
-            flex min-h-[158px]
-            items-center
-            gap-4
-            rounded-[16px]
-            border
-            border-slate-200
-            bg-slate-50
-            p-4
-            dark:border-white/10
-            dark:bg-white/[0.03]
-          "
-        >
-          <div
-            className="
-              h-[72px]
-              w-[72px]
-              shrink-0
-              animate-pulse
-              rounded-[12px]
-              bg-slate-200
-              dark:bg-white/10
-            "
-          />
-
-          <div className="min-w-0 flex-1 space-y-3">
-            <div
-              className="
-                h-3
-                w-24
-                animate-pulse
-                rounded-full
-                bg-slate-200
-                dark:bg-white/10
-              "
-            />
-
-            <div
-              className="
-                h-5
-                w-40
-                animate-pulse
-                rounded-full
-                bg-slate-200
-                dark:bg-white/10
-              "
-            />
-
-            <div
-              className="
-                h-3
-                w-28
-                animate-pulse
-                rounded-full
-                bg-slate-200
-                dark:bg-white/10
-              "
-            />
-          </div>
-        </div>
-
-        <SpotifyFooter />
-      </div>
-    );
+  if (mode === "loading") {
+    return <SpotifyLoading />;
   }
 
   /*
-   * Currently playing
+   * CURRENTLY PLAYING
    */
   if (
     mode === "now-playing" &&
     nowPlaying
   ) {
+    const progress = getProgress(
+      nowPlaying.progressMs,
+      nowPlaying.durationMs,
+    );
+
     return (
-      <div
+      <article
+        data-hero-spotify
         className="
+          relative
           w-full
           overflow-hidden
-          rounded-[24px]
+          rounded-[1.35rem]
           border
-          border-slate-200
-          bg-white
-          shadow-[0_20px_60px_rgba(15,23,42,0.08)]
-          dark:border-white/10
-          dark:bg-slate-950/70
-          dark:shadow-none
+          border-cyan-500/20
+          bg-white/95
+          shadow-[0_24px_70px_rgba(15,23,42,0.08)]
+          backdrop-blur-2xl
+          dark:border-cyan-400/20
+          dark:bg-[#07111e]/94
+          dark:shadow-[0_24px_70px_rgba(0,0,0,0.35)]
         "
       >
         <SpotifyHeader
           mode="NOW PLAYING"
-          isPlaying={nowPlaying.isPlaying}
+          isPlaying={
+            nowPlaying.isPlaying
+          }
         />
 
         <div
           className="
-            mx-3 mb-3
+            m-3
             overflow-hidden
-            rounded-[16px]
+            rounded-xl
             border
-            border-slate-200
+            border-slate-200/80
             bg-slate-50
-            dark:border-white/10
-            dark:bg-white/[0.035]
+            dark:border-white/[0.06]
+            dark:bg-white/[0.025]
           "
         >
-          <div className="flex items-center gap-4 p-4">
+          <a
+            href={nowPlaying.spotifyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              group
+              flex
+              items-center
+              gap-3
+              p-3
+              transition-colors
+              duration-200
+              hover:bg-slate-100/70
+              dark:hover:bg-white/[0.025]
+            "
+          >
             <AlbumArtwork
               src={nowPlaying.image}
-              alt={nowPlaying.title}
+              title={nowPlaying.title}
             />
 
             <div className="min-w-0 flex-1">
               <p
                 className="
-                  mb-1
                   text-[9px]
                   font-bold
                   uppercase
-                  tracking-[0.2em]
+                  tracking-[0.18em]
                   text-[#1db954]
                 "
               >
-                Spotify
+                {nowPlaying.isPlaying
+                  ? "Listening now"
+                  : "Paused"}
               </p>
 
               <h3
                 className="
+                  mt-1
                   truncate
-                  text-[15px]
+                  text-[14px]
                   font-semibold
                   leading-tight
                   text-slate-950
@@ -411,7 +869,7 @@ export default function SpotifyNowPlaying() {
                   truncate
                   text-[9px]
                   text-slate-400
-                  dark:text-white/35
+                  dark:text-white/30
                 "
                 title={nowPlaying.album}
               >
@@ -419,18 +877,27 @@ export default function SpotifyNowPlaying() {
               </p>
             </div>
 
-            <Equalizer />
-          </div>
-
-          <div className="px-4 pb-4">
             <div
               className="
-                mb-2
+                shrink-0
+                text-slate-400
+                transition-colors
+                group-hover:text-[#1db954]
+                dark:text-white/30
+              "
+            >
+              <ExternalLinkIcon />
+            </div>
+          </a>
+
+          <div className="px-3 pb-3">
+            <div
+              className="
                 h-[3px]
                 overflow-hidden
                 rounded-full
                 bg-slate-200
-                dark:bg-white/10
+                dark:bg-white/[0.08]
               "
             >
               <div
@@ -438,27 +905,24 @@ export default function SpotifyNowPlaying() {
                   h-full
                   rounded-full
                   bg-[#1ed760]
-                  transition-all
+                  transition-[width]
                   duration-700
                 "
                 style={{
-                  width: `${getProgressPercentage(
-                    nowPlaying.progressMs,
-                    nowPlaying.durationMs,
-                  )}%`,
+                  width: `${progress}%`,
                 }}
               />
             </div>
 
             <div
               className="
+                mt-1.5
                 flex
-                items-center
                 justify-between
                 text-[8px]
                 font-medium
                 text-slate-400
-                dark:text-white/35
+                dark:text-white/30
               "
             >
               <span>
@@ -481,30 +945,33 @@ export default function SpotifyNowPlaying() {
             nowPlaying.spotifyUrl
           }
         />
-      </div>
+      </article>
     );
   }
 
   /*
-   * Recently played fallback
+   * RECENTLY PLAYED
    */
   if (
     mode === "recently-played" &&
     recentlyPlayed
   ) {
     return (
-      <div
+      <article
+        data-hero-spotify
         className="
+          relative
           w-full
           overflow-hidden
-          rounded-[24px]
+          rounded-[1.35rem]
           border
-          border-slate-200
-          bg-white
-          shadow-[0_20px_60px_rgba(15,23,42,0.08)]
-          dark:border-white/10
-          dark:bg-slate-950/70
-          dark:shadow-none
+          border-cyan-500/20
+          bg-white/95
+          shadow-[0_24px_70px_rgba(15,23,42,0.08)]
+          backdrop-blur-2xl
+          dark:border-cyan-400/20
+          dark:bg-[#07111e]/94
+          dark:shadow-[0_24px_70px_rgba(0,0,0,0.35)]
         "
       >
         <SpotifyHeader
@@ -514,30 +981,44 @@ export default function SpotifyNowPlaying() {
 
         <div
           className="
-            mx-3 mb-3
+            m-3
             overflow-hidden
-            rounded-[16px]
+            rounded-xl
             border
-            border-slate-200
+            border-slate-200/80
             bg-slate-50
-            dark:border-white/10
-            dark:bg-white/[0.035]
+            dark:border-white/[0.06]
+            dark:bg-white/[0.025]
           "
         >
-          <div className="flex items-center gap-4 p-4">
+          <a
+            href={recentlyPlayed.spotifyUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+              group
+              flex
+              items-center
+              gap-3
+              p-3
+              transition-colors
+              duration-200
+              hover:bg-slate-100/70
+              dark:hover:bg-white/[0.025]
+            "
+          >
             <AlbumArtwork
               src={recentlyPlayed.image}
-              alt={recentlyPlayed.title}
+              title={recentlyPlayed.title}
             />
 
             <div className="min-w-0 flex-1">
               <p
                 className="
-                  mb-1
                   text-[9px]
                   font-bold
                   uppercase
-                  tracking-[0.2em]
+                  tracking-[0.18em]
                   text-[#1db954]
                 "
               >
@@ -546,8 +1027,9 @@ export default function SpotifyNowPlaying() {
 
               <h3
                 className="
+                  mt-1
                   truncate
-                  text-[15px]
+                  text-[14px]
                   font-semibold
                   leading-tight
                   text-slate-950
@@ -578,7 +1060,7 @@ export default function SpotifyNowPlaying() {
                   truncate
                   text-[9px]
                   text-slate-400
-                  dark:text-white/35
+                  dark:text-white/30
                 "
                 title={recentlyPlayed.album}
               >
@@ -588,11 +1070,10 @@ export default function SpotifyNowPlaying() {
 
             <div
               className="
-                hidden
+                flex
                 shrink-0
                 items-center
                 gap-1.5
-                sm:flex
               "
             >
               <span
@@ -606,18 +1087,20 @@ export default function SpotifyNowPlaying() {
 
               <span
                 className="
+                  hidden
                   text-[8px]
                   font-bold
                   uppercase
-                  tracking-[0.16em]
+                  tracking-[0.12em]
                   text-slate-400
-                  dark:text-white/35
+                  sm:inline
+                  dark:text-white/30
                 "
               >
-                Offline
+                Recent
               </span>
             </div>
-          </div>
+          </a>
         </div>
 
         <SpotifyFooter
@@ -626,298 +1109,12 @@ export default function SpotifyNowPlaying() {
           }
           recentlyPlayed
         />
-      </div>
+      </article>
     );
   }
 
   /*
-   * Empty state
+   * EMPTY
    */
-  return (
-    <div
-      className="
-        w-full
-        overflow-hidden
-        rounded-[24px]
-        border
-        border-slate-200
-        bg-white
-        shadow-[0_20px_60px_rgba(15,23,42,0.08)]
-        dark:border-white/10
-        dark:bg-slate-950/70
-        dark:shadow-none
-      "
-    >
-      <SpotifyHeader
-        mode="NOW PLAYING"
-        isPlaying={false}
-      />
-
-      <div
-        className="
-          mx-3 mb-3
-          flex
-          min-h-[158px]
-          items-center
-          justify-center
-          rounded-[16px]
-          border
-          border-slate-200
-          bg-slate-50
-          px-5
-          text-center
-          dark:border-white/10
-          dark:bg-white/[0.035]
-        "
-      >
-        <div>
-          <SpotifyLogoCircle />
-
-          <p
-            className="
-              mt-3
-              text-[12px]
-              font-semibold
-              text-slate-900
-              dark:text-white
-            "
-          >
-            Spotify
-          </p>
-
-          <p
-            className="
-              mt-1
-              text-[10px]
-              text-slate-500
-              dark:text-white/45
-            "
-          >
-            Not currently playing
-          </p>
-        </div>
-      </div>
-
-      <SpotifyFooter />
-    </div>
-  );
-}
-
-function SpotifyHeader({
-  mode,
-  isPlaying,
-}: {
-  mode: string;
-  isPlaying: boolean;
-}) {
-  return (
-    <div
-      className="
-        flex
-        min-h-[66px]
-        items-center
-        justify-between
-        border-b
-        border-slate-200
-        px-4
-        dark:border-white/10
-      "
-    >
-      <div className="flex items-center gap-3">
-        <SpotifyLogoCircle />
-
-        <div>
-          <p
-            className="
-              text-[9px]
-              font-bold
-              uppercase
-              tracking-[0.2em]
-              text-slate-700
-              dark:text-white/75
-            "
-          >
-            {mode}
-          </p>
-
-          <p
-            className="
-              mt-1
-              text-[8px]
-              font-medium
-              text-slate-400
-              dark:text-white/35
-            "
-          >
-            Spotify
-          </p>
-        </div>
-      </div>
-
-      {isPlaying ? (
-        <Equalizer />
-      ) : (
-        <div
-          className="
-            flex
-            h-6
-            items-end
-            gap-[3px]
-            opacity-70
-          "
-          aria-hidden="true"
-        >
-          <span className="h-2 w-[2px] rounded-full bg-[#1ed760]" />
-          <span className="h-4 w-[2px] rounded-full bg-[#1ed760]" />
-          <span className="h-6 w-[2px] rounded-full bg-[#1ed760]" />
-          <span className="h-3 w-[2px] rounded-full bg-[#1ed760]" />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function AlbumArtwork({
-  src,
-  alt,
-}: {
-  src?: string;
-  alt: string;
-}) {
-  return (
-    <div
-      className="
-        relative
-        h-[72px]
-        w-[72px]
-        shrink-0
-        overflow-hidden
-        rounded-[10px]
-        bg-slate-200
-        shadow-sm
-        dark:bg-white/10
-      "
-    >
-      {src ? (
-        <img
-          src={src}
-          alt={alt}
-          className="
-            h-full
-            w-full
-            object-cover
-          "
-          loading="eager"
-        />
-      ) : (
-        <div
-          className="
-            flex
-            h-full
-            w-full
-            items-center
-            justify-center
-            text-[#1ed760]
-          "
-        >
-          <SpotifyIcon />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SpotifyFooter({
-  spotifyUrl,
-  recentlyPlayed = false,
-}: {
-  spotifyUrl?: string;
-  recentlyPlayed?: boolean;
-}) {
-  const handleOpenSpotify = () => {
-    if (!spotifyUrl) return;
-
-    window.open(
-      spotifyUrl,
-      "_blank",
-      "noopener,noreferrer",
-    );
-  };
-
-  return (
-    <div
-      className="
-        flex
-        min-h-[48px]
-        items-center
-        justify-between
-        gap-3
-        border-t
-        border-slate-200
-        px-4
-        dark:border-white/10
-      "
-    >
-      <div className="flex items-center gap-2">
-        <span
-          className="
-            h-2
-            w-2
-            rounded-full
-            bg-[#1ed760]
-            shadow-[0_0_10px_rgba(30,215,96,0.55)]
-          "
-        />
-
-        <span
-          className="
-            text-[8px]
-            font-bold
-            uppercase
-            tracking-[0.18em]
-            text-slate-500
-            dark:text-white/40
-          "
-        >
-          {recentlyPlayed
-            ? "Recent activity"
-            : "Live activity"}
-        </span>
-      </div>
-
-      {spotifyUrl && (
-        <button
-          type="button"
-          onClick={handleOpenSpotify}
-          className="
-            group
-            flex
-            items-center
-            gap-2
-            text-[8px]
-            font-bold
-            uppercase
-            tracking-[0.14em]
-            text-slate-700
-            transition-colors
-            hover:text-[#1db954]
-            dark:text-white/60
-            dark:hover:text-[#1ed760]
-          "
-        >
-          <span>Open in Spotify</span>
-
-          <span
-            className="
-              transition-transform
-              duration-200
-              group-hover:translate-x-0.5
-            "
-          >
-            <ExternalLinkIcon />
-          </span>
-        </button>
-      )}
-    </div>
-  );
+  return <SpotifyEmpty />;
 }
