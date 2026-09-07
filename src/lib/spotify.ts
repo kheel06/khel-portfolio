@@ -6,8 +6,15 @@ const SPOTIFY_REFRESH_TOKEN_KEY =
 const SPOTIFY_TOKEN_URL =
   "https://accounts.spotify.com/api/token";
 
+const SPOTIFY_CURRENTLY_PLAYING_URL =
+  "https://api.spotify.com/v1/me/player";
+
 const SPOTIFY_RECENTLY_PLAYED_URL =
   "https://api.spotify.com/v1/me/player/recently-played?limit=1";
+
+/* ============================================================================
+   TYPES
+   ============================================================================ */
 
 export type RecentlyPlayedTrack = {
   title: string;
@@ -16,6 +23,17 @@ export type RecentlyPlayedTrack = {
   image: string | null;
   spotifyUrl: string;
   playedAt: string;
+};
+
+export type NowPlayingTrack = {
+  isPlaying: boolean;
+  progressMs: number;
+  durationMs: number;
+  title: string;
+  artist: string;
+  album: string;
+  image: string | null;
+  spotifyUrl: string;
 };
 
 /* ============================================================================
@@ -36,6 +54,14 @@ async function getRefreshToken() {
     }
   }
 
+  /*
+   * Optional fallback.
+   *
+   * You don't need this if you're using Upstash,
+   * but it allows local development with:
+   *
+   * SPOTIFY_REFRESH_TOKEN=...
+   */
   const envToken =
     process.env.SPOTIFY_REFRESH_TOKEN?.trim();
 
@@ -70,7 +96,7 @@ export async function saveSpotifyRefreshToken(
 }
 
 /* ============================================================================
-   CONFIG
+   SPOTIFY CONFIG
    ============================================================================ */
 
 function getSpotifyConfig() {
@@ -113,7 +139,7 @@ async function refreshSpotifyAccessToken() {
 
   if (!refreshToken) {
     throw new Error(
-      "Missing SPOTIFY_REFRESH_TOKEN. Connect your Spotify account first.",
+      "Missing Spotify refresh token. Connect your Spotify account first.",
     );
   }
 
@@ -179,8 +205,10 @@ async function refreshSpotifyAccessToken() {
   }
 
   /*
-   * Spotify may return a new refresh token.
-   * When it does, persist the new one.
+   * Spotify can rotate the refresh token.
+   *
+   * If a new one is returned, save it back
+   * into Upstash Redis.
    */
   if (
     typeof data.refresh_token ===
@@ -202,6 +230,127 @@ async function refreshSpotifyAccessToken() {
   }
 
   return data.access_token;
+}
+
+/* ============================================================================
+   CURRENTLY PLAYING
+   ============================================================================ */
+
+export async function getNowPlaying() {
+  const accessToken =
+    await refreshSpotifyAccessToken();
+
+  const response =
+    await fetch(
+      SPOTIFY_CURRENTLY_PLAYING_URL,
+      {
+        method: "GET",
+
+        headers: {
+          Authorization:
+            `Bearer ${accessToken}`,
+        },
+
+        cache: "no-store",
+      },
+    );
+
+  /*
+   * Spotify returns 204 No Content when
+   * there is nothing currently playing.
+   */
+  if (response.status === 204) {
+    return null;
+  }
+
+  if (!response.ok) {
+    let data: any = null;
+
+    try {
+      data = await response.json();
+    } catch {
+      // Spotify may return an empty/non-JSON response.
+    }
+
+    console.error(
+      "Spotify currently playing failed:",
+      {
+        status: response.status,
+        error: data?.error,
+      },
+    );
+
+    throw new Error(
+      data?.error?.message ??
+        "Spotify currently playing request failed.",
+    );
+  }
+
+  const data =
+    await response.json();
+
+  /*
+   * Spotify can return an episode instead of
+   * a track. We only want music tracks.
+   */
+  const item =
+    data?.item;
+
+  if (
+    !item ||
+    item.type !== "track"
+  ) {
+    return null;
+  }
+
+  const track =
+    item;
+
+  return {
+    isPlaying:
+      data?.is_playing === true,
+
+    progressMs:
+      typeof data?.progress_ms ===
+        "number"
+        ? data.progress_ms
+        : 0,
+
+    durationMs:
+      typeof track?.duration_ms ===
+        "number"
+        ? track.duration_ms
+        : 0,
+
+    title:
+      track?.name ??
+      "Unknown track",
+
+    artist:
+      track?.artists
+        ?.map(
+          (artist: {
+            name?: string;
+          }) => artist.name,
+        )
+        .filter(Boolean)
+        .join(", ") ??
+      "Unknown artist",
+
+    album:
+      track?.album?.name ??
+      "Unknown album",
+
+    image:
+      track?.album?.images?.[0]
+        ?.url ??
+      null,
+
+    spotifyUrl:
+      track?.external_urls
+        ?.spotify ??
+      "https://open.spotify.com/",
+  } satisfies NowPlayingTrack;
 }
 
 /* ============================================================================
@@ -227,10 +376,15 @@ export async function getRecentlyPlayed() {
       },
     );
 
-  const data =
-    await response.json();
-
   if (!response.ok) {
+    let data: any = null;
+
+    try {
+      data = await response.json();
+    } catch {
+      // Ignore invalid/empty response.
+    }
+
     console.error(
       "Spotify recently played failed:",
       {
@@ -244,6 +398,9 @@ export async function getRecentlyPlayed() {
         "Spotify recently played request failed.",
     );
   }
+
+  const data =
+    await response.json();
 
   const item =
     data?.items?.[0];

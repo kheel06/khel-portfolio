@@ -17,6 +17,7 @@ import {
 
 import { gsap } from "@/lib/gsap";
 import VisitorStats from "@/components/hero/visitor-stats";
+import SpotifyNowPlaying from "@/components/hero/spotify-now-playing";
 
 /* ============================================================================
    STATUS DOT
@@ -652,21 +653,7 @@ function SpotifyCard() {
             dark:bg-black/20
           "
         >
-          <iframe
-            data-testid="embed-iframe"
-            title="Spotify player"
-            src="https://open.spotify.com/embed/track/4iVj0UxqLlgrFWNdOnCwFS?utm_source=generator"
-            width="100%"
-            height="152"
-            frameBorder="0"
-            allowFullScreen
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-            className="
-              block
-              w-full
-            "
-          />
+          <SpotifyNowPlaying />
         </div>
 
         {/* FOOTER */}
